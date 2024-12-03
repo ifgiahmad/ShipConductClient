@@ -225,10 +225,10 @@ function DataTableDrillDetail<TData extends HasId>({
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
-                                handleOpenModal(row.original.id, "UPLOAD PHOTO")
+                                handleOpenModal(row.original.id, "UPLOAD VIDEO")
                               }
                             >
-                              Upload Foto
+                              Upload Video
                             </DropdownMenuItem>
                           </>
                         )}
