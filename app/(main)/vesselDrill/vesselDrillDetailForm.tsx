@@ -325,7 +325,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
           toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to upload photo.",
+            description: "Failed to upload video.",
           });
           return false;
         }
@@ -492,7 +492,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               )}
             />
           </>
-        ) : currentMode === "UPLOAD PHOTO" ? (
+        ) : currentMode === "UPLOAD VIDEO" ? (
           <>
             <FormField
               name="item"
