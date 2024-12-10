@@ -46,10 +46,13 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
       item: "",
       shipSection: "",
       fileName: "",
+      docName: "",
       smallFileLink: "",
       normalFileLink: "",
+      docLink: "",
       videoDescription: "",
       video: null,
+      doc: null,
     },
   });
 
@@ -61,6 +64,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
   } = methods;
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [docPreview, setDocPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -83,6 +87,12 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
           setImagePreview(data.normalFileLink);
         } else {
           setImagePreview(null);
+        }
+
+        if (data.docLink) {
+          setDocPreview(data.docLink);
+        } else {
+          setDocPreview(null);
         }
       } catch (err) {
         console.error("Failed to fetch data by ID:", err);
@@ -112,6 +122,19 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
       setValue("fileName", "");
       setValue("video", null);
       setImagePreview(null);
+    }
+  };
+
+  const handleDocChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue("docName", file.name);
+      setValue("doc", file);
+      setDocPreview(URL.createObjectURL(file));
+    } else {
+      setValue("docName", "");
+      setValue("doc", null);
+      setDocPreview(null);
     }
   };
 
@@ -268,6 +291,30 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
             </FormItem>
           )}
         />
+
+        {docPreview && (
+          <div className="mb-4 flex justify-center">
+            <video
+              src={docPreview}
+              controls
+              className="rounded-md border border-gray-300"
+              style={{ maxWidth: "620px", height: "auto" }}
+            />
+          </div>
+        )}
+
+        <FormItem>
+          <FormLabel>Upload Document</FormLabel>
+          <FormControl>
+            <input
+              type="file"
+              accept="pdf/*"
+              onChange={handleDocChange}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          </FormControl>
+          <FormMessage>{errors.docName?.message}</FormMessage>
+        </FormItem>
 
         <div className="flex justify-between mt-4">
           <div className="flex space-x-4">
