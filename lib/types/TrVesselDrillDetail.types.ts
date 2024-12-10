@@ -9,8 +9,10 @@ export type TrVesselDrillDetail = {
   grade?: string;
   gradeDescription?: string;
   fileName?: string;
+  docName?: string;
   smallFileLink?: string;
   normalFileLink?: string;
+  docLink?: string;
   videoDescription?: string;
   isDeleted?: boolean;
   uploadedBy?: string;
@@ -23,6 +25,7 @@ export type TrVesselDrillDetail = {
   modifiedDate?: Date;
   mode?: string;
   video?: File | null;
+  doc?: File | null;
 };
 
 export const saveTrVesselDrillDetailZod = z.object({
@@ -36,9 +39,11 @@ export const saveTrVesselDrillDetailZod = z.object({
   gradeDescription: z.string().optional(),
   linkShared: z.string().optional(),
   fileName: z.string().optional(),
+  docName: z.string().optional(),
   smallFileLink: z.string().optional(),
   normalFileLink: z.string().optional(),
   videoDescription: z.string().optional(),
+  docLink: z.string().optional(),
   isDeleted: z.boolean().optional(),
   uploadedBy: z.string().optional(),
   uploadedDate: z.date().optional(),
@@ -49,6 +54,7 @@ export const saveTrVesselDrillDetailZod = z.object({
   modifiedBy: z.string().optional(),
   modifiedDate: z.date().optional(),
   video: z.instanceof(File).nullable().optional(),
+  doc: z.instanceof(File).nullable().optional(),
 });
 
 export const uploadVideoTrVesselDrillDetailZod = z
@@ -58,9 +64,12 @@ export const uploadVideoTrVesselDrillDetailZod = z
     item: z.string().min(1, "Item is required"),
     shipSection: z.string().min(1, "Ship Section is required"),
     video: z.instanceof(File).nullable().optional(),
+    doc: z.instanceof(File).nullable().optional(),
     fileName: z.string().optional(),
+    docName: z.string().optional(),
     smallFileLink: z.string().optional(),
     normalFileLink: z.string().optional(),
+    docLink: z.string().optional(),
   })
   .refine(
     (data) =>
