@@ -51,6 +51,7 @@ export const uploadVideoForCrew = async (
   const formData = new FormData();
 
   if (item.video) formData.append("file", item.video);
+  if (item.doc) formData.append("doc", item.doc);
   if (item.id) formData.append("id", item.id.toString());
   if (item.videoDescription)
     formData.append("videoDescription", item.videoDescription.toString());
