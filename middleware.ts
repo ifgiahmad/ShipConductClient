@@ -16,10 +16,13 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/vesselAssessment/:path*",
+    "/vesselDrill/:path*",
     "//",
     "/assessmentCompare/:path*",
     "/assessmentCategory/:path*",
     "/shipSection/:path*",
     "/interval/:path*",
+    "/item/:path*",
+    "/drillCategory/:path*",
   ],
 };
