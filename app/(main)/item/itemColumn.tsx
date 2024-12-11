@@ -27,7 +27,7 @@ export const getItemColumns = ({
     cell: ({ row }) => (
       <img
         src={row.getValue("fileLink")}
-        alt="Item Photo"
+        alt=""
         style={{ width: "100px", height: "auto" }}
       />
     ),
