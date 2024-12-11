@@ -99,9 +99,11 @@ function DataTableDrillCategory<TData extends HasId>({
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Filter items..."
-          value={(table.getColumn("item")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("itemDrill")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("item")?.setFilterValue(event.target.value)
+            table.getColumn("itemDrill")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
