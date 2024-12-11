@@ -81,6 +81,7 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
         if (data.photo) {
           data.id = response.returnId;
           const resPhoto = await uploadPhoto(data);
+         console.log(resPhoto);
           if (resPhoto.status === 200) {
             onSave();
             toast({
