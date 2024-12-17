@@ -39,14 +39,8 @@ export const createTrVesselAssessmentZod = z.object({
   gradeTotal: z.number().optional(),
   /* downtime: z.number().optional(), */
   downtime: z
-    .string()
-    .optional()
-    .transform((val) =>
-      val === "" || val === undefined ? undefined : parseFloat(val)
-    )
-    .refine((val) => val === undefined || (!isNaN(val) && val >= 0), {
-      message: "Downtime must be a valid number greater than or equal to 0",
-    }),
+    .union([z.coerce.number().nonnegative(), z.undefined()])
+    .optional(),
   totalScore: z.number().optional(),
   status: z.string().optional(),
   linkShared: z.string().optional(),
