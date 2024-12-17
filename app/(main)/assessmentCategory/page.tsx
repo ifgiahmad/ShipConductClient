@@ -13,6 +13,7 @@ const columns: ColumnDef<MsAssessmentCategory>[] = [
   { header: "Interval", accessorKey: "interval" },
   { header: "Category Section", accessorKey: "categorySection" },
   { header: "Ship Section", accessorKey: "shipSection" },
+  { header: "Start Month", accessorKey: "startMonthString" },
 ];
 
 const AssessmentCategoryPage: React.FC = () => {
