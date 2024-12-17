@@ -5,7 +5,7 @@ export type TrVesselAssessment = {
   vslType?: string;
   vslCode?: string;
   vslName?: string;
-  interval?: string;
+  /*  interval?: string; */
   periodDate?: Date;
   finalDate?: Date;
   gradeTotal?: number;
@@ -26,7 +26,7 @@ export const createTrVesselAssessmentZod = z.object({
   vslType: z.string().min(1, "Vessel Type is required"),
   vslName: z.string().optional(),
   vslCode: z.string().min(1, "Vessel Code is required"),
-  interval: z.string().min(1, "Interval is required"),
+  /* interval: z.string().min(1, "Interval is required"), */
   periodDate: z.date().refine((date) => !isNaN(date.getTime()), {
     message: "Period Date is required",
   }),
@@ -37,7 +37,17 @@ export const createTrVesselAssessmentZod = z.object({
   mode: z.string().optional(),
   id: z.number().optional(),
   gradeTotal: z.number().optional(),
-  downtime: z.number().optional(),
+  /* downtime: z.number().optional(), */
+  downtime: z
+    .string()
+    .transform((val) => {
+      const parsed = parseFloat(val);
+      if (isNaN(parsed)) throw new Error("Must be a valid number");
+      return parsed;
+    })
+    .refine((val) => val >= 0, {
+      message: "Downtime must be greater than or equal to 0",
+    }),
   totalScore: z.number().optional(),
   status: z.string().optional(),
   linkShared: z.string().optional(),

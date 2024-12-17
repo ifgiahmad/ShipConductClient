@@ -42,6 +42,7 @@ const IntervalForm = ({ onClose, onSave, id, mode }: IntervalFormProps) => {
     defaultValues: {
       id: Number(id),
       interval: "",
+      value: 0,
       mode: "",
       isDeleted: false,
     },
@@ -55,6 +56,7 @@ const IntervalForm = ({ onClose, onSave, id, mode }: IntervalFormProps) => {
         try {
           const data = await getMsIntervalById(id);
           setValue("interval", data.interval ?? "");
+          setValue("value", data.value ?? 0);
         } catch (error) {
           console.error("Error fetching interval data:", error);
         }
@@ -115,6 +117,31 @@ const IntervalForm = ({ onClose, onSave, id, mode }: IntervalFormProps) => {
                 <FormItem>
                   <FormLabel>Interval</FormLabel>
                   <Input required placeholder="Enter interval" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="value"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Value</FormLabel>
+                  <Input
+                    type="number"
+                    required
+                    placeholder="Enter Value"
+                    {...field}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      const input = e.target.value;
+                      // Filter input hanya angka dan ubah ke number
+                      const numericValue = input
+                        ? parseInt(input.replace(/[^0-9]/g, ""), 10)
+                        : 0;
+                      field.onChange(numericValue); // Simpan sebagai angka
+                    }}
+                  />
                   <FormMessage />
                 </FormItem>
               )}

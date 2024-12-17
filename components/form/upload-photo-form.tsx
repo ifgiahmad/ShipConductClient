@@ -25,7 +25,11 @@ import { toast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { MsItem } from "@/lib/types/MsItem.types";
-import { getMsItemByCodeNameItem } from "@/services/service_api_itemForCrew";
+import {
+  getMsItem,
+  getMsItemByCodeNameItem,
+  getMsItemById,
+} from "@/services/service_api_itemForCrew";
 
 type DetailData = z.infer<typeof UploadPhotoTrVesselAssessmentDetailZod>;
 
@@ -56,6 +60,7 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
       normalFileLink: "",
       photoDescription: "",
       photo: null,
+      itemId: 0,
     },
   });
 
@@ -81,6 +86,7 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
       try {
         const data = await getTrVesselAssessmentDetailByIdForCrew(id);
         setValue("item", data.item ?? "");
+        setValue("itemId", data.itemId ?? 0);
         setValue("shipSection", data.shipSection ?? "");
         setValue("fileName", data.fileName ?? "");
         setValue("smallFileLink", data.smallFileLink ?? "");
@@ -94,9 +100,9 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
           setImagePreview(null);
         }
 
-        if (data.item) {
+        if (data.itemId) {
           console.log(data.item);
-          const dataItem = await getMsItemByCodeNameItem("", data.item);
+          const dataItem = await getMsItemById(data.itemId);
           console.log(dataItem);
           if (dataItem.fileLink) {
             setExampleImagePreview(dataItem.fileLink);

@@ -5,7 +5,7 @@ export type TrVesselDrill = {
   vslType?: string;
   vslCode?: string;
   vslName?: string;
-  interval?: string;
+  /* interval?: string; */
   periodDate?: Date;
   finalDate?: Date;
   grade?: string;
@@ -21,7 +21,7 @@ export const createTrVesselDrillZod = z.object({
   vslType: z.string().min(1, "Vessel Type is required"),
   vslName: z.string().optional(),
   vslCode: z.string().min(1, "Vessel Code is required"),
-  interval: z.string().min(1, "Interval is required"),
+  /* interval: z.string().min(1, "Interval is required"), */
   periodDate: z.date().refine((date) => !isNaN(date.getTime()), {
     message: "Period Date is required",
   }),

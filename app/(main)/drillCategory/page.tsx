@@ -11,7 +11,7 @@ const columns: ColumnDef<MsDrillCategory>[] = [
   { header: "Vessel Type", accessorKey: "vslType" },
   { header: "Item", accessorKey: "itemDrill" },
   { header: "Interval", accessorKey: "interval" },
-  { header: "Ship Section", accessorKey: "shipSection" },
+  { header: "Start Month", accessorKey: "startMonthString" },
 ];
 
 const DrillCategoryPage: React.FC = () => {

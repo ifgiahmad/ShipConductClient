@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const columns: ColumnDef<MsInterval>[] = [
   { header: "Interval", accessorKey: "interval" },
+  { header: "Value", accessorKey: "value" },
 ];
 
 const IntervalPage: React.FC = () => {

@@ -20,11 +20,11 @@ export const getMsGradeCriteriaById = async (
 
 export const getMsGradeCriteriaByGrade = async (
   grade: number,
-  categorySection: string
+  categoryId: number
 ): Promise<MsGradeCriteria[]> => {
-  const encodedShipSection = encodeURIComponent(categorySection);
+  /* const encodedShipSection = encodeURIComponent(categorySection); */
   const response = await api.get<MsGradeCriteria[]>(
-    `api/gradeCriteria/getGradeCriteriaByGrade?grade=${grade}&categorySection=${encodedShipSection}`
+    `api/gradeCriteria/getGradeCriteriaByGrade?grade=${grade}&categoryId=${categoryId}`
   );
   return response.data;
 };

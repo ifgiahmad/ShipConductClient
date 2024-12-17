@@ -89,8 +89,8 @@ const VesselDrillUploadForm = () => {
   const [idList, setIdList] = useState<number[]>([]);
 
   const columnsDetail = [
-    { header: "Item", accessorKey: "item" },
-    { header: "Ship Section", accessorKey: "shipSection" },
+    { header: "Item", accessorKey: "itemName" },
+    /*  { header: "Ship Section", accessorKey: "shipSection" }, */
     {
       header: "Video",
       accessorKey: "normalFileLink",
@@ -193,7 +193,7 @@ const VesselDrillUploadForm = () => {
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
     const groupedData = dataDetail.reduce((acc, item) => {
-      const section = item.shipSection ?? "Unknown";
+      const section = item.itemName ?? "Unknown";
       (acc[section] = acc[section] || []).push(item);
       return acc;
     }, {} as Record<string, TrVesselDrillDetail[]>);

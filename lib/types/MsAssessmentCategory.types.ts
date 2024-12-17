@@ -13,6 +13,7 @@ export type MsAssessmentCategory = {
   modifiedDate?: Date | null;
   mode?: string;
   deleted: boolean;
+  startMonth: number;
 };
 
 export const saveMsAssessmentCategoryZod = z.object({
@@ -24,6 +25,7 @@ export const saveMsAssessmentCategoryZod = z.object({
   id: z.number().optional(),
   mode: z.string().optional(),
   deleted: z.boolean().optional(),
+  startMonth: z.number().min(1, "Start Month is required"),
 });
 
 export type saveMsAssessmentCategoryDto = z.infer<

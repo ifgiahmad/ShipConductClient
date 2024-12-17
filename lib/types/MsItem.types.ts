@@ -12,6 +12,7 @@ export type MsItem = {
   modifiedDate?: Date | null;
   isDeleted: boolean;
   photo?: File | null;
+  type?: string;
 };
 
 export const saveMsItemZod = z.object({
@@ -19,6 +20,7 @@ export const saveMsItemZod = z.object({
   vslType: z.string().optional(),
   id: z.number().optional(),
   mode: z.string().optional(),
+  type: z.string().optional(),
   isDeleted: z.boolean().optional(),
   photo: z.instanceof(File).nullable().optional(),
   fileName: z.string().optional(),

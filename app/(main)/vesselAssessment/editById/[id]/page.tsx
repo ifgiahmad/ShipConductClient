@@ -121,7 +121,6 @@ const EditVesselAssessmentForm = () => {
       setValue("vslName", data.vslName ?? "");
       setValue("vslType", data.vslType ?? "");
       setValue("vslCode", data.vslCode ?? "");
-      setValue("interval", data.interval ?? "");
       setValue("linkShared", data.linkShared ?? "");
       setValue("gradeTotal", data.gradeTotal ?? 0);
       setValue(
@@ -378,24 +377,6 @@ const EditVesselAssessmentForm = () => {
                           </PopoverContent>
                         </Popover>
                         <FormMessage>{errors.finalDate?.message}</FormMessage>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    name="interval"
-                    control={control}
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-1">
-                        <FormLabel>Interval</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Interval"
-                            {...field}
-                            readOnly
-                            className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                          />
-                        </FormControl>
-                        <FormMessage>{errors.interval?.message}</FormMessage>
                       </FormItem>
                     )}
                   />

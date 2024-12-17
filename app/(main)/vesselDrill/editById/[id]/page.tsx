@@ -79,9 +79,8 @@ const EditVesselDrillForm = () => {
   const { toast } = useToast();
 
   const columnsDetail = [
-    { header: "Item", accessorKey: "item" },
+    { header: "ItemName", accessorKey: "itemName" },
     { header: "Interval", accessorKey: "interval" },
-    { header: "Ship Section", accessorKey: "shipSection" },
     { header: "Grade", accessorKey: "grade" },
     { header: "Grade Description", accessorKey: "gradeDescription" },
     {
@@ -114,13 +113,12 @@ const EditVesselDrillForm = () => {
       setIdHeader(data.id);
       console.log("Fetched vslType:", data.vslType);
       setVslType(data.vslType || null);
-      console.log(vslType);
 
       // Populate form with fetched data
       setValue("vslName", data.vslName ?? "");
       setValue("vslType", data.vslType ?? "");
       setValue("vslCode", data.vslCode ?? "");
-      setValue("interval", data.interval ?? "");
+      /* setValue("interval", data.interval ?? ""); */
       setValue("linkShared", data.linkShared ?? "");
       setValue("grade", data.grade ?? "");
       setValue(
@@ -146,6 +144,7 @@ const EditVesselDrillForm = () => {
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselDrillDetail(Number(id));
+    console.log(dataDetail);
     setDetail(dataDetail);
 
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
@@ -169,39 +168,39 @@ const EditVesselDrillForm = () => {
     } else {
       data.mode = "CLOSED";
     }
-    if ((data.mode === "CLOSED" && data.grade) || data.mode !== "CLOSED") {
-      try {
-        const ret = await saveTrVesselDrill(data);
-        if (ret.status === 200) {
-          router.push(`/vesselDrill/`);
-          toast({
-            description: "Vessel Drill updated successfully.",
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to update data",
-          });
-        }
-      } catch (err) {
+    /*  if ((data.mode === "CLOSED" && data.grade) || data.mode !== "CLOSED") { */
+    try {
+      const ret = await saveTrVesselDrill(data);
+      if (ret.status === 200) {
+        router.push(`/vesselDrill/`);
+        toast({
+          description: "Vessel Drill updated successfully.",
+        });
+      } else {
         toast({
           variant: "destructive",
           title: "Error",
-          description:
-            "Error updating data: " +
-            (err instanceof Error ? err.message : "Unknown error"),
+          description: "Failed to update data",
         });
-      } finally {
-        setLoading(false);
       }
-    } else {
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          "Error updating data: " +
+          (err instanceof Error ? err.message : "Unknown error"),
+      });
+    } finally {
+      setLoading(false);
+    }
+    /*  } else {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Grade must be filled",
       });
-    }
+    } */
   };
 
   return (
@@ -375,7 +374,7 @@ const EditVesselDrillForm = () => {
                       </FormItem>
                     )}
                   />
-                  <FormField
+                  {/* <FormField
                     name="interval"
                     control={control}
                     render={({ field }) => (
@@ -392,7 +391,7 @@ const EditVesselDrillForm = () => {
                         <FormMessage>{errors.interval?.message}</FormMessage>
                       </FormItem>
                     )}
-                  />
+                  /> */}
                 </Card>
                 <Card className="p-2">
                   <FormField

@@ -23,15 +23,12 @@ const AssessmentCategoryPage: React.FC = () => {
   };
 
   useEffect(() => {
-    /* async function fetchData() {
-      const result = await getMsAssessmentCategory();
-      setData(result);
-    } */
     fetchData();
   }, []);
 
   const fetchData = async () => {
     const result = await getMsAssessmentCategory();
+    console.log(result);
     setData(result);
   };
 

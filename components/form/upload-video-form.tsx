@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,10 @@ import {
   uploadVideoTrVesselDrillDetailZod,
 } from "@/lib/types/TrVesselDrillDetail.types";
 import { toast } from "@/hooks/use-toast";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
+pdfjs.GlobalWorkerOptions.workerSrc = "../../app/assets/pdf.worker.min.js";
 
 interface UploadVideoFormProps {
   onClose: () => void;
@@ -43,8 +47,9 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
     resolver: zodResolver(uploadVideoTrVesselDrillDetailZod),
     defaultValues: {
       id: Number(id),
-      item: "",
-      shipSection: "",
+      itemName: "",
+      interval: "",
+      intervalId: 0,
       fileName: "",
       docName: "",
       smallFileLink: "",
@@ -66,6 +71,13 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [docPreview, setDocPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpenDoc, setModalOpenDoc] = useState(false);
+
+  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    setNumPages(numPages);
+  };
 
   useEffect(() => {
     if (currentId > 0) {
@@ -75,12 +87,15 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
     async function getDataById(id: number) {
       try {
         const data = await getTrVesselDrillDetailByIdForCrew(id);
-        setValue("item", data.item ?? "");
-        setValue("shipSection", data.shipSection ?? "");
+        console.log(data);
+        setValue("itemName", data.itemName ?? "");
         setValue("fileName", data.fileName ?? "");
         setValue("smallFileLink", data.smallFileLink ?? "");
         setValue("normalFileLink", data.normalFileLink ?? "");
         setValue("videoDescription", data.videoDescription ?? "");
+        setValue("id", data.id ?? 0);
+        setValue("intervalId", data.intervalId ?? 0);
+        setValue("interval", data.interval ?? "");
         setValue("id", data.id ?? 0);
 
         if (data.normalFileLink) {
@@ -91,6 +106,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
 
         if (data.docLink) {
           setDocPreview(data.docLink);
+          setValue("docName", data.docName);
         } else {
           setDocPreview(null);
         }
@@ -125,7 +141,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
     }
   };
 
-  const handleDocChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  /*  const handleDocChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setValue("docName", file.name);
@@ -136,8 +152,40 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
       setValue("doc", null);
       setDocPreview(null);
     }
+  }; */
+
+  const handleDocChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type === "application/pdf") {
+        setValue("docName", file.name);
+        setValue("doc", file);
+        setDocPreview(URL.createObjectURL(file)); // Menyiapkan URL untuk ditampilkan
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid File Type",
+          description: "Please upload a valid PDF file.",
+        });
+        setValue("docName", "");
+        setValue("doc", null);
+        setDocPreview(null);
+      }
+    } else {
+      setValue("docName", "");
+      setValue("doc", null);
+      setDocPreview(null);
+    }
   };
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    onClose();
+  };
+
+  const handleCloseDocument = () => {
+    setModalOpenDoc(false);
+  };
   const handleSave = async () => {
     return await handleSubmit(async (data) => {
       const success = await onDetailSubmit(data);
@@ -213,7 +261,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
         className="grid grid-cols-1 gap-6"
       >
         <FormField
-          name="item"
+          name="itemName"
           control={control}
           render={({ field }) => (
             <FormItem>
@@ -226,26 +274,26 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
                   className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
                 />
               </FormControl>
-              <FormMessage>{errors.item?.message}</FormMessage>
+              <FormMessage>{errors.itemName?.message}</FormMessage>
             </FormItem>
           )}
         />
 
         <FormField
-          name="shipSection"
+          name="interval"
           control={control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Ship Section</FormLabel>
+              <FormLabel>Interval</FormLabel>
               <FormControl>
                 <Input
                   readOnly
-                  placeholder="Ship Section"
+                  placeholder="Interval"
                   {...field}
                   className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
                 />
               </FormControl>
-              <FormMessage>{errors.shipSection?.message}</FormMessage>
+              <FormMessage>{errors.interval?.message}</FormMessage>
             </FormItem>
           )}
         />
@@ -293,13 +341,30 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
         />
 
         {docPreview && (
-          <div className="mb-4 flex justify-center">
-            <video
-              src={docPreview}
-              controls
-              className="rounded-md border border-gray-300"
-              style={{ maxWidth: "620px", height: "auto" }}
+          <div className="mt-4 flex items-center space-x-4">
+            <FormField
+              name="docName"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      readOnly
+                      placeholder="document"
+                      {...field}
+                      className="w-full max-w-xs border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
+            <Button
+              type="button"
+              onClick={() => setModalOpenDoc(true)} // Membuka modal saat tombol diklik
+              className="inline-flex justify-center rounded-md border shadow-sm bg-blue-600 hover:bg-blue-500 text-white"
+            >
+              View Document
+            </Button>
           </div>
         )}
 
@@ -360,6 +425,22 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
             </Button>
           </div>
         </div>
+        <Dialog open={isModalOpenDoc} onOpenChange={handleCloseDocument}>
+          <DialogContent className="lg:max-w-[1200px] max-h-[800px] overflow-auto">
+            <DialogTitle>Dokumen Drill</DialogTitle>
+
+            {docPreview && (
+              <div className="flex justify-center mt-4">
+                <iframe
+                  src={docPreview}
+                  width="600"
+                  height="400"
+                  className="mt-4"
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </form>
     </FormProvider>
   );

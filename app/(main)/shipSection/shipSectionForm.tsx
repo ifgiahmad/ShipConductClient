@@ -76,6 +76,7 @@ const ShipSectionForm = ({
       categorySection: "",
       mode: "",
       isDeleted: false,
+      categoryId: 0,
     },
   });
 
@@ -89,7 +90,7 @@ const ShipSectionForm = ({
           getMsCategorySection(),
           id > 0 ? getMsShipSectionById(id) : Promise.resolve(null),
         ]);
-
+        console.log(shipSection);
         setVesselType(vesselData);
         setCategorySection(categoryData);
 
@@ -98,6 +99,7 @@ const ShipSectionForm = ({
           setValue("sectionName", shipSection.sectionName ?? "");
           setSelectedVesselType(shipSection.vslType ?? "");
           setSelectedCategorySection(shipSection.categorySection ?? "");
+          setValue("categoryId", shipSection.categoryId ?? 0);
         } else {
           setValue("mode", "CREATE");
         }
@@ -229,6 +231,14 @@ const ShipSectionForm = ({
                     onValueChange={(value) => {
                       setSelectedCategorySection(value);
                       setValue("categorySection", value);
+
+                      // Cari dan tetapkan categoryId berdasarkan nilai yang dipilih
+                      const selectedCategory = categorySection.find(
+                        (v) => v.categorySection === value
+                      );
+                      if (selectedCategory) {
+                        setValue("categoryId", selectedCategory.id);
+                      }
                     }}
                     value={selectedCategorySection || field.value}
                   >
@@ -236,28 +246,28 @@ const ShipSectionForm = ({
                       <SelectValue placeholder="Select Category Section" />
                     </SelectTrigger>
                     <SelectContent>
+                      {/* Input Search */}
                       <div className="p-2">
                         <Input
                           type="text"
                           placeholder="Search Category Section..."
-                          value={searchTerms.category}
+                          value={searchTerms.category || ""}
                           onChange={(e) =>
                             handleSearchChange("category", e.target.value)
                           }
                           className="w-full p-2 border rounded-md"
                         />
                       </div>
+
+                      {/* Filtered Items */}
                       {categorySection
-                        .filter((v) =>
+                        ?.filter((v) =>
                           v.categorySection
                             ?.toLowerCase()
-                            .includes(searchTerms.category.toLowerCase())
+                            .includes(searchTerms.category?.toLowerCase() || "")
                         )
                         .map((v) => (
-                          <SelectItem
-                            key={v.kodeCategorySection}
-                            value={v.categorySection}
-                          >
+                          <SelectItem key={v.id} value={v.categorySection}>
                             {v.categorySection}
                           </SelectItem>
                         ))}

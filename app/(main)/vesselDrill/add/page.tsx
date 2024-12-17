@@ -80,7 +80,7 @@ const AddVesselDrillForm: React.FC = () => {
       status: "",
       grade: "",
       mode: "",
-      interval: "",
+      /*  interval: "", */
     },
   });
 
@@ -133,33 +133,33 @@ const AddVesselDrillForm: React.FC = () => {
     data.mode = "CREATE";
     data.vslName = selectedVesselName ?? "";
     try {
-      const dataDrillCategory = await getMsDrillCategoryByVslType(data.vslType);
+      /* const dataDrillCategory = await getMsDrillCategoryByVslType(data.vslType);
       console.log(dataDrillCategory);
-      setDrillCategory(dataDrillCategory);
-      if (dataDrillCategory.length > 0) {
-        const ret = await saveTrVesselDrill(data);
-        if (ret.status === 200) {
-          const newId = ret.data.returnId;
-          console.log(newId);
-          router.push(`editById/${newId}`);
-          toast({
-            description: "Vessel Drill was updated successfully.",
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Failed to generate data",
-            description: "Failed to save data",
-          });
-        }
+      setDrillCategory(dataDrillCategory); */
+      /*  if (dataDrillCategory.length > 0) { */
+      const ret = await saveTrVesselDrill(data);
+      if (ret.status === 200) {
+        const newId = ret.data.returnId;
+        console.log(newId);
+        router.push(`editById/${newId}`);
+        toast({
+          description: "Vessel Drill was updated successfully.",
+        });
       } else {
+        toast({
+          variant: "destructive",
+          title: "Failed to generate data",
+          description: "Failed to save data",
+        });
+      }
+      /* } else {
         toast({
           variant: "destructive",
           title: "Error",
           description:
             "Category Assesment for vessel Type " + data.vslType + " not found",
         });
-      }
+      } */
     } catch (err) {
       toast({
         variant: "destructive",
@@ -282,7 +282,7 @@ const AddVesselDrillForm: React.FC = () => {
               />
             </Card>
             <Card className="p-2">
-              <FormField
+              {/* <FormField
                 control={control}
                 name="interval"
                 render={({ field }) => (
@@ -327,7 +327,7 @@ const AddVesselDrillForm: React.FC = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
               <FormField
                 control={control}
                 name="periodDate"

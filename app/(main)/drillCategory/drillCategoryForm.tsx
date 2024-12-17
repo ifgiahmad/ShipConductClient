@@ -49,6 +49,8 @@ import {
 import { MsShipSection } from "@/lib/types/MsShipSection.types";
 import { MsInterval } from "@/lib/types/MsInterval.types";
 import { getMsInterval } from "@/services/service_api_interval";
+import { MsItem } from "@/lib/types/MsItem.types";
+import { getMsItem } from "@/services/service_api_item";
 
 type DataModel = z.infer<typeof saveMsDrillCategoryZod>;
 
@@ -70,18 +72,22 @@ const DrillCategoryForm = ({
   const [selectedVesselType, setSelectedVesselType] = useState<
     string | undefined
   >();
-  const [shipSection, setShipSection] = useState<MsShipSection[]>([]);
+  const [selectedItem, setSelectedItem] = useState<string | undefined>();
+  /* const [shipSection, setShipSection] = useState<MsShipSection[]>([]);
   const [selectedShipSection, setSelectedShipSection] = useState<
     string | undefined
-  >();
+  >(); */
   const [interval, setInterval] = useState<MsInterval[]>([]);
+  const [item, setItem] = useState<MsItem[]>([]);
   const [selectedInterval, setSelectedInterval] = useState<
     string | undefined
   >();
+  const [selectedStartMonth, setSelectedStartMonth] = useState<number>();
   const [searchTerms, setSearchTerms] = useState({
     vessel: "",
     ship: "",
     interval: "",
+    item: "",
   });
 
   const methods = useForm<saveMsDrillCategoryDto>({
@@ -90,8 +96,12 @@ const DrillCategoryForm = ({
       id: Number(id),
       vslType: "",
       itemDrill: "",
+      itemId: 0,
+      intervalId: 0,
       interval: "",
-      shipSection: "",
+      startMonth: 0,
+      startMonthString: "",
+      /*  shipSection: "", */
       mode: "",
       deleted: false,
     },
@@ -106,21 +116,25 @@ const DrillCategoryForm = ({
           const data = await getMsDrillCategoryById(id);
 
           setValue("itemDrill", data.itemDrill ?? "");
-
+          setValue("itemId", data.itemId ?? 0);
+          setValue("intervalId", data.intervalId ?? 0);
+          setValue("startMonth", data.startMonth ?? 0);
+          setValue("startMonthString", data.startMonthString ?? "");
           if (data.vslType) {
             setSelectedVesselType(data.vslType);
             setValue("vslType", data.vslType);
-            await fetchShipSection(data.vslType);
           }
-
-          if (data.shipSection) {
-            setValue("shipSection", data.shipSection);
-            setSelectedShipSection(data.shipSection);
-          }
-
           if (data.interval) {
             setValue("interval", data.interval);
             setSelectedInterval(data.interval);
+          }
+          if (data.itemDrill) {
+            setValue("itemDrill", data.itemDrill);
+            setSelectedItem(data.itemDrill);
+          }
+          if (data.startMonth) {
+            setValue("startMonth", data.startMonth);
+            setSelectedStartMonth(data.startMonth);
           }
         } catch (error) {
           console.error("Error fetching Drill category data:", error);
@@ -136,7 +150,7 @@ const DrillCategoryForm = ({
     id,
     setValue,
     setSelectedInterval,
-    setSelectedShipSection,
+    /*  setSelectedShipSection, */
     setSelectedVesselType,
   ]);
 
@@ -146,6 +160,9 @@ const DrillCategoryForm = ({
       setVesselType(vesselData);
       const intervalData = await getMsInterval();
       setInterval(intervalData);
+      const itemData: MsItem[] = await getMsItem();
+      const filteredItems = itemData.filter((item) => item.type === "Drill");
+      setItem(filteredItems);
     } catch (error) {
       console.error("Error fetching vessel and interval data:", error);
     }
@@ -157,7 +174,7 @@ const DrillCategoryForm = ({
       return;
     }
 
-    try {
+    /*  try {
       const data = await getMsShipSectionByVslType(vslType);
       setShipSection(data);
     } catch (error) {
@@ -166,14 +183,14 @@ const DrillCategoryForm = ({
         vslType,
         error
       );
-    }
+    } */
   };
 
   const handleSearchChange = (type: string, value: string) => {
     setSearchTerms((prev) => ({ ...prev, [type]: value }));
   };
 
-  const handleShipSectionSelect = (value: string) => {
+  /* const handleShipSectionSelect = (value: string) => {
     const selectedShipSection = shipSection.find(
       (shipSection) => shipSection.sectionName === value
     );
@@ -182,10 +199,9 @@ const DrillCategoryForm = ({
     } else {
       setSelectedShipSection("");
     }
-  };
+  }; */
 
   const onSubmit: SubmitHandler<DataModel> = async (data) => {
-    console.log(data);
     data.mode = mode;
     try {
       const response = await saveMsDrillCategory(data);
@@ -278,12 +294,67 @@ const DrillCategoryForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Item</FormLabel>
-                  <Textarea placeholder="Enter item" {...field} />
+                  <Select
+                    onValueChange={(value) => {
+                      const _selectedItem = item.find(
+                        (v) => v.id.toString() === value
+                      );
+                      if (_selectedItem) {
+                        setSelectedItem(_selectedItem.itemName);
+                        setValue("itemDrill", _selectedItem.itemName);
+                        setValue("itemId", _selectedItem.id);
+                      }
+                    }}
+                    value={
+                      item
+                        .find((v) => v.itemName === selectedItem)
+                        ?.id.toString() || field.value
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Item" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <div className="p-2">
+                        <Input
+                          type="text"
+                          placeholder="Search Item..."
+                          value={searchTerms.item}
+                          onChange={(e) =>
+                            handleSearchChange("item", e.target.value)
+                          }
+                          className="w-full p-2 border rounded-md"
+                        />
+                      </div>
+                      {item
+                        .filter((v) =>
+                          v.itemName
+                            ?.toLowerCase()
+                            .includes(searchTerms.item.toLowerCase())
+                        )
+                        .map((v) => (
+                          <SelectItem key={v.id} value={v.id.toString()}>
+                            {v.itemName}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
+            {/* <FormField
+              control={control}
+              name="itemDrill"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Item</FormLabel>
+                  <Textarea placeholder="Enter item" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+            {/* <FormField
               control={control}
               name="shipSection"
               render={({ field }) => (
@@ -327,19 +398,38 @@ const DrillCategoryForm = ({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
             <FormField
               control={control}
               name="interval"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Interval</FormLabel>
-                  <Select
+                  {/* <Select
                     onValueChange={(value) => {
                       setSelectedInterval(value);
-                      setValue("interval", value);
+                      setValue("intervalId", value ? parseInt(value, 10) : 0);
                     }}
                     value={selectedInterval || field.value}
+                  > */}
+                  <Select
+                    onValueChange={(value) => {
+                      if (value) {
+                        const _selectedInterval = interval.find(
+                          (v) => v.id.toString() === value
+                        );
+                        if (_selectedInterval) {
+                          setSelectedInterval(_selectedInterval.interval); // Simpan nama item ke state
+                          setValue("interval", _selectedInterval.interval); // Simpan nama item ke itemDrill
+                          setValue("intervalId", _selectedInterval.id); // Simpan ID item ke itemId
+                        }
+                      }
+                    }}
+                    value={
+                      interval
+                        .find((v) => v.interval === selectedInterval)
+                        ?.id.toString() || field.value
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Interval" />
@@ -363,10 +453,66 @@ const DrillCategoryForm = ({
                             .includes(searchTerms.interval.toLowerCase())
                         )
                         .map((i) => (
-                          <SelectItem key={i.id} value={i.interval}>
+                          <SelectItem key={i.id} value={i.id.toString()}>
                             {i.interval}
                           </SelectItem>
                         ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="startMonth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Month</FormLabel>
+                  <Select
+                    value={String(field.value)} // Konversi angka ke string
+                    onValueChange={(val) => field.onChange(Number(val))} // Konversi string ke angka
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem key="January" value="1">
+                        January
+                      </SelectItem>
+                      <SelectItem key="February" value="2">
+                        February
+                      </SelectItem>
+                      <SelectItem key="March" value="3">
+                        March
+                      </SelectItem>
+                      <SelectItem key="April" value="4">
+                        April
+                      </SelectItem>
+                      <SelectItem key="May" value="5">
+                        May
+                      </SelectItem>
+                      <SelectItem key="June" value="6">
+                        June
+                      </SelectItem>
+                      <SelectItem key="July" value="7">
+                        July
+                      </SelectItem>
+                      <SelectItem key="August" value="8">
+                        August
+                      </SelectItem>
+                      <SelectItem key="September" value="9">
+                        September
+                      </SelectItem>
+                      <SelectItem key="October" value="10">
+                        October
+                      </SelectItem>
+                      <SelectItem key="November" value="11">
+                        November
+                      </SelectItem>
+                      <SelectItem key="December" value="12">
+                        December
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -382,7 +528,11 @@ const DrillCategoryForm = ({
           <Button
             type="submit"
             variant="default"
-            className="bg-green-900 hover:bg-green-600"
+            className={
+              mode !== "DELETE"
+                ? "bg-green-900 hover:bg-green-600"
+                : "bg-red-800 hover:bg-red-600"
+            }
           >
             {mode === "DELETE" ? "Delete" : "Save"}
           </Button>

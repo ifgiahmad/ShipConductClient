@@ -7,6 +7,10 @@ export type TrVesselAssessmentDetail = {
   interval?: string;
   shipSection?: string;
   categorySection?: string;
+  itemId?: number;
+  intervalId?: number;
+  shipSectionId?: number;
+  categorySectionId?: number;
   grade: number;
   gradeDescription?: string;
   fileName?: string;
@@ -31,6 +35,10 @@ export const saveTrVesselAssessmentDetailZod = z.object({
   interval: z.string().min(1, "Interval is required"),
   shipSection: z.string().min(1, "Ship Section is required"),
   categorySection: z.string().min(1, "Ship Section is required"),
+  itemId: z.number().min(1, "Item is required"),
+  intervalId: z.number().min(1, "Interval is required"),
+  shipSectionId: z.number().min(1, "Ship Section is required"),
+  categorySectionId: z.number().min(1, "Ship Section is required"),
   mode: z.string().optional(),
   id: z.number().optional(),
   vesselAssessmentId: z.number().optional(),
@@ -58,6 +66,7 @@ export const UploadPhotoTrVesselAssessmentDetailZod = z
     id: z.number().optional(),
     photoDescription: z.string().optional(),
     item: z.string().min(1, "Item is required"),
+    itemId: z.number().min(1, "Item is required"),
     shipSection: z.string().min(1, "Ship Section is required"),
     photo: z.instanceof(File).nullable().optional(),
     fileName: z.string().optional(),

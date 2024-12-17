@@ -75,9 +75,8 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
     defaultValues: {
       id: Number(id),
       vesselDrillId: Number(idHeader),
-      item: "",
+      itemName: "",
       interval: "",
-      shipSection: "",
       grade: "",
       gradeDescription: "",
       fileName: "",
@@ -244,9 +243,10 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
     async function getDataById(Id: Number) {
       try {
         const data = await getTrVesselDrillDetailById(Number(Id));
-        setValue("item", data.item ?? "");
+        setValue("itemName", data.itemName ?? "");
         setValue("interval", data.interval ?? "");
-
+        setValue("itemId", data.itemId ?? 0);
+        setValue("intervalId", data.intervalId ?? 0);
         setValue("grade", data.grade ?? "");
         setValue("gradeDescription", data.gradeDescription ?? "");
 
@@ -255,9 +255,9 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
         setValue("normalFileLink", data.normalFileLink ?? "");
         setValue("videoDescription", data.videoDescription ?? "");
         setValue("vesselDrillId", data.vesselDrillId ?? 0);
-        setValue("shipSection", data.shipSection ?? "");
+        /*  setValue("shipSection", data.shipSection ?? "");
 
-        setSelectedShipSection(data.shipSection || "");
+        setSelectedShipSection(data.shipSection || ""); */
         setImagePreview(data.normalFileLink || null);
         if (currentMode === "" || currentMode === null) {
           setCurrentMode(data.fileName ? "INPUT GRADE" : "UPLOAD VIDEO");
@@ -290,12 +290,12 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
       return;
     }
 
-    try {
+    /*  try {
       const data = await getMsGradeCriteriaByGrade(grade, categorySection);
       setGradeCriteria(data);
     } catch (error) {
       console.error("Error fetching grade criteria:", error);
-    }
+    } */
   };
 
   const fetchInterval = async () => {
@@ -308,6 +308,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
   };
 
   const onDetailSubmit = async (data: DetailData) => {
+    console.log(data);
     setLoading(true);
     data.mode = mode;
     if (data.id === 0) {
@@ -382,7 +383,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
         ) : currentMode === "INPUT GRADE" ? (
           <>
             <FormField
-              name="item"
+              name="itemName"
               control={control}
               render={({ field }) => (
                 <FormItem>
@@ -395,7 +396,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                       className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </FormControl>
-                  <FormMessage>{errors.item?.message}</FormMessage>
+                  <FormMessage>{errors.itemName?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -417,7 +418,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                 </FormItem>
               )}
             />
-            <FormField
+            {/*  <FormField
               name="shipSection"
               control={control}
               render={({ field }) => (
@@ -434,7 +435,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                   <FormMessage>{errors.shipSection?.message}</FormMessage>
                 </FormItem>
               )}
-            />
+            /> */}
             {imagePreview && (
               <div className="mb-4 flex justify-center">
                 <video
@@ -495,7 +496,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
         ) : currentMode === "UPLOAD VIDEO" ? (
           <>
             <FormField
-              name="item"
+              name="itemName"
               control={control}
               render={({ field }) => (
                 <FormItem>
@@ -508,13 +509,13 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                       className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
                     />
                   </FormControl>
-                  <FormMessage>{errors.item?.message}</FormMessage>
+                  <FormMessage>{errors.itemName?.message}</FormMessage>
                 </FormItem>
               )}
             />
 
             {/* Ship Section Field */}
-            <FormField
+            {/*  <FormField
               name="shipSection"
               control={control}
               render={({ field }) => (
@@ -531,7 +532,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                   <FormMessage>{errors.shipSection?.message}</FormMessage>
                 </FormItem>
               )}
-            />
+            /> */}
 
             {/* Image Preview Section */}
             {imagePreview && (
@@ -580,7 +581,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
         ) : (
           <>
             <FormField
-              name="item"
+              name="itemName"
               control={control}
               render={({ field }) => (
                 <FormItem>
@@ -592,7 +593,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                       className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </FormControl>
-                  <FormMessage>{errors.item?.message}</FormMessage>
+                  <FormMessage>{errors.itemName?.message}</FormMessage>
                 </FormItem>
               )}
             />
@@ -643,7 +644,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               )}
             />
 
-            <FormField
+            {/*  <FormField
               control={control}
               name="shipSection"
               render={({ field }) => (
@@ -687,7 +688,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
           </>
         )}
 

@@ -3,9 +3,11 @@ import { z } from "zod";
 export type TrVesselDrillDetail = {
   id: number;
   vesselDrillId?: number;
-  item?: string;
+  itemName?: string;
+  itemId?: number;
   interval?: string;
-  shipSection?: string;
+  intervalId?: number;
+  /*   shipSection?: string; */
   grade?: string;
   gradeDescription?: string;
   fileName?: string;
@@ -29,9 +31,10 @@ export type TrVesselDrillDetail = {
 };
 
 export const saveTrVesselDrillDetailZod = z.object({
-  item: z.string().min(1, "Item is required"),
+  itemName: z.string().min(1, "Item is required"),
   interval: z.string().min(1, "Interval is required"),
-  shipSection: z.string().min(1, "Ship Section is required"),
+  itemId: z.number().min(1, "Item is required"),
+  intervalId: z.number().min(1, "Interval is required"),
   mode: z.string().optional(),
   id: z.number().optional(),
   vesselDrillId: z.number().optional(),
@@ -61,8 +64,10 @@ export const uploadVideoTrVesselDrillDetailZod = z
   .object({
     id: z.number().optional(),
     videoDescription: z.string().optional(),
-    item: z.string().min(1, "Item is required"),
-    shipSection: z.string().min(1, "Ship Section is required"),
+    itemName: z.string().min(1, "Item is required"),
+    interval: z.string().min(1, "Interval is required"),
+    intervalId: z.number().min(1, "Interval is required"),
+    /*  shipSection: z.string().min(1, "Ship Section is required"), */
     video: z.instanceof(File).nullable().optional(),
     doc: z.instanceof(File).nullable().optional(),
     fileName: z.string().optional(),

@@ -82,7 +82,7 @@ const AddVesselAssessmentForm: React.FC = () => {
       status: "",
       gradeTotal: 0,
       mode: "",
-      interval: "",
+      /*  interval: "", */
     },
   });
 
@@ -116,7 +116,7 @@ const AddVesselAssessmentForm: React.FC = () => {
     ) {
       setValue("finalDate", new Date()); // Reset finalDate if it's invalid
     }
-    const fetchInterval = async () => {
+    /* const fetchInterval = async () => {
       try {
         const interval = await getMsInterval();
         console.log(interval);
@@ -124,9 +124,9 @@ const AddVesselAssessmentForm: React.FC = () => {
       } catch (error) {
         console.error("Error fetching interval:", error);
       }
-    };
+    }; */
     fetchVessel();
-    fetchInterval();
+    /* fetchInterval(); */
   }, [periodDateValue, setValue, getValues]);
 
   const onSubmit = async (data: createTrVesselAssessmentDto) => {
@@ -286,7 +286,7 @@ const AddVesselAssessmentForm: React.FC = () => {
               />
             </Card>
             <Card className="p-2">
-              <FormField
+              {/*  <FormField
                 control={control}
                 name="interval"
                 render={({ field }) => (
@@ -331,7 +331,7 @@ const AddVesselAssessmentForm: React.FC = () => {
                     <FormMessage />
                   </FormItem>
                 )}
-              />
+              /> */}
               <FormField
                 control={control}
                 name="periodDate"

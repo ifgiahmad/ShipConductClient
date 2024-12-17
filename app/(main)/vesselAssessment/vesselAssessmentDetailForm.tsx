@@ -40,7 +40,10 @@ import { getMsShipSectionByVslType } from "@/services/service_api_shipSection";
 import { MsInterval } from "@/lib/types/MsInterval.types";
 import { getMsInterval } from "@/services/service_api_interval";
 import { MsGradeCriteria } from "@/lib/types/MsGradeCriteria.types";
-import { getMsGradeCriteriaByGrade } from "@/services/service_api_gradeCriteria";
+import {
+  getMsGradeCriteriaByGrade,
+  getMsGradeCriteriaById,
+} from "@/services/service_api_gradeCriteria";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -95,6 +98,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
       modifiedBy: "",
       mode: "",
       isDeleted: false,
+      /*  categorySectionId: 0, */
     },
   });
 
@@ -109,18 +113,14 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     string | undefined
   >();
   const [interval, setInterval] = useState<MsInterval[]>([]);
-  const [selectedInterval, setSelectedInterval] = useState<
-    string | undefined
-  >();
+  const [selectedInterval, setSelectedInterval] = useState<string>();
   const [gradeCriteria, setGradeCriteria] = useState<MsGradeCriteria[]>([]);
 
   const [selectedGradeCriteria, setSelectedGradeCriteria] = useState<string[]>(
     []
   );
   const [selectedGrade, setSelectedGrade] = useState<number | undefined>();
-  const [selectedCategorySection, setSelectedCategorySection] = useState<
-    string | undefined
-  >();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>();
   const [searchTerms, setSearchTerms] = useState({
     ship: "",
     interval: "",
@@ -193,12 +193,12 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     );
     if (selectedShipSection) {
       setSelectedShipSection(selectedShipSection.sectionName);
-      setSelectedCategorySection(selectedShipSection.categorySection);
+      setSelectedCategoryId(selectedShipSection.categoryId);
       setValue("categorySection", selectedShipSection.categorySection || "");
     } else {
       setSelectedShipSection("");
       setValue("categorySection", "");
-      setSelectedCategorySection("");
+      setSelectedCategoryId(0);
     }
   };
 
@@ -279,6 +279,11 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
         setValue("vesselAssessmentId", data.vesselAssessmentId ?? 0);
         setValue("shipSection", data.shipSection ?? "");
         setValue("categorySection", data.categorySection ?? "");
+        setValue("categorySectionId", data.categorySectionId ?? 0);
+
+        setValue("itemId", data.itemId ?? 0);
+        setValue("intervalId", data.intervalId ?? 0);
+        setValue("shipSectionId", data.shipSectionId ?? 0);
 
         setSelectedShipSection(data.shipSection || "");
         setImagePreview(data.normalFileLink || null);
@@ -286,8 +291,14 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
           setCurrentMode(data.fileName ? "INPUT GRADE" : "UPLOAD PHOTO");
         }
 
-        if (data.categorySection) {
-          setSelectedCategorySection(data.categorySection);
+        if (data.categorySectionId) {
+          setSelectedCategoryId(data.categorySectionId);
+        }
+
+        if (data.interval) {
+          console.log(data.interval);
+          setSelectedInterval(data.interval);
+          console.log(selectedInterval);
         }
 
         if (vslType) {
@@ -303,11 +314,11 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
           }
         }
 
-        if (data.categorySection && data.grade) {
+        if (data.categorySectionId && data.grade) {
           try {
             const gradeCriteria = await getMsGradeCriteriaByGrade(
               data.grade,
-              data.categorySection
+              data.categorySectionId
             );
             setGradeCriteria(gradeCriteria);
           } catch (error) {
@@ -320,9 +331,9 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     }
   }, [currentId, vslType, setValue, currentMode]);
 
-  const fetchGradeCriteria = async (grade: number, categorySection: string) => {
-    console.log(grade, categorySection);
-    if (!grade || !categorySection) {
+  const fetchGradeCriteria = async (grade: number, categoryId: number) => {
+    console.log(grade, categoryId);
+    if (!grade || !categoryId) {
       console.warn(
         "No grade and categorysection provided for fetching grade criteria."
       );
@@ -330,7 +341,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     }
 
     try {
-      const data = await getMsGradeCriteriaByGrade(grade, categorySection);
+      const data = await getMsGradeCriteriaByGrade(grade, categoryId);
       setGradeCriteria(data);
     } catch (error) {
       console.error("Error fetching grade criteria:", error);
@@ -533,7 +544,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                           field.onChange(numericValue);
                           fetchGradeCriteria(
                             numericValue,
-                            selectedCategorySection ?? ""
+                            selectedCategoryId ?? 0
                           );
                         }}
                         value={
@@ -702,9 +713,17 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                       <FormLabel>Interval</FormLabel>
                       <Select
                         onValueChange={(value) => {
+                          console.log(selectedInterval);
                           setSelectedInterval(value);
                           setValue("interval", value);
-                          field.onChange(value);
+
+                          const _selectedInterval = interval.find(
+                            (v) => v.id === parseInt(value, 10)
+                          );
+                          if (_selectedInterval) {
+                            setValue("intervalId", _selectedInterval.id);
+                            setValue("interval", _selectedInterval.interval);
+                          }
                         }}
                         value={selectedInterval || field.value}
                       >
@@ -730,7 +749,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                                 .includes(searchTerms.interval.toLowerCase())
                             )
                             .map((s) => (
-                              <SelectItem key={s.id} value={s.interval}>
+                              <SelectItem key={s.id} value={s.id.toString()}>
                                 {s.interval}
                               </SelectItem>
                             ))}
@@ -885,7 +904,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                       <>
                         <p>
                           Data Not Found for Grade {selectedGrade} and Category
-                          Section {selectedCategorySection}{" "}
+                          Section {selectedCategoryId}{" "}
                         </p>
                       </>
                     )}
