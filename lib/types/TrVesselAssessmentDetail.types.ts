@@ -28,6 +28,7 @@ export type TrVesselAssessmentDetail = {
   modifiedDate?: Date;
   mode?: string;
   photo?: File | null;
+  itemSamplePhoto?: string;
 };
 
 export const saveTrVesselAssessmentDetailZod = z.object({

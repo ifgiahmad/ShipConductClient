@@ -26,7 +26,14 @@ const columns: ColumnDef<TrVesselAssessment>[] = [
       return dateValue ? format(dateValue, "dd-MM-yyyy") : "N/A";
     },
   },
-  { header: "Grade Total", accessorKey: "gradeTotal" },
+  { header: "Total Score", accessorKey: "totalScore" },
+  /*  {
+    header: "Grade Total",
+    accessorFn: (row) => {
+      const grade = row.gradeTotal;
+      return grade !== undefined && grade !== null ? grade.toFixed(2) : "0.00";
+    },
+  }, */
   { header: "Status", accessorKey: "status" },
   {
     accessorKey: "linkShared",

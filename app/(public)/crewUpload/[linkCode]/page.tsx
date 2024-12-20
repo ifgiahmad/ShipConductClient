@@ -45,6 +45,8 @@ import {
 } from "@/services/service_api_vesselAssessmentForCrew";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DataTableCrewAssessmentResults from "@/components/Data-Table/data-table-crewAssessmentResults";
+import { CellContext } from "@tanstack/react-table";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const CrewUploadForm = () => {
   const router = useRouter();
@@ -98,18 +100,78 @@ const CrewUploadForm = () => {
   const [vesselCode, setVesselCode] = useState<string | null>(null);
   const [idList, setIdList] = useState<number[]>([]);
 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [itemName, setItemName] = useState<string>();
+
+  const handleImageSampleClick = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+  };
+
+  const handleOpenModal = (_id: number, _item?: string) => {
+    setEditId(_id);
+    setItemName(_item);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+  const handleSaveModal = () => {
+    setModalOpen(false);
+    fetchDetail();
+  };
+
   const columnsDetail = [
     { header: "Item", accessorKey: "item" },
     { header: "Ship Section", accessorKey: "shipSection" },
+
+    {
+      header: "Sample Photo",
+      cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) =>
+        row.original.itemSamplePhoto ? (
+          <img
+            src={row.original.itemSamplePhoto}
+            alt=""
+            style={{ width: "100px", height: "auto", cursor: "pointer" }}
+            onClick={() =>
+              handleImageSampleClick(row.original.itemSamplePhoto || "")
+            }
+          />
+        ) : null, // Tidak menampilkan apapun jika URL kosong
+    },
     {
       header: "Photo",
       accessorKey: "smallFileLink",
       cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => (
-        <img
-          src={row.original.smallFileLink}
-          alt=""
-          style={{ width: "100px", height: "auto" }}
-        />
+        <div style={{ textAlign: "center" }}>
+          {/* Render gambar jika ada URL */}
+          {row.original.smallFileLink && (
+            <img
+              src={row.original.smallFileLink}
+              alt=""
+              style={{
+                width: "100px",
+                height: "auto",
+                cursor: "pointer",
+                marginBottom: "8px",
+              }}
+              onClick={() =>
+                handleImageSampleClick(row.original.smallFileLink || "")
+              }
+            />
+          )}
+          {/* Tombol Upload Photo */}
+          <Button
+            onClick={() => handleOpenModal(row.original.id, row.original.item)}
+            /*  variant="outline" */
+            size="sm"
+            className=" bg-orange-700 hover:bg-orange-400"
+          >
+            Upload Photo
+          </Button>
+        </div>
       ),
     },
     { header: "Photo Description", accessorKey: "photoDescription" },
@@ -358,6 +420,24 @@ const CrewUploadForm = () => {
                             onClose={() => handleCloseDetail()}
                             onSaveData={() => handleSaveDetail()}
                           />
+                          {/* Modal */}
+                          {selectedImage && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                              <div className="bg-white p-4 rounded-lg shadow-lg">
+                                <img
+                                  src={selectedImage}
+                                  alt="Selected"
+                                  className="max-w-[80vw] max-h-[80vh] w-auto h-auto"
+                                />
+                                <button
+                                  onClick={() => setSelectedImage(null)}
+                                  className="mt-4 px-4 py-2 bg-cyan-800 text-white rounded"
+                                >
+                                  Close
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     </div>
@@ -382,6 +462,18 @@ const CrewUploadForm = () => {
                 </>
               </TabsContent>
             </Tabs>
+            <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
+              <DialogContent className="md:max-w-[800px] max-h-[600px] overflow-auto">
+                <DialogTitle>Upload Photo - {itemName}</DialogTitle>
+                <UploadPhotoForm
+                  onClose={handleCloseModal}
+                  onSave={handleSaveModal}
+                  id={editId || 0}
+                  idHeader={Number(id)}
+                  idList={idList}
+                />
+              </DialogContent>
+            </Dialog>
 
             <FormProvider {...methods}>
               <form
