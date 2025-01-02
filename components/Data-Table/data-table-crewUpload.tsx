@@ -66,7 +66,7 @@ function DataTableCrewUpload<TData extends HasId>({
       sorting,
       columnFilters,
       columnVisibility,
-      pagination: { pageIndex: 0, pageSize: 100 },
+      pagination: { pageIndex: 0, pageSize: 300 },
     },
   });
 
