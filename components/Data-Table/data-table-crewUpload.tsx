@@ -217,9 +217,9 @@ function DataTableCrewUpload<TData extends HasId>({
             }}
             className="border rounded-md px-2 py-1"
           >
-            <option value={100}>100</option>
-            <option value={150}>150</option>
             <option value={200}>200</option>
+            <option value={300}>300</option>
+            <option value={400}>400</option>
           </select>
         </div>
         <div className="space-x-2">
