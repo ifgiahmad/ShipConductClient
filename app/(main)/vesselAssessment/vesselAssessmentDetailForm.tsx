@@ -133,6 +133,8 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const allCriteria = gradeCriteria.map((item) => item.criteria);
+
   const handleSearchChange = (type: string, value: string) => {
     setSearchTerms((prev) => ({ ...prev, [type]: value }));
   };
@@ -177,11 +179,25 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     setIsDialogOpen(false);
   };
 
-  const handleCheckboxChange = (item: string) => {
-    setSelectedGradeCriteria((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+  const handleCheckboxChange = (criterion: string) => {
+    setSelectedGradeCriteria(
+      (prevSelected) =>
+        prevSelected.includes(criterion)
+          ? prevSelected.filter((item) => item !== criterion) // Uncheck
+          : [...prevSelected, criterion] // Check
     );
   };
+
+  const handleSelectAllChange = () => {
+    if (selectedGradeCriteria.length === allCriteria.length) {
+      setSelectedGradeCriteria([]); // Deselect all
+    } else {
+      setSelectedGradeCriteria(allCriteria); // Select all
+    }
+  };
+
+  // Determine if "Select All" is checked
+  const isAllSelected = selectedGradeCriteria.length === allCriteria.length;
 
   const handleValueChange = (value: string) => {
     setSelectedGradeCriteria(
@@ -943,7 +959,33 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                   <CardContent>
                     {gradeCriteria.length > 0 ? (
                       <>
-                        {gradeCriteria.map((item) => (
+                        <div>
+                          {/* "Select All" checkbox */}
+                          <div>
+                            <Checkbox
+                              checked={isAllSelected}
+                              onCheckedChange={handleSelectAllChange}
+                              className="mr-2"
+                            />
+                            <span>Select All</span>
+                          </div>
+                          {/* Individual checkboxes */}
+                          {gradeCriteria.map((item) => (
+                            <div key={item.id}>
+                              <Checkbox
+                                checked={selectedGradeCriteria.includes(
+                                  item.criteria
+                                )}
+                                onCheckedChange={() =>
+                                  handleCheckboxChange(item.criteria)
+                                }
+                                className="mr-2"
+                              />
+                              <span>{item.criteria}</span>
+                            </div>
+                          ))}
+                        </div>
+                        {/* {gradeCriteria.map((item) => (
                           <div key={item.id}>
                             <Checkbox
                               checked={selectedGradeCriteria.includes(
@@ -956,7 +998,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                             />
                             <span>{item.criteria}</span>
                           </div>
-                        ))}
+                        ))} */}
                       </>
                     ) : (
                       <>
