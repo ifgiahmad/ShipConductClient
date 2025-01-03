@@ -54,6 +54,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrVesselAssessmentDetail } from "@/lib/types/TrVesselAssessmentDetail.types";
 import { VwAssessmentDetailCompare } from "@/lib/types/VwAssessmentDetailCompare";
+import { MsItem } from "@/lib/types/MsItem.types";
+import { getMsItem } from "@/services/service_api_item";
 type DetailData = z.infer<typeof saveTrVesselAssessmentDetailZod>;
 
 interface VesselAssessmentDetailFormProps {
@@ -108,6 +110,8 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     useState<VwAssessmentDetailCompare>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [item, setItem] = useState<MsItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<string | undefined>();
   const [shipSection, setShipSection] = useState<MsShipSection[]>([]);
   const [selectedShipSection, setSelectedShipSection] = useState<
     string | undefined
@@ -125,6 +129,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     ship: "",
     interval: "",
     criteria: "",
+    item: "",
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -252,6 +257,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     };
     fetchInterval();
     fetchData();
+    fetchItem();
 
     async function getPreviousData(Id: Number) {
       try {
@@ -354,6 +360,19 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
       setInterval(interval);
     } catch (error) {
       console.error("Error fetching interval:", error);
+    }
+  };
+
+  const fetchItem = async () => {
+    try {
+      const itemData = await getMsItem();
+      console.log(itemData);
+      const filterItems = itemData.filter(
+        (item) => item.type && item.type.toLowerCase() === "assessment"
+      );
+      setItem(filterItems);
+    } catch (error) {
+      console.error("Error fetching Item data:", error);
     }
   };
 
@@ -463,6 +482,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   name="interval"
                   control={control}
@@ -689,19 +709,57 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
             ) : (
               <>
                 <FormField
-                  name="item"
                   control={control}
+                  name="item"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Item</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Item Category"
-                          {...field}
-                          className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </FormControl>
-                      <FormMessage>{errors.item?.message}</FormMessage>
+                      <Select
+                        onValueChange={(value) => {
+                          const _selectedItem = item.find(
+                            (v) => v.id.toString() === value
+                          );
+                          if (_selectedItem) {
+                            setSelectedItem(_selectedItem.itemName);
+                            setValue("item", _selectedItem.itemName);
+                            setValue("itemId", _selectedItem.id);
+                          }
+                        }}
+                        value={
+                          item
+                            .find((v) => v.itemName === selectedItem)
+                            ?.id.toString() || field.value
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Item" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <div className="p-2">
+                            <Input
+                              type="text"
+                              placeholder="Search Item..."
+                              value={searchTerms.item}
+                              onChange={(e) =>
+                                handleSearchChange("item", e.target.value)
+                              }
+                              className="w-full p-2 border rounded-md"
+                            />
+                          </div>
+                          {item
+                            .filter((v) =>
+                              v.itemName
+                                ?.toLowerCase()
+                                .includes(searchTerms.item.toLowerCase())
+                            )
+                            .map((v) => (
+                              <SelectItem key={v.id} value={v.id.toString()}>
+                                {v.itemName}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

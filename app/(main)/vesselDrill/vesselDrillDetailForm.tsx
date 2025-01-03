@@ -457,17 +457,14 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                       <SelectValue placeholder="Select Grade" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem
-                        key="Video is appropriate"
-                        value="Video is appropriate"
-                      >
-                        Video is appropriate
+                      <SelectItem key="DONE" value="DONE">
+                        DONE
                       </SelectItem>
-                      <SelectItem
-                        key="Video is not appropriate"
-                        value="Video is not appropriate"
-                      >
-                        Video is not appropriate
+                      <SelectItem key="PERINGATAN SP" value="PERINGATAN SP">
+                        PERINGATAN
+                      </SelectItem>
+                      <SelectItem key="DOCKING" value="DOCKING">
+                        DOCKING
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -481,13 +478,56 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Grade Description</FormLabel>
-                  <FormControl>
+                  {/* <FormControl>
                     <Textarea
                       placeholder="Grade Description"
                       {...field}
                       className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                  </FormControl>
+                  </FormControl> */}
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Grade Description" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        key="Dokumentasi video sudah sesuai skenario namun tidak ada penjelasan mengenai video drill"
+                        value="Dokumentasi video sudah sesuai skenario namun tidak ada penjelasan mengenai video drill"
+                      >
+                        Dokumentasi video sudah sesuai skenario namun tidak ada
+                        penjelasan mengenai video drill
+                      </SelectItem>
+                      <SelectItem
+                        key="Tidak ada video drill dianggap tidak drill"
+                        value="Tidak ada video drill dianggap tidak drill"
+                      >
+                        Tidak ada video drill dianggap tidak drill
+                      </SelectItem>
+                      <SelectItem
+                        key="Dokumentasi video Drill sudah di jelaskan dengan baik, namun tidak ada emergency Drill Alarm"
+                        value="Dokumentasi video Drill sudah di jelaskan dengan baik, namun tidak ada emergency Drill Alarm"
+                      >
+                        Dokumentasi video Drill sudah di jelaskan dengan baik,
+                        namun tidak ada emergency Drill Alarm
+                      </SelectItem>
+                      <SelectItem
+                        key="Dokumentasi video Drill sudah di jelaskan dengan baik"
+                        value="Dokumentasi video Drill sudah di jelaskan dengan baik"
+                      >
+                        Dokumentasi video Drill sudah di jelaskan dengan baik
+                      </SelectItem>
+                      <SelectItem
+                        key="Penjelasan di video tidak lengkap dan salah membunyikan emergency Fire Drill Alarm."
+                        value="Penjelasan di video tidak lengkap dan salah membunyikan emergency Fire Drill Alarm."
+                      >
+                        Penjelasan di video tidak lengkap dan salah membunyikan
+                        emergency Fire Drill Alarm.
+                      </SelectItem>
+                      <SelectItem key="DOCKING" value="DOCKING">
+                        DOCKING
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage>{errors.gradeDescription?.message}</FormMessage>
                 </FormItem>
               )}

@@ -23,6 +23,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type DataModel = z.infer<typeof saveMsItemZod>;
 
@@ -41,6 +48,7 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
     defaultValues: {
       id: Number(id),
       itemName: "",
+      type: "",
       mode: "",
       isDeleted: false,
     },
@@ -59,7 +67,9 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
       if (id > 0) {
         try {
           const data = await getMsItemById(id);
+          console.log(data);
           setValue("itemName", data.itemName ?? "");
+          setValue("type", data.type ?? "");
           setImagePreview(data.fileLink || null);
         } catch (error) {
           console.error("Error fetching Item data:", error);
@@ -81,7 +91,7 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
         if (data.photo) {
           data.id = response.returnId;
           const resPhoto = await uploadPhoto(data);
-         console.log(resPhoto);
+          console.log(resPhoto);
           if (resPhoto.status === 200) {
             onSave();
             toast({
@@ -149,6 +159,30 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
                 <FormItem>
                   <FormLabel>Item</FormLabel>
                   <Textarea required placeholder="Enter Item" {...field} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Item Type</FormLabel>
+                  <Select
+                    /*  onValueChange={field.onChange}
+                    defaultValue={field.value} */
+                    value={String(field.value)} // Konversi angka ke string
+                    onValueChange={(val) => field.onChange} // Konversi string ke angka
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose Item Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Drill">Drill</SelectItem>
+                      <SelectItem value="Assessment">Assessment</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

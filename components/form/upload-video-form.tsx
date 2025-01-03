@@ -22,10 +22,10 @@ import {
   uploadVideoTrVesselDrillDetailZod,
 } from "@/lib/types/TrVesselDrillDetail.types";
 import { toast } from "@/hooks/use-toast";
-import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+/* import { pdfjs } from "react-pdf"; */
+/* import "react-pdf/dist/esm/Page/AnnotationLayer.css"; */
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
-pdfjs.GlobalWorkerOptions.workerSrc = "../../app/assets/pdf.worker.min.js";
+/* pdfjs.GlobalWorkerOptions.workerSrc = "../../app/assets/pdf.worker.min.js"; */
 
 interface UploadVideoFormProps {
   onClose: () => void;
@@ -96,7 +96,6 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
         setValue("id", data.id ?? 0);
         setValue("intervalId", data.intervalId ?? 0);
         setValue("interval", data.interval ?? "");
-        setValue("id", data.id ?? 0);
 
         if (data.normalFileLink) {
           setImagePreview(data.normalFileLink);
@@ -140,19 +139,6 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
       setImagePreview(null);
     }
   };
-
-  /*  const handleDocChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setValue("docName", file.name);
-      setValue("doc", file);
-      setDocPreview(URL.createObjectURL(file));
-    } else {
-      setValue("docName", "");
-      setValue("doc", null);
-      setDocPreview(null);
-    }
-  }; */
 
   const handleDocChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -360,7 +346,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
             />
             <Button
               type="button"
-              onClick={() => setModalOpenDoc(true)} // Membuka modal saat tombol diklik
+              onClick={() => setModalOpenDoc(true)}
               className="inline-flex justify-center rounded-md border shadow-sm bg-blue-600 hover:bg-blue-500 text-white"
             >
               View Document

@@ -49,6 +49,8 @@ import {
 import { MsShipSection } from "@/lib/types/MsShipSection.types";
 import { MsInterval } from "@/lib/types/MsInterval.types";
 import { getMsInterval } from "@/services/service_api_interval";
+import { MsItem } from "@/lib/types/MsItem.types";
+import { getMsItem } from "@/services/service_api_item";
 
 type DataModel = z.infer<typeof saveMsAssessmentCategoryZod>;
 
@@ -70,6 +72,8 @@ const AssessmentCategoryForm = ({
   const [selectedVesselType, setSelectedVesselType] = useState<
     string | undefined
   >();
+  const [item, setItem] = useState<MsItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<string | undefined>();
   const [shipSection, setShipSection] = useState<MsShipSection[]>([]);
   const [selectedShipSection, setSelectedShipSection] = useState<
     string | undefined
@@ -82,6 +86,7 @@ const AssessmentCategoryForm = ({
     vessel: "",
     ship: "",
     interval: "",
+    item: "",
   });
 
   const methods = useForm<saveMsAssessmentCategoryDto>({
@@ -90,8 +95,11 @@ const AssessmentCategoryForm = ({
       id: Number(id),
       vslType: "",
       item: "",
+      itemId: Number(0),
       interval: "",
+      intervalId: Number(0),
       shipSection: "",
+      shipSectionId: Number(0),
       categorySection: "",
       mode: "",
       deleted: false,
@@ -105,9 +113,9 @@ const AssessmentCategoryForm = ({
       if (id > 0) {
         try {
           const data = await getMsAssessmentCategoryById(id);
+          console.log(data);
 
-          setValue("item", data.item ?? "");
-          setValue("categorySection", data.categorySection ?? "");
+          setValue("categorySection", data.categorySection);
 
           if (data.vslType) {
             setSelectedVesselType(data.vslType);
@@ -117,11 +125,24 @@ const AssessmentCategoryForm = ({
 
           if (data.shipSection) {
             setValue("shipSection", data.shipSection);
+            setValue("shipSectionId", data.shipSectionId);
             setSelectedShipSection(data.shipSection);
+          }
+
+          if (data.startMonth) {
+            setValue("startMonth", data.startMonth);
+            setValue("startMonthString", data.startMonthString);
+          }
+
+          if (data.item) {
+            setValue("item", data.item);
+            setValue("itemId", data.itemId ?? 0);
+            setSelectedItem(data.item);
           }
 
           if (data.interval) {
             setValue("interval", data.interval);
+            setValue("intervalId", data.intervalId);
             setSelectedInterval(data.interval);
           }
         } catch (error) {
@@ -134,12 +155,14 @@ const AssessmentCategoryForm = ({
 
     fetchData();
     fetchVessel();
+    fetchItem();
   }, [
     id,
     setValue,
     setSelectedInterval,
     setSelectedShipSection,
     setSelectedVesselType,
+    setSelectedItem,
   ]);
 
   const fetchVessel = async () => {
@@ -150,6 +173,15 @@ const AssessmentCategoryForm = ({
       setInterval(intervalData);
     } catch (error) {
       console.error("Error fetching vessel and interval data:", error);
+    }
+  };
+
+  const fetchItem = async () => {
+    try {
+      const itemData = await getMsItem();
+      setItem(itemData);
+    } catch (error) {
+      console.error("Error fetching Item data:", error);
     }
   };
 
@@ -182,11 +214,11 @@ const AssessmentCategoryForm = ({
     if (selectedShipSection) {
       setSelectedShipSection(selectedShipSection.sectionName); // Pastikan ini benar
       setValue("categorySection", selectedShipSection.categorySection || "");
-      console.log("a");
-    } else {
+      setValue("shipSectionId", selectedShipSection.id || 0);
+    } /* else {
       setSelectedShipSection("");
       setValue("categorySection", "");
-    }
+    } */
   };
 
   const onSubmit: SubmitHandler<DataModel> = async (data) => {
@@ -277,13 +309,58 @@ const AssessmentCategoryForm = ({
                 </FormItem>
               )}
             />
+
             <FormField
               control={control}
               name="item"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Item</FormLabel>
-                  <Textarea placeholder="Enter item" {...field} />
+                  <Select
+                    onValueChange={(value) => {
+                      const _selectedItem = item.find(
+                        (v) => v.id.toString() === value
+                      );
+                      if (_selectedItem) {
+                        setSelectedItem(_selectedItem.itemName);
+                        setValue("item", _selectedItem.itemName);
+                        setValue("itemId", _selectedItem.id);
+                      }
+                    }}
+                    value={
+                      item
+                        .find((v) => v.itemName === selectedItem)
+                        ?.id.toString() || field.value
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Item" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <div className="p-2">
+                        <Input
+                          type="text"
+                          placeholder="Search Item..."
+                          value={searchTerms.item}
+                          onChange={(e) =>
+                            handleSearchChange("item", e.target.value)
+                          }
+                          className="w-full p-2 border rounded-md"
+                        />
+                      </div>
+                      {item
+                        .filter((v) =>
+                          v.itemName
+                            ?.toLowerCase()
+                            .includes(searchTerms.item.toLowerCase())
+                        )
+                        .map((v) => (
+                          <SelectItem key={v.id} value={v.id.toString()}>
+                            {v.itemName}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -294,14 +371,6 @@ const AssessmentCategoryForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Ship Section</FormLabel>
-                  {/*  <Select
-                    onValueChange={(value) => {
-                      setSelectedShipSection(value);
-                      setValue("shipSection", value);
-                      field.onChange(value);
-                    }}
-                    value={selectedShipSection || field.value}
-                  > */}
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value); // Bind form value with field
@@ -365,10 +434,22 @@ const AssessmentCategoryForm = ({
                   <FormLabel>Interval</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      setSelectedInterval(value);
-                      setValue("interval", value);
+                      if (value) {
+                        const _selectedInterval = interval.find(
+                          (v) => v.id.toString() === value
+                        );
+                        if (_selectedInterval) {
+                          setSelectedInterval(_selectedInterval.interval); // Simpan nama item ke state
+                          setValue("interval", _selectedInterval.interval); // Simpan nama item ke itemDrill
+                          setValue("intervalId", _selectedInterval.id); // Simpan ID item ke itemId
+                        }
+                      }
                     }}
-                    value={selectedInterval || field.value}
+                    value={
+                      interval
+                        .find((v) => v.interval === selectedInterval)
+                        ?.id.toString() || field.value
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Interval" />
@@ -392,10 +473,66 @@ const AssessmentCategoryForm = ({
                             .includes(searchTerms.interval.toLowerCase())
                         )
                         .map((i) => (
-                          <SelectItem key={i.id} value={i.interval}>
+                          <SelectItem key={i.id} value={i.id.toString()}>
                             {i.interval}
                           </SelectItem>
                         ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="startMonth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Month</FormLabel>
+                  <Select
+                    value={String(field.value)} // Konversi angka ke string
+                    onValueChange={(val) => field.onChange(Number(val))} // Konversi string ke angka
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem key="January" value="1">
+                        January
+                      </SelectItem>
+                      <SelectItem key="February" value="2">
+                        February
+                      </SelectItem>
+                      <SelectItem key="March" value="3">
+                        March
+                      </SelectItem>
+                      <SelectItem key="April" value="4">
+                        April
+                      </SelectItem>
+                      <SelectItem key="May" value="5">
+                        May
+                      </SelectItem>
+                      <SelectItem key="June" value="6">
+                        June
+                      </SelectItem>
+                      <SelectItem key="July" value="7">
+                        July
+                      </SelectItem>
+                      <SelectItem key="August" value="8">
+                        August
+                      </SelectItem>
+                      <SelectItem key="September" value="9">
+                        September
+                      </SelectItem>
+                      <SelectItem key="October" value="10">
+                        October
+                      </SelectItem>
+                      <SelectItem key="November" value="11">
+                        November
+                      </SelectItem>
+                      <SelectItem key="December" value="12">
+                        December
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
