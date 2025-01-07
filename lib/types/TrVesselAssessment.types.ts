@@ -5,11 +5,20 @@ export type TrVesselAssessment = {
   vslType?: string;
   vslCode?: string;
   vslName?: string;
-  /*  interval?: string; */
   periodDate?: Date;
   finalDate?: Date;
-  gradeTotal?: number;
-  downtime?: number;
+  scoreItemGeneral?: number;
+  scoreItemTechnical?: number;
+  scoreItemMarine?: number;
+  downtimeDaysGeneral?: number;
+  downtimeDaysTechnical?: number;
+  downtimeDaysMarine?: number;
+  downtimeGeneral?: number;
+  downtimeTechnical?: number;
+  downtimeMarine?: number;
+  scoreGeneral?: number;
+  scoreTechnical?: number;
+  scoreMarine?: number;
   totalScore?: number;
   scoreDescription?: string;
   description?: string;
@@ -17,16 +26,13 @@ export type TrVesselAssessment = {
   linkShared?: string;
   linkCode?: string;
   createdBy?: string;
-  /*  createdDate?: Date; */
   modifiedBy?: string;
-  /*  modifiedDate?: Date; */
 };
 
 export const createTrVesselAssessmentZod = z.object({
   vslType: z.string().min(1, "Vessel Type is required"),
   vslName: z.string().optional(),
-  vslCode: z.string().min(1, "Vessel Code is required"),
-  /* interval: z.string().min(1, "Interval is required"), */
+  vslCode: z.string().optional(),
   periodDate: z.date().refine((date) => !isNaN(date.getTime()), {
     message: "Period Date is required",
   }),
@@ -36,11 +42,24 @@ export const createTrVesselAssessmentZod = z.object({
   description: z.string().optional(),
   mode: z.string().optional(),
   id: z.number().optional(),
-  gradeTotal: z.number().optional(),
-  /* downtime: z.number().optional(), */
-  downtime: z
+  scoreItemGeneral: z.number().optional(),
+  scoreItemTechnical: z.number().optional(),
+  scoreItemMarine: z.number().optional(),
+  downtimeDaysGeneral: z
     .union([z.coerce.number().nonnegative(), z.undefined()])
     .optional(),
+  downtimeDaysTechnical: z
+    .union([z.coerce.number().nonnegative(), z.undefined()])
+    .optional(),
+  downtimeDaysMarine: z
+    .union([z.coerce.number().nonnegative(), z.undefined()])
+    .optional(),
+  downtimeGeneral: z.number().optional(),
+  downtimeTechnical: z.number().optional(),
+  downtimeMarine: z.number().optional(),
+  scoreGeneral: z.number().optional(),
+  scoreTechnical: z.number().optional(),
+  scoreMarine: z.number().optional(),
   totalScore: z.number().optional(),
   status: z.string().optional(),
   linkShared: z.string().optional(),

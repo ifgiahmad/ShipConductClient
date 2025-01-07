@@ -7,10 +7,12 @@ export type TrVesselAssessmentDetail = {
   interval?: string;
   shipSection?: string;
   categorySection?: string;
+  roleCategory?: string;
   itemId?: number;
   intervalId?: number;
   shipSectionId?: number;
   categorySectionId?: number;
+  roleCategoryId?: number;
   grade: number;
   gradeDescription?: string;
   fileName?: string;
@@ -36,10 +38,12 @@ export const saveTrVesselAssessmentDetailZod = z.object({
   interval: z.string().min(1, "Interval is required"),
   shipSection: z.string().min(1, "Ship Section is required"),
   categorySection: z.string().min(1, "Ship Section is required"),
+  roleCategory: z.string().min(1, "Role Category is required"),
   itemId: z.number().min(1, "Item is required"),
   intervalId: z.number().min(1, "Interval is required"),
   shipSectionId: z.number().min(1, "Ship Section is required"),
   categorySectionId: z.number().min(1, "Ship Section is required"),
+  roleCategoryId: z.number().min(1, "Role Category is required"),
   mode: z.string().optional(),
   id: z.number().optional(),
   vesselAssessmentId: z.number().optional(),

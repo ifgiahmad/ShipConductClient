@@ -90,6 +90,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
       categorySection: "",
       grade: 0,
       gradeDescription: "",
+      roleCategory: "",
       fileName: "",
       smallFileLink: "",
       normalFileLink: "",
@@ -302,6 +303,8 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
         setValue("shipSection", data.shipSection ?? "");
         setValue("categorySection", data.categorySection ?? "");
         setValue("categorySectionId", data.categorySectionId ?? 0);
+        setValue("roleCategory", data.roleCategory ?? "");
+        setValue("roleCategoryId", data.roleCategoryId ?? 0);
 
         setValue("itemId", data.itemId ?? 0);
         setValue("intervalId", data.intervalId ?? 0);

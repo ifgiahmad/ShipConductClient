@@ -2,7 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   createTrVesselAssessmentDto,
   createTrVesselAssessmentZod,
@@ -10,33 +14,11 @@ import {
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import {
-  getTrVesselAssessmentByLink,
-  saveTrVesselAssessment,
-} from "@/services/service_api_vesselAssessment";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { format, parse, setYear } from "date-fns";
 import { TrVesselAssessmentDetail } from "@/lib/types/TrVesselAssessmentDetail.types";
 import { getTrVesselAssessmentDetail } from "@/services/service_api_vesselAssessmentDetail";
 import DataTableCrewUpload from "@/components/Data-Table/data-table-crewUpload";
 import UploadPhotoForm from "@/components/form/upload-photo-form";
-import { ColumnDef } from "@tanstack/react-table";
 import {
   getPreviousLastVesselAssessmentByVslCodeForCrew,
   getTrVesselAssessmentByLinkForCrew,
@@ -45,8 +27,8 @@ import {
 } from "@/services/service_api_vesselAssessmentForCrew";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DataTableCrewAssessmentResults from "@/components/Data-Table/data-table-crewAssessmentResults";
-import { CellContext } from "@tanstack/react-table";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ChevronsUpDown } from "lucide-react";
 
 const CrewUploadForm = () => {
   const router = useRouter();
@@ -68,12 +50,31 @@ const CrewUploadForm = () => {
       linkShared: "",
       linkCode: "",
       status: "",
-      gradeTotal: 0,
+      scoreItemGeneral: 0,
+      scoreItemTechnical: 0,
+      scoreItemMarine: 0,
+      downtimeGeneral: 0,
+      downtimeTechnical: 0,
+      downtimeMarine: 0,
+      downtimeDaysGeneral: 100,
+      downtimeDaysTechnical: 100,
+      downtimeDaysMarine: 100,
+      scoreGeneral: 0,
+      scoreTechnical: 0,
+      scoreMarine: 0,
       mode: "",
-      vslCode: "",
     },
   });
   const [detail, setDetail] = useState<TrVesselAssessmentDetail[]>([]);
+  const [detailGeneral, setDetailGeneral] = useState<
+    TrVesselAssessmentDetail[]
+  >([]);
+  const [detailMarine, setDetailMarine] = useState<TrVesselAssessmentDetail[]>(
+    []
+  );
+  const [detailTechnical, setDetailTechnical] = useState<
+    TrVesselAssessmentDetail[]
+  >([]);
   const [previousDetail, setPreviousDetail] = useState<
     TrVesselAssessmentDetail[]
   >([]);
@@ -99,6 +100,10 @@ const CrewUploadForm = () => {
   const [vesselName, setVesselName] = useState<string | null>(null);
   const [vesselCode, setVesselCode] = useState<string | null>(null);
   const [idList, setIdList] = useState<number[]>([]);
+
+  const [idListGeneral, setIdListGeneral] = useState<number[]>([]);
+  const [idListTechnical, setIdListTechnical] = useState<number[]>([]);
+  const [idListMarine, setIdListMarine] = useState<number[]>([]);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -126,7 +131,7 @@ const CrewUploadForm = () => {
   const columnsDetail = [
     { header: "Item", accessorKey: "item" },
     { header: "Ship Section", accessorKey: "shipSection" },
-
+    { header: "Interval", accessorKey: "interval" },
     {
       header: "Sample Photo",
       cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) =>
@@ -199,7 +204,6 @@ const CrewUploadForm = () => {
         setValue("id", data.id ?? 0);
         setValue("vslName", data.vslName ?? "");
         setValue("vslType", data.vslType ?? "");
-        setValue("vslCode", data.vslCode ?? "");
         setValue(
           "periodDate",
           data.periodDate ? new Date(data.periodDate) : new Date()
@@ -275,6 +279,36 @@ const CrewUploadForm = () => {
     }, {} as Record<string, TrVesselAssessmentDetail[]>);
 
     setDetail(dataDetail);
+
+    if (dataDetail.length > 0) {
+      const filteredDataDetailGeneral = dataDetail.filter(
+        (detail) => detail.roleCategory === "GENERAL"
+      );
+      const idsGeneral = filteredDataDetailGeneral.map(
+        (detail: { id: number }) => detail.id
+      );
+      setIdListGeneral(idsGeneral);
+
+      const filteredDataDetailMarine = dataDetail.filter(
+        (detail) => detail.roleCategory === "MARINE"
+      );
+      const idsMarine = filteredDataDetailMarine.map(
+        (detail: { id: number }) => detail.id
+      );
+      setIdListMarine(idsMarine);
+
+      const filteredDataDetailTechnical = dataDetail.filter(
+        (detail) => detail.roleCategory === "TECHNICAL"
+      );
+      const idsTechnical = filteredDataDetailTechnical.map(
+        (detail: { id: number }) => detail.id
+      );
+      setIdListTechnical(idsTechnical);
+
+      setDetailGeneral(filteredDataDetailGeneral);
+      setDetailMarine(filteredDataDetailMarine);
+      setDetailTechnical(filteredDataDetailTechnical);
+    }
   };
 
   const fetchPreviousDetail = async () => {
@@ -405,21 +439,109 @@ const CrewUploadForm = () => {
                           <CardTitle>Assessment Detail</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <DataTableCrewUpload
-                            data={detail}
-                            columns={columnsDetail}
-                            modalContent={
-                              <UploadPhotoForm
-                                onClose={() => {}}
-                                onSave={() => {}}
-                                id={0}
-                                idHeader={Number(id)}
-                                idList={idList}
-                              />
-                            }
-                            onClose={() => handleCloseDetail()}
-                            onSaveData={() => handleSaveDetail()}
-                          />
+                          <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                            <Collapsible>
+                              <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                                <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                                  General
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="flex items-center"
+                                >
+                                  <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                                  <span className="sr-only">Toggle</span>
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="p-4 bg-gray-50">
+                                <DataTableCrewUpload
+                                  data={detailGeneral}
+                                  columns={columnsDetail}
+                                  modalContent={
+                                    <UploadPhotoForm
+                                      onClose={() => {}}
+                                      onSave={() => {}}
+                                      id={0}
+                                      idHeader={Number(id)}
+                                      idList={idListGeneral}
+                                    />
+                                  }
+                                  onClose={() => handleCloseDetail()}
+                                  onSaveData={() => handleSaveDetail()}
+                                />
+                              </CollapsibleContent>
+                            </Collapsible>
+                          </div>
+                          <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                            <Collapsible>
+                              <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                                <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                                  Technical
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="flex items-center"
+                                >
+                                  <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                                  <span className="sr-only">Toggle</span>
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="p-4 bg-gray-50">
+                                <DataTableCrewUpload
+                                  data={detailTechnical}
+                                  columns={columnsDetail}
+                                  modalContent={
+                                    <UploadPhotoForm
+                                      onClose={() => {}}
+                                      onSave={() => {}}
+                                      id={0}
+                                      idHeader={Number(id)}
+                                      idList={idListTechnical}
+                                    />
+                                  }
+                                  onClose={() => handleCloseDetail()}
+                                  onSaveData={() => handleSaveDetail()}
+                                />
+                              </CollapsibleContent>
+                            </Collapsible>
+                          </div>
+                          <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                            <Collapsible>
+                              <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                                <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                                  Marine
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="flex items-center"
+                                >
+                                  <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                                  <span className="sr-only">Toggle</span>
+                                </Button>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent className="p-4 bg-gray-50">
+                                <DataTableCrewUpload
+                                  data={detailMarine}
+                                  columns={columnsDetail}
+                                  modalContent={
+                                    <UploadPhotoForm
+                                      onClose={() => {}}
+                                      onSave={() => {}}
+                                      id={0}
+                                      idHeader={Number(id)}
+                                      idList={idListMarine}
+                                    />
+                                  }
+                                  onClose={() => handleCloseDetail()}
+                                  onSaveData={() => handleSaveDetail()}
+                                />
+                              </CollapsibleContent>
+                            </Collapsible>
+                          </div>
+
                           {/* Modal */}
                           {selectedImage && (
                             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

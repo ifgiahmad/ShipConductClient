@@ -72,6 +72,7 @@ const AddVesselAssessmentForm: React.FC = () => {
     defaultValues: {
       vslName: "",
       vslType: "",
+      vslCode: "",
       periodDate: new Date(),
       finalDate: new Date(),
       id: 0,
@@ -80,7 +81,19 @@ const AddVesselAssessmentForm: React.FC = () => {
       description: "",
       linkShared: "",
       status: "",
-      gradeTotal: 0,
+      scoreItemGeneral: 0,
+      scoreItemTechnical: 0,
+      scoreItemMarine: 0,
+      downtimeGeneral: 0,
+      downtimeTechnical: 0,
+      downtimeMarine: 0,
+      downtimeDaysGeneral: 100,
+      downtimeDaysTechnical: 100,
+      downtimeDaysMarine: 100,
+      scoreGeneral: 0,
+      scoreTechnical: 0,
+      scoreMarine: 0,
+      totalScore: 0,
       mode: "",
       /*  interval: "", */
     },
@@ -116,17 +129,7 @@ const AddVesselAssessmentForm: React.FC = () => {
     ) {
       setValue("finalDate", new Date()); // Reset finalDate if it's invalid
     }
-    /* const fetchInterval = async () => {
-      try {
-        const interval = await getMsInterval();
-        console.log(interval);
-        setInterval(interval);
-      } catch (error) {
-        console.error("Error fetching interval:", error);
-      }
-    }; */
     fetchVessel();
-    /* fetchInterval(); */
   }, [periodDateValue, setValue, getValues]);
 
   const onSubmit = async (data: createTrVesselAssessmentDto) => {
@@ -189,8 +192,7 @@ const AddVesselAssessmentForm: React.FC = () => {
     );
     if (selectedVessel) {
       console.log(selectedVessel);
-      setSelectedVesselName(selectedVessel.vslName); // Pastikan ini benar
-      setValue("vslCode", selectedVessel.vslCode);
+      setSelectedVesselName(selectedVessel.vslName);
       setValue("vslType", selectedVessel.vslType);
     }
   };
@@ -263,24 +265,6 @@ const AddVesselAssessmentForm: React.FC = () => {
                       />
                     </FormControl>
                     <FormMessage>{errors.vslType?.message}</FormMessage>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="vslCode"
-                control={control}
-                render={({ field }) => (
-                  <FormItem className="md:col-span-1">
-                    <FormLabel>Vessel Code</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Vessel Code"
-                        {...field}
-                        readOnly
-                        className="w-full p-2 border border-gray-300 bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </FormControl>
-                    <FormMessage>{errors.vslCode?.message}</FormMessage>
                   </FormItem>
                 )}
               />

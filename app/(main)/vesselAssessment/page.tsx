@@ -8,6 +8,8 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { format } from "date-fns";
 import TrVesselAssessmentForm from "./vesselAssessmentForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUser } from "@/services/auth";
+import { UserLogin, UserRole } from "@/lib/type";
 
 const columns: ColumnDef<TrVesselAssessment>[] = [
   { header: "Vessel Type", accessorKey: "vslType" },
@@ -26,14 +28,10 @@ const columns: ColumnDef<TrVesselAssessment>[] = [
       return dateValue ? format(dateValue, "dd-MM-yyyy") : "N/A";
     },
   },
+  { header: "Score General", accessorKey: "scoreGeneral" },
+  { header: "Score Technical", accessorKey: "scoreTechnical" },
+  { header: "Score Marine", accessorKey: "scoreMarine" },
   { header: "Total Score", accessorKey: "totalScore" },
-  /*  {
-    header: "Grade Total",
-    accessorFn: (row) => {
-      const grade = row.gradeTotal;
-      return grade !== undefined && grade !== null ? grade.toFixed(2) : "0.00";
-    },
-  }, */
   { header: "Status", accessorKey: "status" },
   {
     accessorKey: "linkShared",
@@ -65,17 +63,25 @@ const columns: ColumnDef<TrVesselAssessment>[] = [
 
 const VesselAssessmentPage: React.FC = () => {
   const [data, setData] = useState<TrVesselAssessment[]>([]);
+  const [user, setUser] = useState<UserRole>();
   const handleSaveDetail = () => {
     fetchData();
   };
 
   useEffect(() => {
     fetchData();
+    fetchUser();
   }, []);
 
   const fetchData = async () => {
     const result = await getTrVesselAssessment();
     setData(result);
+  };
+
+  const fetchUser = async () => {
+    const result = await getUser();
+    setUser(result);
+    console.log(result);
   };
 
   return (

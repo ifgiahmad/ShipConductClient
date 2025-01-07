@@ -12,6 +12,8 @@ export type MsAssessmentCategory = {
   shipSectionId: number;
   categorySection: string;
   categorySectionId: number;
+  roleCategory: string;
+  roleCategoryId: number;
   createdBy?: string;
   createdDate?: Date | null;
   modifiedBy?: string;
@@ -28,11 +30,13 @@ export const saveMsAssessmentCategoryZod = z.object({
   interval: z.string().min(1, "Interval is required"),
   shipSection: z.string().min(1, "Ship Section is required"),
   categorySection: z.string().min(1, "Category Section is required"),
+  roleCategory: z.string().min(1, "Role Category is required"),
   id: z.number().optional(),
   itemId: z.number().optional(),
   intervalId: z.number().optional(),
   intervalValue: z.number().optional(),
   shipSectionId: z.number().optional(),
+  roleCategoryId: z.number().optional(),
   mode: z.string().optional(),
   deleted: z.boolean().optional(),
   startMonth: z.number().min(1, "Start Month is required"),

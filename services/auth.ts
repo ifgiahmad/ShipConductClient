@@ -1,13 +1,16 @@
-import { Token } from "@/lib/type";
+import { Token, UserRole } from "@/lib/type";
 import axios from "axios";
 import { UserLogin } from "../lib/type";
 import Cookies from "js-cookie";
+import { boolean } from "zod";
 
 // Definisikan tipe untuk login response dan login form
 interface LoginResponse {
   token: Token;
   succeeded: boolean;
   message?: string;
+  roleCode?: string;
+  superUser?: boolean;
 }
 
 interface LoginForm {
@@ -28,9 +31,15 @@ export const login = async (
         password,
       }
     );
+    console.log(response);
     if (response.data.token) {
       setToken(response.data.token);
       setTokenCookies(response.data.token);
+      localStorage.setItem(
+        "superUser",
+        JSON.stringify(response.data.superUser)
+      );
+      localStorage.setItem("roleCode", JSON.stringify(response.data.roleCode));
     } else {
       console.error("Token tidak ditemukan di respons");
     }
@@ -72,6 +81,26 @@ export const getToken = (): Token | null => {
     }
   }
   return null;
+};
+
+export const getUser = (): UserRole | undefined => {
+  if (typeof window !== "undefined") {
+    const _roleCode = localStorage.getItem("roleCode");
+    const roleCode = _roleCode ? JSON.parse(_roleCode) : null;
+    const superUser = localStorage.getItem("superUser");
+    try {
+      if (roleCode && superUser !== null) {
+        return {
+          roleCode,
+          superUser: superUser === "true", // Konversi string ke boolean
+        };
+      }
+    } catch (error) {
+      console.error("Error parsing :", error);
+      return undefined;
+    }
+  }
+  return undefined;
 };
 
 // Fungsi logout untuk menghapus token dari localStorage

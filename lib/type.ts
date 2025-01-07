@@ -52,8 +52,15 @@ export type TrVesselAssessmentDetail = {
 };
 
 export type UserLogin = {
-  Username: string;
-  Password: string;
+  username: string;
+  password: string;
+  superUser: boolean;
+  roleCode?: string;
+};
+
+export type UserRole = {
+  superUser: boolean;
+  roleCode?: string;
 };
 
 export type Token = {
