@@ -51,6 +51,8 @@ import { MsInterval } from "@/lib/types/MsInterval.types";
 import { getMsInterval } from "@/services/service_api_interval";
 import { MsItem } from "@/lib/types/MsItem.types";
 import { getMsItem } from "@/services/service_api_item";
+import { getMsRoleCategory } from "@/services/service_api_roleCategory";
+import { MsRoleCategory } from "@/lib/types/MsRoleCategory.types";
 
 type DataModel = z.infer<typeof saveMsAssessmentCategoryZod>;
 
@@ -82,11 +84,17 @@ const AssessmentCategoryForm = ({
   const [selectedInterval, setSelectedInterval] = useState<
     string | undefined
   >();
+
+  const [roleCategory, setRoleCategory] = useState<MsRoleCategory[]>([]);
+  const [selectedRoleCategory, setSelectedRoleCategory] = useState<
+    string | undefined
+  >();
   const [searchTerms, setSearchTerms] = useState({
     vessel: "",
     ship: "",
     interval: "",
     item: "",
+    roleCategory: "",
   });
 
   const methods = useForm<saveMsAssessmentCategoryDto>({
@@ -100,6 +108,8 @@ const AssessmentCategoryForm = ({
       intervalId: Number(0),
       shipSection: "",
       shipSectionId: Number(0),
+      roleCategory: "",
+      roleCategoryId: Number(0),
       categorySection: "",
       mode: "",
       deleted: false,
@@ -145,6 +155,11 @@ const AssessmentCategoryForm = ({
             setValue("intervalId", data.intervalId);
             setSelectedInterval(data.interval);
           }
+          if (data.roleCategory) {
+            setValue("roleCategory", data.roleCategory);
+            setValue("roleCategoryId", data.roleCategoryId);
+            setSelectedRoleCategory(data.roleCategory);
+          }
         } catch (error) {
           console.error("Error fetching assessment category data:", error);
         }
@@ -156,6 +171,7 @@ const AssessmentCategoryForm = ({
     fetchData();
     fetchVessel();
     fetchItem();
+    fetchRoleCategory();
   }, [
     id,
     setValue,
@@ -163,6 +179,7 @@ const AssessmentCategoryForm = ({
     setSelectedShipSection,
     setSelectedVesselType,
     setSelectedItem,
+    setSelectedRoleCategory,
   ]);
 
   const fetchVessel = async () => {
@@ -182,6 +199,15 @@ const AssessmentCategoryForm = ({
       setItem(itemData);
     } catch (error) {
       console.error("Error fetching Item data:", error);
+    }
+  };
+
+  const fetchRoleCategory = async () => {
+    try {
+      const roleData = await getMsRoleCategory();
+      setRoleCategory(roleData);
+    } catch (error) {
+      console.error("Error fetching Role Category data:", error);
     }
   };
 
@@ -475,6 +501,68 @@ const AssessmentCategoryForm = ({
                         .map((i) => (
                           <SelectItem key={i.id} value={i.id.toString()}>
                             {i.interval}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="roleCategory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role Category</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      if (value) {
+                        const _selectedRoleCategory = roleCategory.find(
+                          (v) => v.id.toString() === value
+                        );
+                        if (_selectedRoleCategory) {
+                          setSelectedRoleCategory(
+                            _selectedRoleCategory.roleCategory
+                          );
+                          setValue(
+                            "roleCategory",
+                            _selectedRoleCategory.roleCategory
+                          );
+                          setValue("roleCategoryId", _selectedRoleCategory.id); // Simpan ID item ke itemId
+                        }
+                      }
+                    }}
+                    value={
+                      roleCategory
+                        .find((v) => v.roleCategory === selectedRoleCategory)
+                        ?.id.toString() || field.value
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Role Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <div className="p-2">
+                        <Input
+                          type="text"
+                          placeholder="Search Role Category..."
+                          value={searchTerms.roleCategory}
+                          onChange={(e) =>
+                            handleSearchChange("roleCategory", e.target.value)
+                          }
+                          className="w-full p-2 border rounded-md"
+                        />
+                      </div>
+                      {roleCategory
+                        .filter((i) =>
+                          i.roleCategory
+                            ?.toLowerCase()
+                            .includes(searchTerms.roleCategory.toLowerCase())
+                        )
+                        .map((i) => (
+                          <SelectItem key={i.id} value={i.id.toString()}>
+                            {i.roleCategory}
                           </SelectItem>
                         ))}
                     </SelectContent>

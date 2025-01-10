@@ -13,6 +13,7 @@ const columns: ColumnDef<MsAssessmentCategory>[] = [
   { header: "Interval", accessorKey: "interval" },
   { header: "Category Section", accessorKey: "categorySection" },
   { header: "Ship Section", accessorKey: "shipSection" },
+  { header: "Role Category", accessorKey: "roleCategory" },
   { header: "Start Month", accessorKey: "startMonthString" },
 ];
 
