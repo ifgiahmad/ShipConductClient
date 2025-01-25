@@ -89,12 +89,10 @@ export const getUser = (): UserRole | undefined => {
     const roleCode = _roleCode ? JSON.parse(_roleCode) : null;
     const superUser = localStorage.getItem("superUser");
     try {
-      if (roleCode && superUser !== null) {
-        return {
-          roleCode,
-          superUser: superUser === "true", // Konversi string ke boolean
-        };
-      }
+      return {
+        roleCode,
+        superUser: superUser === "true", // Konversi string ke boolean
+      };
     } catch (error) {
       console.error("Error parsing :", error);
       return undefined;

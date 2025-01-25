@@ -198,6 +198,7 @@ const EditVesselAssessmentForm = () => {
   };
 
   const onSubmit = async (data: createTrVesselAssessmentDto) => {
+    console.log(data);
     setLoading(true);
     if (status === "OPEN") {
       data.mode = "GENERATE LINK";
@@ -206,7 +207,9 @@ const EditVesselAssessmentForm = () => {
       data.mode = "CLOSED";
     }
     if (
-      (data.mode === "CLOSED" && data.downtimeDaysGeneral) ||
+      (data.mode === "CLOSED" &&
+        typeof data.downtimeDaysGeneral === "number" &&
+        data.downtimeDaysGeneral >= 0) ||
       data.mode !== "CLOSED"
     ) {
       try {
@@ -712,7 +715,10 @@ const EditVesselAssessmentForm = () => {
                   >
                     Back
                   </Button>
-                  {status === "READY" ? (
+                  {status === "CLOSED" ||
+                  status === "UPLOADING PHOTO" ||
+                  status === "READY" ||
+                  status === "PHOTO COMPLETED" ? (
                     <>
                       {" "}
                       <Button

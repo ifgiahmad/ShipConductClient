@@ -26,7 +26,7 @@ const Sidebar = () => {
   return (
     <Command className="bg-secondary rounded-none">
       <CommandInput placeholder="Type a command or search..." />
-      <CommandList>
+      <CommandList className="max-h-[400px]">
         <CommandEmpty>No results found.</CommandEmpty>
 
         <CommandGroup heading="Activity">

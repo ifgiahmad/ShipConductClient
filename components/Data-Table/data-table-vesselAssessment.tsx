@@ -37,7 +37,7 @@ import { link } from "fs";
 interface HasId {
   id: number;
   status?: string;
-  // Define other properties as needed
+  linkCode?: string;
 }
 
 interface DataTableProps<TData extends HasId> {
@@ -84,6 +84,7 @@ function DataTableVesselAssessment<TData extends HasId>({
 
   const urlAdd = "/vesselAssessment/add";
   const urlEdit = "/vesselAssessment/editById/";
+  const urlView = "/vesselAssessment/view/";
 
   const handleOpenModal = (_id: number, _mode: string) => {
     setEditId(_id);
@@ -199,6 +200,11 @@ function DataTableVesselAssessment<TData extends HasId>({
                             <DropdownMenuItem>
                               <Link href={`${urlEdit + row.original.id}`}>
                                 Edit
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Link href={`${urlView + row.original.linkCode}`}>
+                                View
                               </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem

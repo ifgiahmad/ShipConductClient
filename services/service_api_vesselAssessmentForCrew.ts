@@ -2,6 +2,7 @@ import api from "@/lib/api";
 import { TrVesselAssessment } from "@/lib/types/TrVesselAssessment.types";
 import { TrVesselAssessmentDetail } from "@/lib/types/TrVesselAssessmentDetail.types";
 import { AxiosResponse } from "axios";
+import heic2any from "heic2any";
 
 interface SaveVesselAssessmentResponse {
   returnId: any;
@@ -50,7 +51,39 @@ export const uploadPhotoForCrew = async (
 ): Promise<AxiosResponse<TrVesselAssessmentDetail>> => {
   const formData = new FormData();
 
-  if (item.photo) formData.append("file", item.photo);
+  /*  if (item.photo) formData.append("file", item.photo); */
+
+  if (item.photo) {
+    const file = item.photo as File;
+    if (
+      file.type === "image/heic" ||
+      file.name.endsWith(".heic") ||
+      file.name.endsWith(".HEIC")
+    ) {
+      try {
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: "image/jpeg",
+        });
+
+        const convertedFile = new File(
+          [convertedBlob as Blob],
+          file.name.replace(/\.heic$/, ".jpg"),
+          { type: "image/jpeg" }
+        );
+
+        formData.append("file", convertedFile);
+      } catch (error) {
+        console.error("Error converting HEIC to JPEG:", error);
+        throw new Error("Failed to convert HEIC file to JPEG.");
+      }
+    } else {
+      formData.append("file", file);
+      console.log(file);
+      console.log("ayay");
+    }
+  }
+
   if (item.id) formData.append("id", item.id.toString());
   if (item.photoDescription)
     formData.append("photoDescription", item.photoDescription.toString());
