@@ -7,5 +7,5 @@ export type MsVessel = {
   vslCode: string;
   vslType: string;
   vslName: string;
-  /* vslMate: string; */
+  vslMate: string;
 };

@@ -5,8 +5,12 @@ export type TrVesselAssessment = {
   vslType?: string;
   vslCode?: string;
   vslName?: string;
+  vslMate?: string;
   periodDate?: Date;
+  periodName?: string;
   finalDate?: Date;
+  month?: number;
+  year?: number;
   scoreItemGeneral?: number;
   scoreItemTechnical?: number;
   scoreItemMarine?: number;
@@ -27,12 +31,21 @@ export type TrVesselAssessment = {
   linkCode?: string;
   createdBy?: string;
   modifiedBy?: string;
+  closedDpaby?: string;
+  closedTsby?: string;
+  closedMsby?: string;
+  closedDateDpa?: Date;
+  closedDateTs?: Date;
+  closedDateMs?: Date;
 };
 
 export const createTrVesselAssessmentZod = z.object({
   vslType: z.string().min(1, "Vessel Type is required"),
   vslName: z.string().optional(),
   vslCode: z.string().optional(),
+  vslMate: z.string().optional(),
+  month: z.number().optional(),
+  year: z.number().optional(),
   periodDate: z.date().refine((date) => !isNaN(date.getTime()), {
     message: "Period Date is required",
   }),
@@ -41,6 +54,7 @@ export const createTrVesselAssessmentZod = z.object({
   }),
   description: z.string().optional(),
   mode: z.string().optional(),
+  role: z.string().optional(),
   id: z.number().optional(),
   scoreItemGeneral: z.number().optional(),
   scoreItemTechnical: z.number().optional(),
@@ -66,6 +80,9 @@ export const createTrVesselAssessmentZod = z.object({
   linkCode: z.string().optional(),
   createdBy: z.string().optional(),
   modifiedBy: z.string().optional(),
+  closedDpaby: z.string().optional(),
+  closedTsby: z.string().optional(),
+  closedMsby: z.string().optional(),
 });
 
 export type createTrVesselAssessmentDto = z.infer<

@@ -101,6 +101,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
       modifiedBy: "",
       mode: "",
       isDeleted: false,
+      /*  excludeCount: false, */
       /*  categorySectionId: 0, */
     },
   });
@@ -635,6 +636,23 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                     </FormItem>
                   )}
                 />
+                {/* <FormField
+                  name="excludeCount"
+                  control={control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exclude Count</FormLabel>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value ?? false}
+                          onCheckedChange={field.onChange}
+                          className="p-2 ml-2 mr-2"
+                        />
+                      </FormControl>
+                      <FormMessage>{errors.excludeCount?.message}</FormMessage>
+                    </FormItem>
+                  )}
+                /> */}
               </>
             ) : currentMode === "UPLOAD PHOTO" ? (
               <>

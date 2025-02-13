@@ -14,7 +14,8 @@ import { UserLogin, UserRole } from "@/lib/type";
 const columns: ColumnDef<TrVesselAssessment>[] = [
   { header: "Vessel Type", accessorKey: "vslType" },
   { header: "Vessel Name", accessorKey: "vslName" },
-  {
+  { header: "Period Name", accessorKey: "periodName" },
+  /* {
     header: "Period Date",
     accessorFn: (row) => {
       const dateValue = row.periodDate ? new Date(row.periodDate) : null;
@@ -27,11 +28,13 @@ const columns: ColumnDef<TrVesselAssessment>[] = [
       const dateValue = row.finalDate ? new Date(row.finalDate) : null;
       return dateValue ? format(dateValue, "dd-MM-yyyy") : "N/A";
     },
-  },
+  }, */
+  { header: "Score Item General", accessorKey: "scoreItemGeneral" },
+  { header: "Downtime General", accessorKey: "downtimeGeneral" },
   { header: "Score General", accessorKey: "scoreGeneral" },
-  { header: "Score Technical", accessorKey: "scoreTechnical" },
+  /* { header: "Score Technical", accessorKey: "scoreTechnical" },
   { header: "Score Marine", accessorKey: "scoreMarine" },
-  { header: "Total Score", accessorKey: "totalScore" },
+  { header: "Total Score", accessorKey: "totalScore" }, */
   { header: "Status", accessorKey: "status" },
   {
     accessorKey: "linkShared",

@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import {
   getTrVesselAssessmentById,
+  getTrVesselAssessmentByNameAndPeriod,
   saveTrVesselAssessment,
 } from "@/services/service_api_vesselAssessment";
 import {
@@ -34,11 +35,11 @@ import { cn } from "@/lib/utils";
 import { format, parse } from "date-fns";
 import { TrVesselAssessmentDetail } from "@/lib/types/TrVesselAssessmentDetail.types";
 import { getTrVesselAssessmentDetail } from "@/services/service_api_vesselAssessmentDetail";
-import DataTable from "@/components/Data-Table/data-table";
 import VesselAssessmentDetailForm from "../../vesselAssessmentDetailForm";
 import DataTableAssessmentDetail from "@/components/Data-Table/data-table-vesselAssessmentDetail";
 import { UserRole } from "@/lib/type";
 import { getUser } from "@/services/auth";
+import { TrVesselAssessment } from "@/lib/types/TrVesselAssessment.types";
 
 const EditVesselAssessmentForm = () => {
   const router = useRouter();
@@ -53,8 +54,11 @@ const EditVesselAssessmentForm = () => {
       vslName: "",
       vslType: "",
       vslCode: "",
+      vslMate: "",
       periodDate: new Date(),
       finalDate: new Date(),
+      month: 0,
+      year: 0,
       id: Number(id),
       createdBy: "",
       modifiedBy: "",
@@ -76,14 +80,21 @@ const EditVesselAssessmentForm = () => {
       scoreMarine: 0,
       totalScore: 0,
       mode: "",
+      role: "",
+      closedDpaby: "",
+      closedTsby: "",
+      closedMsby: "",
     },
   });
   const [detail, setDetail] = useState<TrVesselAssessmentDetail[]>([]);
+  const [dataVslMate, setDataVslMate] = useState<TrVesselAssessment>();
   const [status, setStatus] = useState<string | null>(null);
   const [idHeader, setIdHeader] = useState<number | null>(null);
   const [vslType, setVslType] = useState<string | null>(null);
   const [idList, setIdList] = useState<number[]>([]);
   const [user, setUser] = useState<UserRole>();
+  const [allowInputGrade, setAllowInputGrade] = useState<boolean>(true);
+  const [isClosed, setIsClosed] = useState<boolean>(false);
 
   const {
     setValue,
@@ -132,6 +143,7 @@ const EditVesselAssessmentForm = () => {
       // Populate form with fetched data
       setValue("vslName", data.vslName ?? "");
       setValue("vslType", data.vslType ?? "");
+      setValue("vslMate", data.vslMate ?? "");
       setValue("vslCode", data.vslCode ?? "");
       setValue("linkShared", data.linkShared ?? "");
       setValue("scoreItemGeneral", data.scoreItemGeneral ?? 0);
@@ -163,7 +175,61 @@ const EditVesselAssessmentForm = () => {
       );
       setValue("description", data.description);
       setValue("status", data.status);
+      setValue("closedDpaby", data.closedDpaby ?? "");
+      setValue("closedTsby", data.closedTsby ?? "");
+      setValue("closedMsby", data.closedMsby ?? "");
       setStatus(data.status ?? "");
+
+      if (data.vslMate) {
+        console.log("asd");
+        const dataVslMate = await getTrVesselAssessmentByNameAndPeriod(
+          data.vslMate || "",
+          data.month || 0,
+          data.year || 0
+        );
+        console.log(dataVslMate);
+        setDataVslMate(dataVslMate);
+
+        if (dataVslMate && data.vslType !== "TB") {
+          if (user) {
+            if (user?.roleCode === "DPA") {
+              console.log("dp");
+              if (!dataVslMate.closedDpaby) {
+                console.log("y");
+                setAllowInputGrade(false);
+                console.log(allowInputGrade);
+              }
+              console.log(allowInputGrade);
+            } else if (user?.roleCode === "CRW-TS") {
+              if (!dataVslMate.closedTsby) {
+                setAllowInputGrade(false);
+              }
+            } else if (user?.roleCode === "CRW-MS") {
+              if (!dataVslMate.closedMsby) {
+                setAllowInputGrade(false);
+              }
+            }
+          }
+        }
+      }
+
+      if (user) {
+        if (user?.roleCode === "DPA") {
+          console.log(data);
+          if (data.closedDpaby) {
+            setIsClosed(true);
+          }
+        } else if (user?.roleCode === "CRW-TS") {
+          if (data.closedTsby) {
+            setIsClosed(true);
+          }
+        } else if (user?.roleCode === "CRW-MS") {
+          if (data.closedMsby) {
+            setIsClosed(true);
+          }
+        }
+      }
+
       // Set your state values here as before
     } catch (error) {
       console.error("Failed to fetch assessment data", error);
@@ -177,6 +243,7 @@ const EditVesselAssessmentForm = () => {
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselAssessmentDetail(Number(id));
+    console.log(dataDetail);
     setDetail(dataDetail);
 
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
@@ -199,6 +266,7 @@ const EditVesselAssessmentForm = () => {
 
   const onSubmit = async (data: createTrVesselAssessmentDto) => {
     console.log(data);
+    data.role = user?.roleCode || "";
     setLoading(true);
     if (status === "OPEN") {
       data.mode = "GENERATE LINK";
@@ -250,6 +318,33 @@ const EditVesselAssessmentForm = () => {
   return (
     <>
       <div style={{ height: "80vh", overflowY: "auto" }}>
+        {getValues("vslType") === "TB" &&
+        getValues("vslMate") !== null &&
+        !isClosed ? (
+          <Card className="mb-2">
+            <p className="text-red-500 text-center">
+              Untuk Kapal TugBoat yang memiliki kapal pasangan, penginputan
+              nilai downtime akan berada di kapal pasangannya.
+            </p>
+          </Card>
+        ) : (
+          <></>
+        )}
+
+        {getValues("vslType") !== "TB" &&
+        getValues("vslMate") !== null &&
+        allowInputGrade === false &&
+        !isClosed ? (
+          <Card className="mb-2">
+            <p className="text-red-500 text-center">
+              Silahkan selesaikan penginputan nilai di kapal{" "}
+              {dataVslMate?.vslName} terlebih dahulu
+            </p>
+          </Card>
+        ) : (
+          <></>
+        )}
+
         <Card className="mb-2">
           <CardHeader>
             <CardTitle>Vessel Assessment</CardTitle>
@@ -294,6 +389,24 @@ const EditVesselAssessmentForm = () => {
                           />
                         </FormControl>
                         <FormMessage>{errors.vslType?.message}</FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name="vslMate"
+                    control={control}
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-1">
+                        <FormLabel>Vessel Mate</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Vessel Mate"
+                            {...field}
+                            readOnly
+                            className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                          />
+                        </FormControl>
+                        <FormMessage>{errors.vslMate?.message}</FormMessage>
                       </FormItem>
                     )}
                   />
@@ -439,271 +552,226 @@ const EditVesselAssessmentForm = () => {
                     )}
                   />
                 </Card>
-                {user?.superUser || user?.roleCode === "DPA" ? (
-                  <>
-                    <Card className="p-2">
-                      <FormField
-                        name="scoreItemGeneral"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Score Item General</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Score Item General"
-                                {...field}
-                                readOnly
-                                className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.scoreItemGeneral?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        name="downtimeDaysGeneral"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Downtime Days General</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="Downtime Days General"
-                                {...field}
-                                onKeyDown={(e) => {
-                                  if (
-                                    !(
-                                      (e.key >= "0" && e.key <= "9") ||
-                                      e.key === "." ||
-                                      e.key === "-" ||
-                                      e.key === "Backspace" ||
-                                      e.key === "Delete" ||
-                                      e.key === "ArrowLeft" ||
-                                      e.key === "ArrowRight"
-                                    )
-                                  ) {
-                                    e.preventDefault();
-                                  }
-                                }}
-                                className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                style={{
-                                  MozAppearance: "textfield",
-                                  WebkitAppearance: "none",
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.downtimeDaysGeneral?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      />
-                      {/* <FormField
-                        name="scoreGeneral"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Score General</FormLabel>
-                            <FormControl>
-                              <Input
-                                readOnly
-                                placeholder="Score General"
-                                {...field}
-                                className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.scoreGeneral?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      /> */}
-                    </Card>
-                  </>
-                ) : (
+                {getValues("vslType") === "TB" &&
+                getValues("vslMate") !== null ? (
                   <></>
-                )}
-                {user?.superUser || user?.roleCode === "CRW-TS" ? (
-                  <>
-                    {" "}
-                    <Card className="p-2">
-                      <FormField
-                        name="scoreItemTechnical"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Score Item Technical</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Score Item Technical"
-                                {...field}
-                                readOnly
-                                className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.scoreItemTechnical?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        name="downtimeDaysTechnical"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Downtime Days Technical</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="Downtime Days TEchnical"
-                                {...field}
-                                onKeyDown={(e) => {
-                                  if (
-                                    !(
-                                      (e.key >= "0" && e.key <= "9") ||
-                                      e.key === "." ||
-                                      e.key === "-" ||
-                                      e.key === "Backspace" ||
-                                      e.key === "Delete" ||
-                                      e.key === "ArrowLeft" ||
-                                      e.key === "ArrowRight"
-                                    )
-                                  ) {
-                                    e.preventDefault();
-                                  }
-                                }}
-                                className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                style={{
-                                  MozAppearance: "textfield",
-                                  WebkitAppearance: "none",
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.downtimeDaysTechnical?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      />
-                      {/*  <FormField
-                        name="scoreTechnical"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Score Technical</FormLabel>
-                            <FormControl>
-                              <Input
-                                readOnly
-                                placeholder="Score Technical"
-                                {...field}
-                                className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.scoreTechnical?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      /> */}
-                    </Card>
-                  </>
                 ) : (
-                  <></>
-                )}
-                {user?.superUser || user?.roleCode === "CRW-MS" ? (
                   <>
-                    {" "}
-                    <Card className="p-2">
-                      <FormField
-                        name="scoreItemMarine"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Score Item Marine</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Score Item Marine"
-                                {...field}
-                                readOnly
-                                className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.scoreItemMarine?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        name="downtimeDaysMarine"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Downtime Days Marine</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="Downtime Days MArine"
-                                {...field}
-                                onKeyDown={(e) => {
-                                  if (
-                                    !(
-                                      (e.key >= "0" && e.key <= "9") ||
-                                      e.key === "." ||
-                                      e.key === "-" ||
-                                      e.key === "Backspace" ||
-                                      e.key === "Delete" ||
-                                      e.key === "ArrowLeft" ||
-                                      e.key === "ArrowRight"
-                                    )
-                                  ) {
-                                    e.preventDefault();
-                                  }
-                                }}
-                                className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                style={{
-                                  MozAppearance: "textfield",
-                                  WebkitAppearance: "none",
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.downtimeDaysMarine?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      />
-                      {/* <FormField
-                        name="scoreMarine"
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem className="md:col-span-1">
-                            <FormLabel>Score Marine</FormLabel>
-                            <FormControl>
-                              <Input
-                                readOnly
-                                placeholder="Score Marine"
-                                {...field}
-                                className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                              />
-                            </FormControl>
-                            <FormMessage>
-                              {errors.scoreMarine?.message}
-                            </FormMessage>
-                          </FormItem>
-                        )}
-                      /> */}
-                    </Card>
+                    {(user?.superUser || user?.roleCode === "DPA") &&
+                    /* getValues("downtimeGeneral") !== null &&
+                    getValues("downtimeGeneral") === 0 && */
+                    allowInputGrade &&
+                    !isClosed ? (
+                      <>
+                        <Card className="p-2">
+                          <FormField
+                            name="scoreItemGeneral"
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-1">
+                                <FormLabel>Score Item General</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Score Item General"
+                                    {...field}
+                                    readOnly
+                                    className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                                  />
+                                </FormControl>
+                                <FormMessage>
+                                  {errors.scoreItemGeneral?.message}
+                                </FormMessage>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            name="downtimeDaysGeneral"
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-1">
+                                <FormLabel>Downtime Days General</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Downtime Days General"
+                                    {...field}
+                                    onKeyDown={(e) => {
+                                      if (
+                                        !(
+                                          (e.key >= "0" && e.key <= "9") ||
+                                          e.key === "." ||
+                                          e.key === "-" ||
+                                          e.key === "Backspace" ||
+                                          e.key === "Delete" ||
+                                          e.key === "ArrowLeft" ||
+                                          e.key === "ArrowRight"
+                                        )
+                                      ) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    style={{
+                                      MozAppearance: "textfield",
+                                      WebkitAppearance: "none",
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage>
+                                  {errors.downtimeDaysGeneral?.message}
+                                </FormMessage>
+                              </FormItem>
+                            )}
+                          />
+                        </Card>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                    {/*   {(user?.superUser || user?.roleCode === "CRW-TS") &&
+                    getValues("downtimeTechnical") !== null &&
+                    getValues("downtimeTechnical") === 0 ? (
+                      <>
+                        {" "}
+                        <Card className="p-2">
+                          <FormField
+                            name="scoreItemTechnical"
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-1">
+                                <FormLabel>Score Item Technical</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Score Item Technical"
+                                    {...field}
+                                    readOnly
+                                    className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                                  />
+                                </FormControl>
+                                <FormMessage>
+                                  {errors.scoreItemTechnical?.message}
+                                </FormMessage>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            name="downtimeDaysTechnical"
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-1">
+                                <FormLabel>Downtime Days Technical</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Downtime Days TEchnical"
+                                    {...field}
+                                    onKeyDown={(e) => {
+                                      if (
+                                        !(
+                                          (e.key >= "0" && e.key <= "9") ||
+                                          e.key === "." ||
+                                          e.key === "-" ||
+                                          e.key === "Backspace" ||
+                                          e.key === "Delete" ||
+                                          e.key === "ArrowLeft" ||
+                                          e.key === "ArrowRight"
+                                        )
+                                      ) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    style={{
+                                      MozAppearance: "textfield",
+                                      WebkitAppearance: "none",
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage>
+                                  {errors.downtimeDaysTechnical?.message}
+                                </FormMessage>
+                              </FormItem>
+                            )}
+                          />
+                        </Card>
+                      </>
+                    ) : (
+                      <></>
+                    )} */}
+                    {/* {(user?.superUser || user?.roleCode === "CRW-MS") &&
+                    getValues("downtimeMarine") !== null &&
+                    getValues("downtimeMarine") === 0 ? (
+                      <>
+                        {" "}
+                        <Card className="p-2">
+                          <FormField
+                            name="scoreItemMarine"
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-1">
+                                <FormLabel>Score Item Marine</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="Score Item Marine"
+                                    {...field}
+                                    readOnly
+                                    className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                                  />
+                                </FormControl>
+                                <FormMessage>
+                                  {errors.scoreItemMarine?.message}
+                                </FormMessage>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            name="downtimeDaysMarine"
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-1">
+                                <FormLabel>Downtime Days Marine</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Downtime Days MArine"
+                                    {...field}
+                                    onKeyDown={(e) => {
+                                      if (
+                                        !(
+                                          (e.key >= "0" && e.key <= "9") ||
+                                          e.key === "." ||
+                                          e.key === "-" ||
+                                          e.key === "Backspace" ||
+                                          e.key === "Delete" ||
+                                          e.key === "ArrowLeft" ||
+                                          e.key === "ArrowRight"
+                                        )
+                                      ) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                    className="w-full border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    style={{
+                                      MozAppearance: "textfield",
+                                      WebkitAppearance: "none",
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormMessage>
+                                  {errors.downtimeDaysMarine?.message}
+                                </FormMessage>
+                              </FormItem>
+                            )}
+                          />
+                        </Card>
+                      </>
+                    ) : (
+                      <></>
+                    )} */}
                   </>
-                ) : (
-                  <></>
                 )}
 
                 <div className="md:col-span-4 flex justify-end mt-4">
@@ -715,12 +783,14 @@ const EditVesselAssessmentForm = () => {
                   >
                     Back
                   </Button>
-                  {status === "CLOSED" ||
-                  status === "UPLOADING PHOTO" ||
-                  status === "READY" ||
-                  status === "PHOTO COMPLETED" ? (
+                  {(status === "CLOSED" ||
+                    status === "UPLOADING PHOTO" ||
+                    status === "PROCESS CLOSED" ||
+                    status === "READY" ||
+                    status === "PHOTO COMPLETED") &&
+                  allowInputGrade &&
+                  !isClosed ? (
                     <>
-                      {" "}
                       <Button
                         type="submit"
                         className="w-full md:w-auto bg-orange-700 hover:bg-orange-500"
@@ -774,8 +844,10 @@ const EditVesselAssessmentForm = () => {
               idHeader={Number(idHeader)}
               vslType={String(vslType)}
               onSaveData={() => handleSaveDetail()}
-              status={status ?? ""}
-              mode={""}
+              allowInputGrade={allowInputGrade}
+              isClosed={isClosed}
+              /* status={status ?? ""}
+              mode={""} */
             />
           </CardContent>
         </Card>

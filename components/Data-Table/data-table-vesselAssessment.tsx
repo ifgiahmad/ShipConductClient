@@ -64,6 +64,7 @@ function DataTableVesselAssessment<TData extends HasId>({
   const [isModalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [editMode, setEditMode] = useState<string | null>(null);
+  const [globalFilter, setGlobalFilter] = useState<string>("");
 
   const table = useReactTable({
     data,
@@ -79,6 +80,12 @@ function DataTableVesselAssessment<TData extends HasId>({
       sorting,
       columnFilters,
       columnVisibility,
+      globalFilter,
+    },
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(filterValue.toLowerCase());
     },
   });
 
@@ -109,11 +116,9 @@ function DataTableVesselAssessment<TData extends HasId>({
     <>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Vessel Name..."
-          value={(table.getColumn("vslName")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("vslName")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search in all columns..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm"
         />
         <Link href={urlAdd}>
@@ -152,9 +157,9 @@ function DataTableVesselAssessment<TData extends HasId>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-auto max-h-[500px]">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-200 sticky top-0 z-10 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -165,6 +170,19 @@ function DataTableVesselAssessment<TData extends HasId>({
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+
+                    {/* Input pencarian untuk filter per kolom */}
+                    {header.column.getCanFilter() ? (
+                      <Input
+                        type="text"
+                        value={(header.column.getFilterValue() as string) ?? ""}
+                        onChange={(e) =>
+                          header.column.setFilterValue(e.target.value)
+                        }
+                        placeholder={`Search ${header.column.id}`}
+                        className="mt-1 w-full text-sm px-2 py-1 border rounded-md"
+                      />
+                    ) : null}
                   </TableHead>
                 ))}
                 <TableHead>Actions</TableHead>

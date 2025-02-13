@@ -37,21 +37,16 @@ export const getTrVesselAssessmentByLink = async (
   return response.data;
 };
 
-/* export const saveTrVesselAssessment = async (
-  item: Partial<TrVesselAssessment>
-): Promise<AxiosResponse<TrVesselAssessment>> => {
-  try {
-    console.log(item);
-    const response = await api.post<TrVesselAssessment>(
-      `api/vesselAssessment/saveVesselAssessment`,
-      item
-    );
-    return response;
-  } catch (error) {
-    console.error("Error saving Vessel Assessment:", error);
-    throw error;
-  }
-}; */
+export const getTrVesselAssessmentByNameAndPeriod = async (
+  vslName: string,
+  month: number,
+  year: number
+): Promise<TrVesselAssessment> => {
+  const response = await api.get<TrVesselAssessment>(
+    `api/vesselAssessment/getVesselAssessmentByNameAndPeriod?vslName=${vslName}&month=${month}&year=${year}`
+  );
+  return response.data;
+};
 
 export const saveTrVesselAssessment = async (
   item: Partial<TrVesselAssessment>

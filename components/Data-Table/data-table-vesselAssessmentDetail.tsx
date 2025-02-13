@@ -45,8 +45,10 @@ interface DataTableAssessmentDetailProps<TData extends HasId> {
   idHeader: number;
   vslType: string;
   onSaveData: () => void;
-  status: string;
-  mode: string;
+  allowInputGrade: boolean;
+  isClosed: boolean;
+  /*  status: string;
+  mode: string; */
 }
 
 function DataTableAssessmentDetail<TData extends HasId>({
@@ -56,9 +58,11 @@ function DataTableAssessmentDetail<TData extends HasId>({
   idHeader,
   onSaveData,
   vslType,
-  status,
-  mode,
-}: DataTableAssessmentDetailProps<TData>) {
+  allowInputGrade,
+  isClosed,
+}: /*  status,
+  mode, */
+DataTableAssessmentDetailProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -193,43 +197,63 @@ function DataTableAssessmentDetail<TData extends HasId>({
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline">...</Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {row.original.smallFileLink ? (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "INPUT GRADE")
-                              }
-                            >
-                              Input Grade
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "EDIT")
-                              }
-                            >
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "DELETE")
-                              }
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "UPLOAD PHOTO")
-                              }
-                            >
-                              Upload Foto
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
+                      {allowInputGrade && !isClosed ? (
+                        <>
+                          {" "}
+                          <DropdownMenuContent>
+                            {row.original.smallFileLink ? (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(
+                                      row.original.id,
+                                      "INPUT GRADE"
+                                    )
+                                  }
+                                >
+                                  Input Grade
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(row.original.id, "DELETE")
+                                  }
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </>
+                            ) : (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(row.original.id, "EDIT")
+                                  }
+                                >
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(row.original.id, "DELETE")
+                                  }
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(
+                                      row.original.id,
+                                      "UPLOAD PHOTO"
+                                    )
+                                  }
+                                >
+                                  Upload Foto
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </>
+                      ) : (
+                        <></>
+                      )}
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>

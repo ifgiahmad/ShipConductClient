@@ -73,6 +73,7 @@ const AddVesselAssessmentForm: React.FC = () => {
       vslName: "",
       vslType: "",
       vslCode: "",
+      vslMate: "",
       periodDate: new Date(),
       finalDate: new Date(),
       id: 0,
@@ -194,6 +195,7 @@ const AddVesselAssessmentForm: React.FC = () => {
       console.log(selectedVessel);
       setSelectedVesselName(selectedVessel.vslName);
       setValue("vslType", selectedVessel.vslType);
+      setValue("vslMate", selectedVessel.vslMate ?? "");
     }
   };
 
@@ -268,54 +270,26 @@ const AddVesselAssessmentForm: React.FC = () => {
                   </FormItem>
                 )}
               />
-            </Card>
-            <Card className="p-2">
-              {/*  <FormField
+              <FormField
+                name="vslMate"
                 control={control}
-                name="interval"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Interval</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        setSelectedInterval(value);
-                        setValue("interval", value);
-                        field.onChange(value);
-                      }}
-                      value={selectedInterval || field.value}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Interval" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <div className="p-2">
-                          <Input
-                            type="text"
-                            placeholder="Search Interval..."
-                            value={searchTerms.interval}
-                            onChange={(e) =>
-                              handleSearchChange("interval", e.target.value)
-                            }
-                            className="w-full p-2 border rounded-md mb-2"
-                          />
-                        </div>
-                        {interval
-                          .filter((s) =>
-                            s.interval
-                              ?.toLowerCase()
-                              .includes(searchTerms.interval.toLowerCase())
-                          )
-                          .map((s) => (
-                            <SelectItem key={s.id} value={s.interval}>
-                              {s.interval}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
+                  <FormItem className="md:col-span-1">
+                    <FormLabel>Vessel Mate</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Vessel Mate"
+                        {...field}
+                        readOnly
+                        className="w-full p-2 border border-gray-300 bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </FormControl>
+                    <FormMessage>{errors.vslMate?.message}</FormMessage>
                   </FormItem>
                 )}
-              /> */}
+              />
+            </Card>
+            <Card className="p-2">
               <FormField
                 control={control}
                 name="periodDate"

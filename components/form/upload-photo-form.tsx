@@ -30,6 +30,7 @@ import {
   getMsItemByCodeNameItem,
   getMsItemById,
 } from "@/services/service_api_itemForCrew";
+import dynamic from "next/dynamic";
 
 type DetailData = z.infer<typeof UploadPhotoTrVesselAssessmentDetailZod>;
 
@@ -166,7 +167,7 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
     }
   };
 
-  const onDetailSubmit = async (
+  /*  const onDetailSubmit = async (
     data: uploadPhotoTrVesselAssessmentDetailDto
   ) => {
     setLoading(true);
@@ -197,7 +198,77 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
     } finally {
       setLoading(false);
     }
+  }; */
+
+  const onDetailSubmit = async (
+    data: uploadPhotoTrVesselAssessmentDetailDto
+  ) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+
+      if (data.photo) {
+        const file = data.photo as File;
+
+        // Jika file bertipe HEIC
+        if (
+          file.type === "image/heic" ||
+          file.name.toLowerCase().endsWith(".heic")
+        ) {
+          if (typeof window !== "undefined") {
+            const heic2any = (await import("heic2any")).default;
+
+            const convertedBlob = await heic2any({
+              blob: file,
+              toType: "image/jpeg",
+            });
+
+            const convertedFile = new File(
+              [convertedBlob as Blob],
+              file.name.replace(/\.heic$/i, ".jpg"),
+              { type: "image/jpeg" }
+            );
+            data.photo = convertedFile;
+            /*  formData.append("file", convertedFile); */
+          } else {
+            throw new Error("HEIC conversion is not supported in SSR.");
+          }
+        } else {
+          formData.append("file", file);
+        }
+      } /* else {
+        throw new Error("No photo provided.");
+      } */
+
+      const response = await uploadPhotoForCrew(data);
+
+      if (response.status === 200) {
+        toast({
+          description: "Photo Assessment Detail updated successfully.",
+        });
+        return true;
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to upload photo.",
+        });
+        return false;
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Error uploading photo: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`,
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <Card>
       <CardContent>

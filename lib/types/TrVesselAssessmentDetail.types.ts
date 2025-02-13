@@ -20,6 +20,7 @@ export type TrVesselAssessmentDetail = {
   normalFileLink?: string;
   photoDescription?: string;
   isDeleted?: boolean;
+  /* excludeCount?: boolean; */
   uploadedBy?: string;
   uploadedDate?: Date;
   assessedBy?: string;
@@ -64,6 +65,7 @@ export const saveTrVesselAssessmentDetailZod = z.object({
   modifiedBy: z.string().optional(),
   modifiedDate: z.date().optional(),
   photo: z.instanceof(File).nullable().optional(),
+  /*  excludeCount: z.boolean().optional(), */
 });
 
 export const UploadPhotoTrVesselAssessmentDetailZod = z

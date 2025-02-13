@@ -163,7 +163,7 @@ const CrewUploadForm = () => {
                 marginBottom: "8px",
               }}
               onClick={() =>
-                handleImageSampleClick(row.original.smallFileLink || "")
+                handleImageSampleClick(row.original.normalFileLink || "")
               }
             />
           )}

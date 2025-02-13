@@ -10,6 +10,7 @@ import {
 import {
   createTrVesselAssessmentDto,
   createTrVesselAssessmentZod,
+  TrVesselAssessment,
 } from "@/lib/types/TrVesselAssessment.types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getTrVesselAssessmentByNameAndPeriod } from "@/services/service_api_vesselAssessment";
 
 const CrewUploadForm = () => {
   const router = useRouter();
@@ -92,6 +94,15 @@ const CrewUploadForm = () => {
   const [totalScoreGeneralItem, setTotalScoreGeneralItem] = useState<
     number | undefined
   >();
+
+  const [totalScoreTechnicalItemVslMate, setTotalScoreTechnicalItemVslMate] =
+    useState<number | undefined>();
+  const [totalScoreMarineItemVslMate, setTotalScoreMarineItemVslMate] =
+    useState<number | undefined>();
+
+  const [totalScoreGeneralItemVslMate, setTotalScoreGeneralItemVslMate] =
+    useState<number | undefined>();
+
   const [downtimeDayGeneral, setDowntimeDayGeneral] = useState<
     number | undefined
   >();
@@ -133,6 +144,7 @@ const CrewUploadForm = () => {
   const [idListMarine, setIdListMarine] = useState<number[]>([]);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [dataVslMate, setDataVslMate] = useState<TrVesselAssessment>();
 
   const handleImageSampleClick = (imageUrl: string) => {
     setSelectedImage(imageUrl);
@@ -208,6 +220,56 @@ const CrewUploadForm = () => {
         setDowntimeGeneral(data.downtimeGeneral ?? 0);
         setAverageScoreGeneral(data.scoreItemGeneral ?? 0);
 
+        const dataVslMate = await getTrVesselAssessmentByNameAndPeriod(
+          data.vslMate || "",
+          data.month || 0,
+          data.year || 0
+        );
+        setDataVslMate(dataVslMate);
+
+        if (dataVslMate) {
+          const dataDetailVslMate = await getTrVesselAssessmentDetailForCrew(
+            Number(dataVslMate?.id)
+          );
+
+          if (dataDetailVslMate.length > 0) {
+            const filteredDataDetailGeneral = dataDetailVslMate.filter(
+              (detail) => detail.roleCategory === "GENERAL"
+            );
+
+            const totalScoreGeneral = filteredDataDetailGeneral.reduce(
+              (sum, detail) => {
+                return sum + detail.grade;
+              },
+              0
+            );
+            setTotalScoreGeneralItemVslMate(totalScoreGeneral);
+
+            const filteredDataDetailMarine = dataDetailVslMate.filter(
+              (detail) => detail.roleCategory === "MARINE"
+            );
+            const totalScoreMarine = filteredDataDetailMarine.reduce(
+              (sum, detail) => {
+                return sum + detail.grade;
+              },
+              0
+            );
+            setTotalScoreMarineItemVslMate(totalScoreMarine);
+
+            const filteredDataDetailTechnical = dataDetailVslMate.filter(
+              (detail) => detail.roleCategory === "TECHNICAL"
+            );
+
+            const totalScoreTechnical = filteredDataDetailTechnical.reduce(
+              (sum, detail) => {
+                return sum + detail.grade;
+              },
+              0
+            );
+            setTotalScoreTechnicalItemVslMate(totalScoreTechnical);
+          }
+        }
+
         if (data.periodDate) {
           const periodDate =
             typeof data.periodDate === "string"
@@ -250,6 +312,7 @@ const CrewUploadForm = () => {
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselAssessmentDetailForCrew(Number(id));
+
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
     const groupedData = dataDetail.reduce((acc, item) => {
@@ -371,7 +434,7 @@ const CrewUploadForm = () => {
                                 <Card className="p-2">
                                   <div className="grid w-full max-w-sm items-center gap-1.5">
                                     <Label htmlFor="totalScoreGeneral">
-                                      Total Score General
+                                      Total Score
                                     </Label>
                                     <Input
                                       type="number"
@@ -382,8 +445,20 @@ const CrewUploadForm = () => {
                                     />
                                   </div>
                                   <div className="grid w-full max-w-sm items-center gap-1.5">
+                                    <Label htmlFor="totalScoreGeneralVslMate">
+                                      Total Score Vessel {dataVslMate?.vslName}
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      id="totalScoreGeneralVslMate"
+                                      placeholder="Total Score General"
+                                      value={totalScoreGeneralItemVslMate}
+                                      readOnly
+                                    />
+                                  </div>
+                                  <div className="grid w-full max-w-sm items-center gap-1.5">
                                     <Label htmlFor="averageScoreGeneral">
-                                      Average Score General
+                                      Average Score
                                     </Label>
                                     <Input
                                       type="number"
@@ -483,7 +558,7 @@ const CrewUploadForm = () => {
                                 <Card className="p-2">
                                   <div className="grid w-full max-w-sm items-center gap-1.5">
                                     <Label htmlFor="totalScoreTechnical">
-                                      Total Score Technical
+                                      Total Score
                                     </Label>
                                     <Input
                                       type="number"
@@ -494,8 +569,20 @@ const CrewUploadForm = () => {
                                     />
                                   </div>
                                   <div className="grid w-full max-w-sm items-center gap-1.5">
+                                    <Label htmlFor="totalScoreTechnicalVslMate">
+                                      Total Score Vessel {dataVslMate?.vslName}
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      id="totalScoreTechnicalVslMate"
+                                      placeholder="Total Score Tchnical"
+                                      value={totalScoreTechnicalItemVslMate}
+                                      readOnly
+                                    />
+                                  </div>
+                                  <div className="grid w-full max-w-sm items-center gap-1.5">
                                     <Label htmlFor="averageScoreTechnical">
-                                      Average Score Technical
+                                      Average Score
                                     </Label>
                                     <Input
                                       type="number"
@@ -509,7 +596,7 @@ const CrewUploadForm = () => {
                                 <Card className="p-2">
                                   <div className="grid w-full max-w-sm items-center gap-1.5">
                                     <Label htmlFor="finalScoreTechnical">
-                                      Final Score Technical
+                                      Final Score
                                     </Label>
                                     <Input
                                       type="number"
@@ -568,13 +655,25 @@ const CrewUploadForm = () => {
                                 <Card className="p-2">
                                   <div className="grid w-full max-w-sm items-center gap-1.5">
                                     <Label htmlFor="totalScoreMarine">
-                                      Total Score Marine
+                                      Total Score
                                     </Label>
                                     <Input
                                       type="number"
                                       id="totalScoreMarine"
                                       placeholder="Total Score Marine"
                                       value={totalScoreMarineItem}
+                                      readOnly
+                                    />
+                                  </div>
+                                  <div className="grid w-full max-w-sm items-center gap-1.5">
+                                    <Label htmlFor="totalScoreMarineVslMate">
+                                      Total Score Vessel {dataVslMate?.vslName}
+                                    </Label>
+                                    <Input
+                                      type="number"
+                                      id="totalScoreMarineVslMate"
+                                      placeholder="Total Score Marine"
+                                      value={totalScoreMarineItemVslMate}
                                       readOnly
                                     />
                                   </div>
