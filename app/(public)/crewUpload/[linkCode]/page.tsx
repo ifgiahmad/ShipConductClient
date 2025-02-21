@@ -87,6 +87,29 @@ const CrewUploadForm = () => {
   const [averagesDetail, setAveragesDetail] = useState<Record<string, number>>(
     {}
   );
+  const [totalItems, setTotalItems] = useState<number | undefined>();
+  const [totalPhotoItems, setTotalPhotoItems] = useState<number | undefined>();
+
+  const [totalItemsGeneral, setTotalItemsGeneral] = useState<
+    number | undefined
+  >();
+  const [totalPhotoItemsGeneral, setTotalPhotoItemsGeneral] = useState<
+    number | undefined
+  >();
+
+  const [totalItemsMarine, setTotalItemsMarine] = useState<
+    number | undefined
+  >();
+  const [totalPhotoItemsMarine, setTotalPhotoItemsMarine] = useState<
+    number | undefined
+  >();
+
+  const [totalItemsTechnical, setTotalItemsTechnical] = useState<
+    number | undefined
+  >();
+  const [totalPhotoItemsTechnical, setTotalPhotoItemsTechnical] = useState<
+    number | undefined
+  >();
 
   const {
     setValue,
@@ -270,6 +293,12 @@ const CrewUploadForm = () => {
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselAssessmentDetailForCrew(Number(id));
+    setTotalItems(dataDetail.length);
+    const countWithFileLink = dataDetail.filter(
+      (item) => item.normalFileLink && item.normalFileLink.trim() !== ""
+    ).length;
+
+    setTotalPhotoItems(countWithFileLink);
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
     const groupedData = dataDetail.reduce((acc, item) => {
@@ -288,6 +317,12 @@ const CrewUploadForm = () => {
         (detail: { id: number }) => detail.id
       );
       setIdListGeneral(idsGeneral);
+      setTotalItemsGeneral(filteredDataDetailGeneral.length);
+      setTotalPhotoItemsGeneral(
+        filteredDataDetailGeneral.filter(
+          (item) => item.normalFileLink && item.normalFileLink.trim() !== ""
+        ).length
+      );
 
       const filteredDataDetailMarine = dataDetail.filter(
         (detail) => detail.roleCategory === "MARINE"
@@ -296,6 +331,12 @@ const CrewUploadForm = () => {
         (detail: { id: number }) => detail.id
       );
       setIdListMarine(idsMarine);
+      setTotalItemsMarine(filteredDataDetailMarine.length);
+      setTotalPhotoItemsMarine(
+        filteredDataDetailMarine.filter(
+          (item) => item.normalFileLink && item.normalFileLink.trim() !== ""
+        ).length
+      );
 
       const filteredDataDetailTechnical = dataDetail.filter(
         (detail) => detail.roleCategory === "TECHNICAL"
@@ -304,6 +345,12 @@ const CrewUploadForm = () => {
         (detail: { id: number }) => detail.id
       );
       setIdListTechnical(idsTechnical);
+      setTotalItemsTechnical(filteredDataDetailTechnical.length);
+      setTotalPhotoItemsTechnical(
+        filteredDataDetailTechnical.filter(
+          (item) => item.normalFileLink && item.normalFileLink.trim() !== ""
+        ).length
+      );
 
       setDetailGeneral(filteredDataDetailGeneral);
       setDetailMarine(filteredDataDetailMarine);
@@ -426,6 +473,11 @@ const CrewUploadForm = () => {
                   Previous Assessment Results
                 </TabsTrigger>
               </TabsList>
+              <CardHeader>
+                <CardTitle>
+                  {totalPhotoItems} item photos out of {totalItems} total items
+                </CardTitle>
+              </CardHeader>
               <TabsContent value="currentAssessment">
                 {isOutOfPeriod ? (
                   <p className="text-red-500 text-center">
@@ -440,6 +492,10 @@ const CrewUploadForm = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                            <p className="p-2">
+                              {totalPhotoItemsGeneral} item photos out of{" "}
+                              {totalItemsGeneral} total items General
+                            </p>
                             <Collapsible>
                               <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
                                 <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
@@ -474,6 +530,10 @@ const CrewUploadForm = () => {
                             </Collapsible>
                           </div>
                           <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                            <p className="p-2">
+                              {totalPhotoItemsTechnical} item photos out of{" "}
+                              {totalItemsTechnical} total items Technical
+                            </p>
                             <Collapsible>
                               <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
                                 <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
@@ -508,6 +568,10 @@ const CrewUploadForm = () => {
                             </Collapsible>
                           </div>
                           <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                            <p className="p-2">
+                              {totalPhotoItemsMarine} item photos out of{" "}
+                              {totalItemsMarine} total items Technical
+                            </p>
                             <Collapsible>
                               <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
                                 <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">

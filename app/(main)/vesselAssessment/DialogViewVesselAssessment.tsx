@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -26,21 +25,21 @@ import {
 import { ChevronsUpDown } from "lucide-react";
 import { UserRole } from "@/lib/type";
 import { getUser } from "@/services/auth";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getTrVesselAssessmentByNameAndPeriod } from "@/services/service_api_vesselAssessment";
 
-const VesselAssessmentViewForm = () => {
-  const router = useRouter();
-  const { linkCode } = useParams();
-  const [baseUrl, setBaseUrl] = useState("");
+interface TrVesselAssessmentFormProps {
+  onClose: () => void;
+  onSave: () => void;
+  linkCode: string;
+}
 
+const DialogViewVesselAssessment = ({
+  onClose,
+  onSave,
+  linkCode,
+}: TrVesselAssessmentFormProps) => {
   const methods = useForm<createTrVesselAssessmentDto>({
     resolver: zodResolver(createTrVesselAssessmentZod),
     defaultValues: {
@@ -198,7 +197,9 @@ const VesselAssessmentViewForm = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (typeof linkCode === "string") {
+        console.log(linkCode);
         const data = await getTrVesselAssessmentByLinkForCrew(linkCode);
+        console.log(data);
         setValue("id", data.id ?? 0);
         setValue("vslName", data.vslName ?? "");
         setValue("vslType", data.vslType ?? "");
@@ -298,7 +299,6 @@ const VesselAssessmentViewForm = () => {
     fetchData();
     fetchDetail();
     fetchUser();
-    setBaseUrl(`${window.location.protocol}//${window.location.host}/`);
   }, [
     id,
     setId,
@@ -411,8 +411,6 @@ const VesselAssessmentViewForm = () => {
                   </CardHeader>
                   <CardContent>
                     <Card>
-                      {/*  {user?.superUser || user?.roleCode === "DPA" ? (
-                        <> */}
                       <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
                         <Collapsible>
                           <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
@@ -530,13 +528,6 @@ const VesselAssessmentViewForm = () => {
                           </CollapsibleContent>
                         </Collapsible>
                       </div>
-                      {/*  </>
-                      ) : (
-                        <></>
-                      )} */}
-
-                      {/*  {user?.superUser || user?.roleCode === "CRW-TS" ? (
-                        <> */}
                       <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
                         <Collapsible>
                           <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
@@ -627,13 +618,6 @@ const VesselAssessmentViewForm = () => {
                           </CollapsibleContent>
                         </Collapsible>
                       </div>
-                      {/* </>
-                      ) : (
-                        <></>
-                      )} */}
-
-                      {/*  {user?.superUser || user?.roleCode === "CRW-MS" ? (
-                        <> */}
                       <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
                         <Collapsible>
                           <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
@@ -724,10 +708,6 @@ const VesselAssessmentViewForm = () => {
                           </CollapsibleContent>
                         </Collapsible>
                       </div>
-                      {/*  </>
-                      ) : (
-                        <></>
-                      )} */}
                     </Card>
 
                     {selectedImage && (
@@ -758,4 +738,4 @@ const VesselAssessmentViewForm = () => {
   );
 };
 
-export default VesselAssessmentViewForm;
+export default DialogViewVesselAssessment;

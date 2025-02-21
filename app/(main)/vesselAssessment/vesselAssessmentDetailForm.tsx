@@ -406,7 +406,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
       if (currentMode === "UPLOAD PHOTO") {
         const response = await uploadPhoto(data);
         if (response.status === 200) {
-          /*  onSave(); */
+          onSave();
           toast({
             description: "Photo Assessment Detail updated successfully.",
           });

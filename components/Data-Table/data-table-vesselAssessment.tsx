@@ -26,13 +26,9 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { Dialog } from "@radix-ui/react-dialog";
-import { DialogContent, DialogTitle } from "../ui/dialog";
-import { link } from "fs";
 
 interface HasId {
   id: number;
@@ -43,17 +39,11 @@ interface HasId {
 interface DataTableProps<TData extends HasId> {
   data: TData[];
   columns: ColumnDef<TData>[];
-  modalContent: React.ReactNode;
-  onSaveData: () => void;
-  mode: string;
 }
 
 function DataTableVesselAssessment<TData extends HasId>({
   data,
   columns,
-  modalContent,
-  onSaveData,
-  mode,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -61,9 +51,7 @@ function DataTableVesselAssessment<TData extends HasId>({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editMode, setEditMode] = useState<string | null>(null);
+
   const [globalFilter, setGlobalFilter] = useState<string>("");
 
   const table = useReactTable({
@@ -90,24 +78,6 @@ function DataTableVesselAssessment<TData extends HasId>({
   });
 
   const urlAdd = "/vesselAssessment/add";
-  const urlEdit = "/vesselAssessment/editById/";
-  const urlView = "/vesselAssessment/view/";
-
-  const handleOpenModal = (_id: number, _mode: string) => {
-    setEditId(_id);
-    setEditMode(_mode);
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setEditId(null);
-  };
-
-  const handleSaveModal = () => {
-    setModalOpen(false);
-    onSaveData();
-  };
 
   const totalRowCount = data.length;
   const filteredRowCount = table.getRowModel().rows.length;
@@ -115,12 +85,6 @@ function DataTableVesselAssessment<TData extends HasId>({
   return (
     <>
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Search in all columns..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-sm"
-        />
         <Link href={urlAdd}>
           <Button
             className="ml-2 bg-green-900 hover:bg-green-600"
@@ -157,35 +121,38 @@ function DataTableVesselAssessment<TData extends HasId>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border overflow-auto max-h-[500px]">
+      <div className="rounded-md border overflow-auto h-auto max-h-[90vh]">
         <Table>
           <TableHeader className="bg-gray-200 sticky top-0 z-10 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                    <div className="flex flex-col items-center">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
 
-                    {/* Input pencarian untuk filter per kolom */}
-                    {header.column.getCanFilter() ? (
-                      <Input
-                        type="text"
-                        value={(header.column.getFilterValue() as string) ?? ""}
-                        onChange={(e) =>
-                          header.column.setFilterValue(e.target.value)
-                        }
-                        placeholder={`Search ${header.column.id}`}
-                        className="mt-1 w-full text-sm px-2 py-1 border rounded-md"
-                      />
-                    ) : null}
+                      {/* Input pencarian untuk filter per kolom */}
+                      {header.column.getCanFilter() ? (
+                        <Input
+                          type="text"
+                          value={
+                            (header.column.getFilterValue() as string) ?? ""
+                          }
+                          onChange={(e) =>
+                            header.column.setFilterValue(e.target.value)
+                          }
+                          placeholder={`Search ${header.column.id}`}
+                          className="mt-1 w-full text-sm px-2 py-1 border rounded-md text-center"
+                        />
+                      ) : null}
+                    </div>
                   </TableHead>
                 ))}
-                <TableHead>Actions</TableHead>
               </TableRow>
             ))}
           </TableHeader>
@@ -204,39 +171,6 @@ function DataTableVesselAssessment<TData extends HasId>({
                       )}
                     </TableCell>
                   ))}
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">...</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {row.original.status === "CANCEL" ||
-                        row.original.status === "CLOSED" ? (
-                          <></>
-                        ) : (
-                          <>
-                            <DropdownMenuItem>
-                              <Link href={`${urlEdit + row.original.id}`}>
-                                Edit
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Link href={`${urlView + row.original.linkCode}`}>
-                                View
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "CANCEL")
-                              }
-                            >
-                              Cancel
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -290,17 +224,6 @@ function DataTableVesselAssessment<TData extends HasId>({
           </Button>
         </div>
       </div>
-      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="lg:max-w-[800px] max-h-[600px] overflow-auto">
-          <DialogTitle>{"Assessment Detail"}</DialogTitle>
-          {React.cloneElement(modalContent as React.ReactElement, {
-            onClose: handleCloseModal,
-            onSave: handleSaveModal,
-            id: editId,
-            mode: editMode,
-          })}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
