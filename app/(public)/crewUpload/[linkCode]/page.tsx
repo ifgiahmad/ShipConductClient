@@ -27,8 +27,20 @@ import {
 } from "@/services/service_api_vesselAssessmentForCrew";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DataTableCrewAssessmentResults from "@/components/Data-Table/data-table-crewAssessmentResults";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ChevronsUpDown } from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const CrewUploadForm = () => {
   const router = useRouter();
@@ -87,6 +99,7 @@ const CrewUploadForm = () => {
   const [averagesDetail, setAveragesDetail] = useState<Record<string, number>>(
     {}
   );
+
   const [totalItems, setTotalItems] = useState<number | undefined>();
   const [totalPhotoItems, setTotalPhotoItems] = useState<number | undefined>();
 
@@ -169,12 +182,11 @@ const CrewUploadForm = () => {
           />
         ) : null, // Tidak menampilkan apapun jika URL kosong
     },
-    {
+    /*  {
       header: "Photo",
       accessorKey: "smallFileLink",
       cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => (
         <div style={{ textAlign: "center" }}>
-          {/* Render gambar jika ada URL */}
           {row.original.smallFileLink && (
             <img
               src={row.original.smallFileLink}
@@ -190,10 +202,8 @@ const CrewUploadForm = () => {
               }
             />
           )}
-          {/* Tombol Upload Photo */}
           <Button
             onClick={() => handleOpenModal(row.original.id, row.original.item)}
-            /*  variant="outline" */
             size="sm"
             className=" bg-orange-700 hover:bg-orange-400"
           >
@@ -201,6 +211,86 @@ const CrewUploadForm = () => {
           </Button>
         </div>
       ),
+    }, */
+    {
+      header: "Photo",
+      cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => {
+        const smallFileLinks = [
+          row.original.smallFileLink,
+          row.original.smallFileLink2,
+          row.original.smallFileLink3,
+        ].filter(Boolean);
+
+        const largeFileLinks = [
+          row.original.normalFileLink,
+          row.original.normalFileLink2,
+          row.original.normalFileLink3,
+        ].filter(Boolean);
+
+        // State untuk mengontrol modal
+        const [isOpen, setIsOpen] = useState(false);
+
+        return (
+          <div style={{ textAlign: "center" }}>
+            {smallFileLinks.length > 0 ? (
+              <>
+                {/* Carousel tanpa membuka modal */}
+                <Carousel className="w-[120px]">
+                  <CarouselContent>
+                    {smallFileLinks.map((src, index) => (
+                      <CarouselItem key={index}>
+                        <img
+                          src={src}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="w-[100px] h-auto rounded-md cursor-pointer"
+                          onClick={() => setIsOpen(true)} // Modal terbuka hanya saat gambar diklik
+                        />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+
+                {/* Modal terbuka hanya saat gambar diklik */}
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogTitle className="sr-only">Photo Preview</DialogTitle>
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {largeFileLinks.map((src, index) => (
+                          <CarouselItem key={index}>
+                            <img
+                              src={src}
+                              alt={`Large Photo ${index + 1}`}
+                              className="w-full h-auto rounded-lg"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                  </DialogContent>
+                </Dialog>
+              </>
+            ) : (
+              <p></p>
+            )}
+
+            {/* Tombol Upload Photo */}
+            <Button
+              onClick={() =>
+                handleOpenModal(row.original.id, row.original.item)
+              }
+              size="sm"
+              className="bg-orange-700 hover:bg-orange-400 mt-2"
+            >
+              Upload Photo
+            </Button>
+          </div>
+        );
+      },
     },
     { header: "Photo Description", accessorKey: "photoDescription" },
   ];
@@ -369,9 +459,9 @@ const CrewUploadForm = () => {
       }
     }
     const dataDetail = await getTrVesselAssessmentDetailForCrew(Number(id));
-    const averages = calculateAverageGradeByCategory(dataDetail);
+    /*  const averages = calculateAverageGradeByCategory(dataDetail); */
     setAveragesDetail(calculateAverageGradeByCategory(dataDetail));
-    console.log(averages);
+    /*    const averagesSection = calculateAverageGradeByShipSection(dataDetail); */
   };
 
   function calculateAverageGradeByCategory(
@@ -649,7 +739,7 @@ const CrewUploadForm = () => {
               </TabsContent>
             </Tabs>
             <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-              <DialogContent className="md:max-w-[800px] max-h-[600px] overflow-auto">
+              <DialogContent className="md:max-w-[1000px] max-h-[800px] overflow-auto">
                 <DialogTitle>Upload Photo - {itemName}</DialogTitle>
                 <UploadPhotoForm
                   onClose={handleCloseModal}

@@ -29,6 +29,8 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
+import DialogDownloadVesselAssessment from "@/app/(main)/vesselAssessment/DialogDownloadAssessment";
 
 interface HasId {
   id: number;
@@ -53,6 +55,11 @@ function DataTableVesselAssessment<TData extends HasId>({
     React.useState<VisibilityState>({});
 
   const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+
+  const handleOpenDownloadDialog = () => {
+    setIsDownloadOpen(true);
+  };
 
   const table = useReactTable({
     data,
@@ -87,14 +94,20 @@ function DataTableVesselAssessment<TData extends HasId>({
       <div className="flex items-center py-4">
         <Link href={urlAdd}>
           <Button
-            className="ml-2 bg-green-900 hover:bg-green-600"
+            className="mr-2 bg-green-900 hover:bg-green-600"
             variant={"default"}
           >
             Add Data
           </Button>
         </Link>
+        <Button
+          className="bg-yellow-600 hover:bg-yellow-300"
+          onClick={() => handleOpenDownloadDialog()}
+        >
+          Download
+        </Button>
 
-        <DropdownMenu>
+        {/*  <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
               Show Columns
@@ -119,7 +132,7 @@ function DataTableVesselAssessment<TData extends HasId>({
                 );
               })}
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
       </div>
       <div className="rounded-md border overflow-auto h-auto max-h-[90vh]">
         <Table>
@@ -224,6 +237,18 @@ function DataTableVesselAssessment<TData extends HasId>({
           </Button>
         </div>
       </div>
+      {/* Dialog Edit */}
+      <Dialog open={isDownloadOpen} onOpenChange={setIsDownloadOpen}>
+        <DialogContent className="w-full max-w-lg h-auto overflow-auto">
+          <DialogTitle>Download Document</DialogTitle>
+          <DialogDownloadVesselAssessment
+            onClose={() => setIsDownloadOpen(false)}
+            onSave={() => {
+              setIsDownloadOpen(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -16,7 +16,8 @@ function ThemeToggler() {
   const { setTheme } = useTheme();
 
   return (
-    <DropdownMenu>
+    <></>
+    /*   <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
@@ -39,7 +40,7 @@ function ThemeToggler() {
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+    </DropdownMenu> */
   );
 }
 

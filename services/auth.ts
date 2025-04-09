@@ -51,8 +51,14 @@ export const login = async (
 };
 
 //Fungsi untuk set token
-export const setToken = (tokenDTO: Token) => {
+/* export const setToken = (tokenDTO: Token) => {
   if (typeof window !== "undefined") {
+    localStorage.setItem("token", JSON.stringify(tokenDTO));
+  }
+}; */
+
+export const setToken = (tokenDTO: Token) => {
+  if (typeof window !== "undefined" && window.localStorage) {
     localStorage.setItem("token", JSON.stringify(tokenDTO));
   }
 };

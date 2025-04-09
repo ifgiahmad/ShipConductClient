@@ -12,15 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ThemeToggler from "./ThemeToggler";
-import { logout } from "@/services/auth";
 
 const Navbar = () => {
   return (
     <header className="bg-teal-600 p-4">
       <div className="bg-emerald-900 dark:bg-green-900 text-white py-2 px-5 flex justify-between">
-        {/*  <Link href="/">
-          <Image src={logo} alt="ShipConduct" width={40} />
-        </Link> */}
         <div className="flex flex-col items-center bg-white p-1 rounded-md">
           <Image
             src={logo}
@@ -39,7 +35,7 @@ const Navbar = () => {
             <DropdownMenuTrigger className="focus:outline-none">
               <Avatar>
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
+                  src=/* "https://github.com/shadcn.png" */ ""
                   alt="@shadcn"
                 ></AvatarImage>
                 <AvatarFallback className="text-black">BT</AvatarFallback>

@@ -37,6 +37,7 @@ export type TrVesselAssessment = {
   closedDateDpa?: Date;
   closedDateTs?: Date;
   closedDateMs?: Date;
+  percentageUpload?: string;
 };
 
 export const createTrVesselAssessmentZod = z.object({

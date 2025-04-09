@@ -1,12 +1,11 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -22,15 +21,8 @@ import {
   UploadPhotoTrVesselAssessmentDetailZod,
 } from "@/lib/types/TrVesselAssessmentDetail.types";
 import { toast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { MsItem } from "@/lib/types/MsItem.types";
-import {
-  getMsItem,
-  getMsItemByCodeNameItem,
-  getMsItemById,
-} from "@/services/service_api_itemForCrew";
-import dynamic from "next/dynamic";
+import { Card, CardContent } from "../ui/card";
+import { getMsItemById } from "@/services/service_api_itemForCrew";
 
 type DetailData = z.infer<typeof UploadPhotoTrVesselAssessmentDetailZod>;
 
@@ -73,18 +65,14 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
   } = methods;
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview2, setImagePreview2] = useState<string | null>(null);
+  const [imagePreview3, setImagePreview3] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  /*   const [exampleImagePreview, setExampleImagePreview] = useState<string | null>(
-    null
-  ); */
 
   useEffect(() => {
     if (currentId > 0) {
       getDataById(currentId);
     }
-    console.log(id);
-    console.log(idHeader);
-    console.log(idList);
 
     async function getDataById(id: number) {
       try {
@@ -95,6 +83,12 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
         setValue("fileName", data.fileName ?? "");
         setValue("smallFileLink", data.smallFileLink ?? "");
         setValue("normalFileLink", data.normalFileLink ?? "");
+        setValue("fileName2", data.fileName ?? "");
+        setValue("smallFileLink2", data.smallFileLink ?? "");
+        setValue("normalFileLink2", data.normalFileLink ?? "");
+        setValue("fileName3", data.fileName ?? "");
+        setValue("smallFileLink3", data.smallFileLink ?? "");
+        setValue("normalFileLink3", data.normalFileLink ?? "");
         setValue("photoDescription", data.photoDescription ?? "");
         setValue("id", data.id ?? 0);
 
@@ -104,11 +98,20 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
           setImagePreview(null);
         }
 
+        if (data.normalFileLink2) {
+          setImagePreview2(data.normalFileLink2);
+        } else {
+          setImagePreview2(null);
+        }
+
+        if (data.normalFileLink3) {
+          setImagePreview3(data.normalFileLink3);
+        } else {
+          setImagePreview3(null);
+        }
+
         if (data.itemId) {
           const dataItem = await getMsItemById(data.itemId);
-          /* if (dataItem.fileLink) {
-            setExampleImagePreview(dataItem.fileLink);
-          } */
         }
       } catch (err) {
         console.error("Failed to fetch data by ID:", err);
@@ -126,6 +129,32 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
       setValue("fileName", "");
       setValue("photo", null);
       setImagePreview(null);
+    }
+  };
+
+  const handleFileChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue("fileName2", file.name);
+      setValue("photo2", file);
+      setImagePreview2(URL.createObjectURL(file));
+    } else {
+      setValue("fileName2", "");
+      setValue("photo2", null);
+      setImagePreview2(null);
+    }
+  };
+
+  const handleFileChange3 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue("fileName3", file.name);
+      setValue("photo3", file);
+      setImagePreview3(URL.createObjectURL(file));
+    } else {
+      setValue("fileName3", "");
+      setValue("photo3", null);
+      setImagePreview3(null);
     }
   };
 
@@ -167,45 +196,13 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
     }
   };
 
-  /*  const onDetailSubmit = async (
-    data: uploadPhotoTrVesselAssessmentDetailDto
-  ) => {
-    setLoading(true);
-    try {
-      const response = await uploadPhotoForCrew(data);
-      if (response.status === 200) {
-        toast({
-          description: "Photo Assessment Detail updated successfully.",
-        });
-        return true; // Indicate success
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to upload photo.",
-        });
-        return false; // Indicate failure
-      }
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: `Error uploading photo: ${
-          err instanceof Error ? err.message : "Unknown error"
-        }`,
-      });
-      return false; // Indicate failure
-    } finally {
-      setLoading(false);
-    }
-  }; */
-
   const onDetailSubmit = async (
     data: uploadPhotoTrVesselAssessmentDetailDto
   ) => {
     setLoading(true);
     try {
       const formData = new FormData();
+      console.log("dsdassad");
 
       if (data.photo) {
         const file = data.photo as File;
@@ -229,16 +226,73 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
               { type: "image/jpeg" }
             );
             data.photo = convertedFile;
-            /*  formData.append("file", convertedFile); */
           } else {
             throw new Error("HEIC conversion is not supported in SSR.");
           }
         } else {
           formData.append("file", file);
         }
-      } /* else {
-        throw new Error("No photo provided.");
-      } */
+      }
+
+      if (data.photo2) {
+        const file = data.photo2 as File;
+
+        // Jika file bertipe HEIC
+        if (
+          file.type === "image/heic" ||
+          file.name.toLowerCase().endsWith(".heic")
+        ) {
+          if (typeof window !== "undefined") {
+            const heic2any = (await import("heic2any")).default;
+
+            const convertedBlob = await heic2any({
+              blob: file,
+              toType: "image/jpeg",
+            });
+
+            const convertedFile = new File(
+              [convertedBlob as Blob],
+              file.name.replace(/\.heic$/i, ".jpg"),
+              { type: "image/jpeg" }
+            );
+            data.photo2 = convertedFile;
+          } else {
+            throw new Error("HEIC conversion is not supported in SSR.");
+          }
+        } else {
+          formData.append("file", file);
+        }
+      }
+
+      if (data.photo3) {
+        const file = data.photo3 as File;
+
+        // Jika file bertipe HEIC
+        if (
+          file.type === "image/heic" ||
+          file.name.toLowerCase().endsWith(".heic")
+        ) {
+          if (typeof window !== "undefined") {
+            const heic2any = (await import("heic2any")).default;
+
+            const convertedBlob = await heic2any({
+              blob: file,
+              toType: "image/jpeg",
+            });
+
+            const convertedFile = new File(
+              [convertedBlob as Blob],
+              file.name.replace(/\.heic$/i, ".jpg"),
+              { type: "image/jpeg" }
+            );
+            data.photo3 = convertedFile;
+          } else {
+            throw new Error("HEIC conversion is not supported in SSR.");
+          }
+        } else {
+          formData.append("file", file);
+        }
+      }
 
       const response = await uploadPhotoForCrew(data);
 
@@ -272,78 +326,97 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
   return (
     <Card>
       <CardContent>
-        {/* <Tabs defaultValue="formUpload">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="formUpload">Form Upload</TabsTrigger>
-            <TabsTrigger value="formExample">Example Image</TabsTrigger>
-          </TabsList>
-          <TabsContent value="formUpload"> */}
         <FormProvider {...methods}>
           <form
             onSubmit={handleSubmit(onDetailSubmit)}
             className="grid grid-cols-1 gap-6"
           >
-            {/*  <FormField
-                  name="item"
-                  control={control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Item</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          readOnly
-                          placeholder="Item Category"
-                          {...field}
-                          className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                        />
-                      </FormControl>
-                      <FormMessage>{errors.item?.message}</FormMessage>
-                    </FormItem>
-                  )}
-                />
- */}
-            {/* <FormField
-              name="shipSection"
-              control={control}
-              render={({ field }) => (
+            <Card className="p-2 mt-2">
+              <CardContent>
+                {imagePreview && (
+                  <div className="mb-4 flex justify-center">
+                    <img
+                      src={imagePreview}
+                      alt="Photo Preview"
+                      className="rounded-md border border-gray-300"
+                      style={{ maxWidth: "620px", height: "auto" }}
+                    />
+                  </div>
+                )}
+
                 <FormItem>
-                  <FormLabel>Ship Section</FormLabel>
+                  <FormLabel>
+                    Close-up or mid-range photos(Foto jarak dekat atau menengah)
+                    <span className="text-red-500"> *</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input
-                      readOnly
-                      placeholder="Ship Section"
-                      {...field}
-                      className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                   </FormControl>
-                  <FormMessage>{errors.shipSection?.message}</FormMessage>
+                  <FormMessage>{errors.photo?.message}</FormMessage>
                 </FormItem>
-              )}
-            /> */}
+              </CardContent>
+            </Card>
 
-            {imagePreview && (
-              <div className="mb-4 flex justify-center">
-                <img
-                  src={imagePreview}
-                  alt="Photo Preview"
-                  className="rounded-md border border-gray-300"
-                  style={{ maxWidth: "620px", height: "auto" }}
-                />
-              </div>
-            )}
+            <Card className="p-2">
+              <CardContent>
+                {imagePreview2 && (
+                  <div className="mb-4 flex justify-center">
+                    <img
+                      src={imagePreview2}
+                      alt="Photo Preview"
+                      className="rounded-md border border-gray-300"
+                      style={{ maxWidth: "620px", height: "auto" }}
+                    />
+                  </div>
+                )}
 
-            <FormItem>
-              <FormLabel>Upload Photo</FormLabel>
-              <FormControl>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-              </FormControl>
-              <FormMessage>{errors.fileName?.message}</FormMessage>
-            </FormItem>
+                <FormItem>
+                  <FormLabel>Overall photo (Foto keseluruhan)</FormLabel>
+                  <span className="text-red-500"> *</span>
+                  <FormControl>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange2}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.photo2?.message}</FormMessage>
+                </FormItem>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent>
+                {imagePreview3 && (
+                  <div className="mb-4 flex justify-center">
+                    <img
+                      src={imagePreview3}
+                      alt="Photo Preview"
+                      className="rounded-md border border-gray-300"
+                      style={{ maxWidth: "620px", height: "auto" }}
+                    />
+                  </div>
+                )}
+
+                <FormItem>
+                  <FormLabel>Additional Photo (Optional)</FormLabel>
+                  <FormControl>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange3}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.fileName3?.message}</FormMessage>
+                </FormItem>
+              </CardContent>
+            </Card>
 
             <FormField
               name="photoDescription"
@@ -362,6 +435,10 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
                 </FormItem>
               )}
             />
+
+            {errors.root && (
+              <p className="text-red-500">{errors.root.message}</p>
+            )}
 
             <div className="flex justify-between mt-4">
               <div className="flex space-x-4">
@@ -409,20 +486,6 @@ const UploadPhotoForm: React.FC<UploadPhotoFormProps> = ({
             </div>
           </form>
         </FormProvider>
-        {/* </TabsContent>
-          <TabsContent value="formExample">
-            {exampleImagePreview && (
-              <div className="mb-4 flex justify-center">
-                <img
-                  src={exampleImagePreview}
-                  alt="Example Photo"
-                  className="rounded-md border border-gray-300"
-                  style={{ maxWidth: "620px", height: "auto" }}
-                />
-              </div>
-            )}
-          </TabsContent>
-        </Tabs> */}
       </CardContent>
     </Card>
   );

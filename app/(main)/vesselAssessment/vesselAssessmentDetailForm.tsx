@@ -56,6 +56,13 @@ import { TrVesselAssessmentDetail } from "@/lib/types/TrVesselAssessmentDetail.t
 import { VwAssessmentDetailCompare } from "@/lib/types/VwAssessmentDetailCompare";
 import { MsItem } from "@/lib/types/MsItem.types";
 import { getMsItem } from "@/services/service_api_item";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 type DetailData = z.infer<typeof saveTrVesselAssessmentDetailZod>;
 
 interface VesselAssessmentDetailFormProps {
@@ -111,6 +118,8 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
   const [previousAssessment, setPreviousAssessment] =
     useState<VwAssessmentDetailCompare>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview2, setImagePreview2] = useState<string | null>(null);
+  const [imagePreview3, setImagePreview3] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [item, setItem] = useState<MsItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<string | undefined>();
@@ -136,6 +145,9 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const allCriteria = gradeCriteria.map((item) => item.criteria);
+  const [smallFileLinks, setSmallFileLinks] = useState<string[]>([]);
+  const [normalFileLinks, setNormalFileLinks] = useState<string[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSearchChange = (type: string, value: string) => {
     setSearchTerms((prev) => ({ ...prev, [type]: value }));
@@ -234,6 +246,32 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     }
   };
 
+  const handleFileChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue("fileName2", file.name);
+      setValue("photo2", file);
+      setImagePreview2(URL.createObjectURL(file));
+    } else {
+      setValue("fileName2", "");
+      setValue("photo2", null);
+      setImagePreview2(null);
+    }
+  };
+
+  const handleFileChange3 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue("fileName3", file.name);
+      setValue("photo3", file);
+      setImagePreview3(URL.createObjectURL(file));
+    } else {
+      setValue("fileName3", "");
+      setValue("photo3", null);
+      setImagePreview3(null);
+    }
+  };
+
   const {
     setValue,
     control,
@@ -299,6 +337,15 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
         setValue("fileName", data.fileName ?? "");
         setValue("smallFileLink", data.smallFileLink ?? "");
         setValue("normalFileLink", data.normalFileLink ?? "");
+
+        setValue("fileName2", data.fileName2 ?? "");
+        setValue("smallFileLink2", data.smallFileLink2 ?? "");
+        setValue("normalFileLink2", data.normalFileLink2 ?? "");
+
+        setValue("fileName3", data.fileName3 ?? "");
+        setValue("smallFileLink3", data.smallFileLink3 ?? "");
+        setValue("normalFileLink3", data.normalFileLink3 ?? "");
+
         setValue("photoDescription", data.photoDescription ?? "");
         setValue("vesselAssessmentId", data.vesselAssessmentId ?? 0);
         setValue("shipSection", data.shipSection ?? "");
@@ -313,6 +360,8 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
 
         setSelectedShipSection(data.shipSection || "");
         setImagePreview(data.normalFileLink || null);
+        setImagePreview2(data.normalFileLink2 || null);
+        setImagePreview3(data.normalFileLink3 || null);
         if (currentMode === "" || currentMode === null) {
           setCurrentMode(data.fileName ? "INPUT GRADE" : "UPLOAD PHOTO");
         }
@@ -350,6 +399,24 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
           } catch (error) {
             console.error("Error fetching grade criteria:", error);
           }
+        }
+
+        if (data) {
+          const linkSmall: string[] = [
+            data?.smallFileLink,
+            data?.smallFileLink2,
+            data?.smallFileLink3,
+          ].filter((item): item is string => Boolean(item)); // Pastikan hanya string yang tersimpan
+
+          setSmallFileLinks(linkSmall);
+
+          const linkNormal: string[] = [
+            data?.normalFileLink,
+            data?.normalFileLink2,
+            data?.normalFileLink3,
+          ].filter((item): item is string => Boolean(item));
+
+          setNormalFileLinks(linkNormal);
         }
       } catch (err) {
         console.error("Error fetching data grade criteria:", err);
@@ -559,7 +626,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                     </FormItem>
                   )}
                 />
-                {imagePreview && (
+                {/* {imagePreview && (
                   <div className="mb-4">
                     <img
                       src={imagePreview}
@@ -569,7 +636,56 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                       height={0}
                     />
                   </div>
-                )}
+                )} */}
+                <div className="mr-3 ml-10 mb-4 mt-2">
+                  {smallFileLinks.length > 0 ? (
+                    <>
+                      {/* Carousel tanpa membuka modal */}
+                      <Carousel className="w-[300px]">
+                        <CarouselContent>
+                          {smallFileLinks.map((src, index) => (
+                            <CarouselItem key={index}>
+                              <img
+                                src={src}
+                                alt={`Thumbnail ${index + 1}`}
+                                className="w-[300px] h-auto rounded-md cursor-pointer"
+                                onClick={() => setIsOpen(true)} // Modal terbuka hanya saat gambar diklik
+                              />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious type="button" />
+                        <CarouselNext type="button" />
+                      </Carousel>
+
+                      {/* Modal terbuka hanya saat gambar diklik */}
+                      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                        <DialogContent className="max-w-2xl">
+                          <DialogTitle className="sr-only">
+                            Photo Preview
+                          </DialogTitle>
+                          <Carousel className="w-full">
+                            <CarouselContent>
+                              {normalFileLinks.map((src, index) => (
+                                <CarouselItem key={index}>
+                                  <img
+                                    src={src}
+                                    alt={`Large Photo ${index + 1}`}
+                                    className="w-full h-auto rounded-lg"
+                                  />
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                        </DialogContent>
+                      </Dialog>
+                    </>
+                  ) : (
+                    <p></p>
+                  )}
+                </div>
                 <FormField
                   control={control}
                   name="grade"
@@ -695,8 +811,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                   )}
                 />
 
-                {/* Image Preview Section */}
-                {imagePreview && (
+                {/* {imagePreview && (
                   <div className="mb-4">
                     <img
                       src={imagePreview}
@@ -708,7 +823,6 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                   </div>
                 )}
 
-                {/* Upload Photo Field */}
                 <FormItem>
                   <FormLabel>Upload Photo</FormLabel>
                   <FormControl>
@@ -721,7 +835,93 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                   </FormControl>
                   <FormMessage>{errors.fileName?.message}</FormMessage>
                 </FormItem>
+ */}
 
+                <Card className="p-2 mt-2">
+                  <CardContent>
+                    {imagePreview && (
+                      <div className="mb-4 flex justify-center">
+                        <img
+                          src={imagePreview}
+                          alt="Photo Preview"
+                          className="rounded-md border border-gray-300"
+                          style={{ maxWidth: "620px", height: "auto" }}
+                        />
+                      </div>
+                    )}
+
+                    <FormItem>
+                      <FormLabel>
+                        Close-up or mid-range photos(Foto jarak dekat atau
+                        menengah)
+                      </FormLabel>
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </FormControl>
+                      <FormMessage>{errors.photo?.message}</FormMessage>
+                    </FormItem>
+                  </CardContent>
+                </Card>
+
+                <Card className="p-2">
+                  <CardContent>
+                    {imagePreview2 && (
+                      <div className="mb-4 flex justify-center">
+                        <img
+                          src={imagePreview2}
+                          alt="Photo Preview"
+                          className="rounded-md border border-gray-300"
+                          style={{ maxWidth: "620px", height: "auto" }}
+                        />
+                      </div>
+                    )}
+
+                    <FormItem>
+                      <FormLabel>Overall photo (Foto keseluruhan)</FormLabel>
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange2}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </FormControl>
+                      <FormMessage>{errors.photo2?.message}</FormMessage>
+                    </FormItem>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent>
+                    {imagePreview3 && (
+                      <div className="mb-4 flex justify-center">
+                        <img
+                          src={imagePreview3}
+                          alt="Photo Preview"
+                          className="rounded-md border border-gray-300"
+                          style={{ maxWidth: "620px", height: "auto" }}
+                        />
+                      </div>
+                    )}
+
+                    <FormItem>
+                      <FormLabel>Additional Photo (Optional)</FormLabel>
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange3}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </FormControl>
+                      <FormMessage>{errors.fileName3?.message}</FormMessage>
+                    </FormItem>
+                  </CardContent>
+                </Card>
                 {/* Photo Description Field */}
                 <FormField
                   name="photoDescription"

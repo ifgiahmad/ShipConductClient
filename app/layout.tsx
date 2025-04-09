@@ -31,14 +31,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
+        {/* <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem={true}
           storageKey="dashboard-theme"
         >
           <div> {children}</div>
-        </ThemeProvider>
+        </ThemeProvider> */}
+        <div> {children}</div>
       </body>
     </html>
   );

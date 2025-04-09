@@ -28,6 +28,15 @@ import { getUser } from "@/services/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getTrVesselAssessmentByNameAndPeriod } from "@/services/service_api_vesselAssessment";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import DataTableCrewAssessmentResults from "@/components/Data-Table/data-table-crewAssessmentResults";
 
 interface TrVesselAssessmentFormProps {
   onClose: () => void;
@@ -126,6 +135,10 @@ const DialogViewVesselAssessment = ({
     number | undefined
   >();
 
+  const [averagesShipSectionDetail, setAveragesShipSectionDetail] = useState<
+    Record<string, number>
+  >({});
+
   const {
     setValue,
     formState: { errors },
@@ -152,7 +165,7 @@ const DialogViewVesselAssessment = ({
   const columnsDetail = [
     { header: "Item", accessorKey: "item" },
     { header: "Ship Section", accessorKey: "shipSection" },
-    {
+    /*  {
       header: "Photo",
       accessorKey: "normalFileLink",
       cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => (
@@ -174,6 +187,75 @@ const DialogViewVesselAssessment = ({
           )}
         </div>
       ),
+    }, */
+    {
+      header: "Photo",
+      cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => {
+        const smallFileLinks = [
+          row.original.smallFileLink,
+          row.original.smallFileLink2,
+          row.original.smallFileLink3,
+        ].filter(Boolean);
+
+        const largeFileLinks = [
+          row.original.normalFileLink,
+          row.original.normalFileLink2,
+          row.original.normalFileLink3,
+        ].filter(Boolean);
+
+        // State untuk mengontrol modal
+        const [isOpen, setIsOpen] = useState(false);
+
+        return (
+          <div style={{ textAlign: "center" }} className="mr-5">
+            {smallFileLinks.length > 0 ? (
+              <>
+                {/* Carousel tanpa membuka modal */}
+                <Carousel className="w-[500px]">
+                  <CarouselContent>
+                    {smallFileLinks.map((src, index) => (
+                      <CarouselItem key={index}>
+                        <img
+                          src={src}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="w-[500px] h-auto rounded-md cursor-pointer"
+                          onClick={() => setIsOpen(true)} // Modal terbuka hanya saat gambar diklik
+                        />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+
+                {/* Modal terbuka hanya saat gambar diklik */}
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogTitle className="sr-only">Photo Preview</DialogTitle>
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {largeFileLinks.map((src, index) => (
+                          <CarouselItem key={index}>
+                            <img
+                              src={src}
+                              alt={`Large Photo ${index + 1}`}
+                              className="w-full h-auto rounded-lg"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                  </DialogContent>
+                </Dialog>
+              </>
+            ) : (
+              <p></p>
+            )}
+          </div>
+        );
+      },
     },
     { header: "Grade", accessorKey: "grade" },
     { header: "Grade Description", accessorKey: "gradeDescription" },
@@ -312,6 +394,9 @@ const DialogViewVesselAssessment = ({
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselAssessmentDetailForCrew(Number(id));
+    dataDetail.sort((a, b) =>
+      (a.shipSection ?? "").localeCompare(b.shipSection ?? "")
+    );
 
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
@@ -377,6 +462,40 @@ const DialogViewVesselAssessment = ({
       setDetailGeneral(filteredDataDetailGeneral);
       setDetailMarine(filteredDataDetailMarine);
       setDetailTechnical(filteredDataDetailTechnical);
+
+      setAveragesShipSectionDetail(
+        calculateAverageGradeByShipSection(filteredDataDetailGeneral)
+      );
+    }
+
+    function calculateAverageGradeByShipSection(
+      data: TrVesselAssessmentDetail[]
+    ): Record<string, number> {
+      const sectionMap: Record<string, { total: number; count: number }> = {};
+
+      data.forEach(({ shipSection, grade }) => {
+        if (!shipSection) {
+          console.warn("Invalid categorySection found, skipping entry:", {
+            shipSection,
+            grade,
+          });
+          return;
+        }
+
+        if (!sectionMap[shipSection]) {
+          sectionMap[shipSection] = { total: 0, count: 0 };
+        }
+        sectionMap[shipSection].total += grade;
+        sectionMap[shipSection].count += 1;
+      });
+
+      const averages: Record<string, number> = {};
+      for (const section in sectionMap) {
+        averages[section] = parseFloat(
+          (sectionMap[section].total / sectionMap[section].count).toFixed(2)
+        );
+      }
+      return averages;
     }
   };
 
@@ -392,6 +511,21 @@ const DialogViewVesselAssessment = ({
   const handleCloseDetail = () => {
     fetchDetail();
   };
+
+  //Detail untuk Score Shipsection
+  const detailShipsection = Object.entries(averagesShipSectionDetail).map(
+    ([key, value]) => ({
+      categorySection: key,
+      shipSectionGrade: value,
+    })
+  );
+
+  console.log(detailShipsection);
+
+  const columnsDetailShipsection = [
+    { header: "Ship Section", accessorKey: "categorySection" },
+    { header: "Score", accessorKey: "shipSectionGrade" },
+  ];
 
   return (
     <>
@@ -428,86 +562,114 @@ const DialogViewVesselAssessment = ({
                           </CollapsibleTrigger>
                           <CollapsibleContent className="p-4 bg-gray-50">
                             <Card>
-                              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                                <Card className="p-2">
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="totalScoreGeneral">
-                                      Total Score
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="totalScoreGeneral"
-                                      placeholder="Total Score General"
-                                      value={totalScoreGeneralItem}
-                                      readOnly
+                              <Card>
+                                <CardHeader>
+                                  <CardTitle>Score Ship Section</CardTitle>
+                                  <CardContent>
+                                    <DataTableCrewAssessmentResults
+                                      data={detailShipsection}
+                                      columns={columnsDetailShipsection}
                                     />
-                                  </div>
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="totalScoreGeneralVslMate">
-                                      Total Score Vessel {dataVslMate?.vslName}
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="totalScoreGeneralVslMate"
-                                      placeholder="Total Score General"
-                                      value={totalScoreGeneralItemVslMate}
-                                      readOnly
-                                    />
-                                  </div>
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="averageScoreGeneral">
-                                      Average Score
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="averageScoreGeneral"
-                                      placeholder="Average Score General"
-                                      value={averageScoreGeneral}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Card>
-                                <Card className="p-2">
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="downtimeDayGeneral">
-                                      Downtime Day General
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="downtimeDayGeneral"
-                                      placeholder="Downtime Day General"
-                                      value={downtimeDayGeneral}
-                                      readOnly
-                                    />
-                                  </div>
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="downtimeGeneral">
-                                      Downtime General
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="downtimeGeneral"
-                                      placeholder="Downtime General"
-                                      value={downtimeGeneral}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Card>
-                                <Card className="p-2">
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="finalScoreGeneral">
-                                      Final Score General
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="finalScoreGeneral"
-                                      placeholder="Final Score General"
-                                      value={finalScoreGeneral}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Card>
-                              </div>
+                                  </CardContent>
+                                </CardHeader>
+                              </Card>
+                              <Card className="mt-2">
+                                <CardHeader>
+                                  <CardTitle>Score Assessment</CardTitle>
+                                  <CardContent>
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mt-2">
+                                      <Card className="p-2">
+                                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                                          <Label htmlFor="totalScoreGeneral">
+                                            Total Score
+                                          </Label>
+                                          <Input
+                                            type="number"
+                                            id="totalScoreGeneral"
+                                            placeholder="Total Score General"
+                                            value={totalScoreGeneralItem}
+                                            readOnly
+                                          />
+                                        </div>
+                                        {dataVslMate ? (
+                                          <>
+                                            <div className="grid w-full max-w-sm items-center gap-1.5">
+                                              <Label htmlFor="totalScoreGeneralVslMate">
+                                                Total Score Vessel{" "}
+                                                {dataVslMate?.vslName}
+                                              </Label>
+                                              <Input
+                                                type="number"
+                                                id="totalScoreGeneralVslMate"
+                                                placeholder="Total Score General"
+                                                value={
+                                                  totalScoreGeneralItemVslMate
+                                                }
+                                                readOnly
+                                              />
+                                            </div>
+                                          </>
+                                        ) : (
+                                          <></>
+                                        )}
+
+                                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                                          <Label htmlFor="averageScoreGeneral">
+                                            Average Score
+                                          </Label>
+                                          <Input
+                                            type="number"
+                                            id="averageScoreGeneral"
+                                            placeholder="Average Score General"
+                                            value={averageScoreGeneral}
+                                            readOnly
+                                          />
+                                        </div>
+                                      </Card>
+                                      <Card className="p-2">
+                                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                                          <Label htmlFor="downtimeDayGeneral">
+                                            Downtime Day General
+                                          </Label>
+                                          <Input
+                                            type="number"
+                                            id="downtimeDayGeneral"
+                                            placeholder="Downtime Day General"
+                                            value={downtimeDayGeneral}
+                                            readOnly
+                                          />
+                                        </div>
+                                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                                          <Label htmlFor="downtimeGeneral">
+                                            Downtime General
+                                          </Label>
+                                          <Input
+                                            type="number"
+                                            id="downtimeGeneral"
+                                            placeholder="Downtime General"
+                                            value={downtimeGeneral}
+                                            readOnly
+                                          />
+                                        </div>
+                                      </Card>
+                                      <Card className="p-2">
+                                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                                          <Label htmlFor="finalScoreGeneral">
+                                            Final Score General
+                                          </Label>
+                                          <Input
+                                            type="number"
+                                            id="finalScoreGeneral"
+                                            placeholder="Final Score General"
+                                            value={finalScoreGeneral}
+                                            readOnly
+                                          />
+                                        </div>
+                                      </Card>
+                                    </div>
+                                  </CardContent>
+                                </CardHeader>
+                              </Card>
                             </Card>
 
                             <DataTableCrewUpload
@@ -544,62 +706,6 @@ const DialogViewVesselAssessment = ({
                             </Button>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="p-4 bg-gray-50">
-                            <Card>
-                              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                                <Card className="p-2">
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="totalScoreTechnical">
-                                      Total Score
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="totalScoreTechnical"
-                                      placeholder="Total Score Tchnical"
-                                      value={totalScoreTechnicalItem}
-                                      readOnly
-                                    />
-                                  </div>
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="totalScoreTechnicalVslMate">
-                                      Total Score Vessel {dataVslMate?.vslName}
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="totalScoreTechnicalVslMate"
-                                      placeholder="Total Score Tchnical"
-                                      value={totalScoreTechnicalItemVslMate}
-                                      readOnly
-                                    />
-                                  </div>
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="averageScoreTechnical">
-                                      Average Score
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="averageScoreTechnical"
-                                      placeholder="Average Score Technical"
-                                      value={averageScoreTechnical}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Card>
-                                <Card className="p-2">
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="finalScoreTechnical">
-                                      Final Score
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="finalScoreTechnical"
-                                      placeholder="Final Score Technical"
-                                      value={finalScoreTechnical}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Card>
-                              </div>
-                            </Card>
                             <DataTableCrewUpload
                               data={detailTechnical}
                               columns={columnsDetail}
@@ -635,60 +741,7 @@ const DialogViewVesselAssessment = ({
                           </CollapsibleTrigger>
                           <CollapsibleContent className="p-4 bg-gray-50">
                             <Card>
-                              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                                <Card className="p-2">
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="totalScoreMarine">
-                                      Total Score
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="totalScoreMarine"
-                                      placeholder="Total Score Marine"
-                                      value={totalScoreMarineItem}
-                                      readOnly
-                                    />
-                                  </div>
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="totalScoreMarineVslMate">
-                                      Total Score Vessel {dataVslMate?.vslName}
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="totalScoreMarineVslMate"
-                                      placeholder="Total Score Marine"
-                                      value={totalScoreMarineItemVslMate}
-                                      readOnly
-                                    />
-                                  </div>
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="averageScoreMarine">
-                                      Average Score Marine
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="averageScoreMarine"
-                                      placeholder="Average Score Marine"
-                                      value={averageScoreMarine}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Card>
-                                <Card className="p-2">
-                                  <div className="grid w-full max-w-sm items-center gap-1.5">
-                                    <Label htmlFor="finalScoreMarine">
-                                      Final Score Marine
-                                    </Label>
-                                    <Input
-                                      type="number"
-                                      id="finalScoreMarine"
-                                      placeholder="Final Score Marine"
-                                      value={finalScoreMarine}
-                                      readOnly
-                                    />
-                                  </div>
-                                </Card>
-                              </div>
+                              <div className="grid grid-cols-1 gap-6 md:grid-cols-3"></div>
                             </Card>
                             <DataTableCrewUpload
                               data={detailMarine}

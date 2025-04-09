@@ -40,6 +40,14 @@ import DataTableAssessmentDetail from "@/components/Data-Table/data-table-vessel
 import { UserRole } from "@/lib/type";
 import { getUser } from "@/services/auth";
 import { TrVesselAssessment } from "@/lib/types/TrVesselAssessment.types";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface TrVesselAssessmentFormProps {
   onClose: () => void;
@@ -122,6 +130,75 @@ const DialogEditVesselAssessment = ({
     { header: "Grade Description", accessorKey: "gradeDescription" },
     {
       header: "Photo",
+      cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => {
+        const smallFileLinks = [
+          row.original.smallFileLink,
+          row.original.smallFileLink2,
+          row.original.smallFileLink3,
+        ].filter(Boolean);
+
+        const largeFileLinks = [
+          row.original.normalFileLink,
+          row.original.normalFileLink2,
+          row.original.normalFileLink3,
+        ].filter(Boolean);
+
+        // State untuk mengontrol modal
+        const [isOpen, setIsOpen] = useState(false);
+
+        return (
+          <div style={{ textAlign: "center" }} className="mr-5">
+            {smallFileLinks.length > 0 ? (
+              <>
+                {/* Carousel tanpa membuka modal */}
+                <Carousel className="w-[200px]">
+                  <CarouselContent>
+                    {smallFileLinks.map((src, index) => (
+                      <CarouselItem key={index}>
+                        <img
+                          src={src}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="w-[200px] h-auto rounded-md cursor-pointer"
+                          onClick={() => setIsOpen(true)} // Modal terbuka hanya saat gambar diklik
+                        />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+
+                {/* Modal terbuka hanya saat gambar diklik */}
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <DialogTitle className="sr-only">Photo Preview</DialogTitle>
+                    <Carousel className="w-full">
+                      <CarouselContent>
+                        {largeFileLinks.map((src, index) => (
+                          <CarouselItem key={index}>
+                            <img
+                              src={src}
+                              alt={`Large Photo ${index + 1}`}
+                              className="w-full h-auto rounded-lg"
+                            />
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                  </DialogContent>
+                </Dialog>
+              </>
+            ) : (
+              <p></p>
+            )}
+          </div>
+        );
+      },
+    },
+    /*  {
+      header: "Photo",
       accessorKey: "smallFileLink",
       cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => (
         <img
@@ -130,7 +207,7 @@ const DialogEditVesselAssessment = ({
           style={{ width: "100px", height: "auto" }}
         />
       ),
-    },
+    }, */
     { header: "Photo Description", accessorKey: "photoDescription" },
   ];
 
@@ -144,6 +221,7 @@ const DialogEditVesselAssessment = ({
   const fetchData = async () => {
     try {
       const data = await getTrVesselAssessmentById(Number(id));
+      console.log(data);
       setIdHeader(data.id);
       setVslType(data.vslType || null);
 
@@ -312,7 +390,7 @@ const DialogEditVesselAssessment = ({
     <>
       <div style={{ height: "80vh", overflowY: "auto" }}>
         {getValues("vslType") === "TB" &&
-        getValues("vslMate") !== null &&
+        getValues("vslMate") !== "" &&
         !isClosed ? (
           <Card className="mb-2">
             <p className="text-red-500 text-center">
@@ -323,7 +401,6 @@ const DialogEditVesselAssessment = ({
         ) : (
           <></>
         )}
-
         {getValues("vslType") !== "TB" &&
         getValues("vslMate") !== null &&
         allowInputGrade === false &&
@@ -337,7 +414,6 @@ const DialogEditVesselAssessment = ({
         ) : (
           <></>
         )}
-
         <Card className="mb-2">
           <CardHeader>
             <CardTitle>Vessel Assessment</CardTitle>
@@ -546,7 +622,7 @@ const DialogEditVesselAssessment = ({
                   />
                 </Card>
                 {getValues("vslType") === "TB" &&
-                getValues("vslMate") !== null ? (
+                getValues("vslMate") !== "" ? (
                   <></>
                 ) : (
                   <>

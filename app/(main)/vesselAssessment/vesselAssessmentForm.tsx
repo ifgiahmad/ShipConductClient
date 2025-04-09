@@ -1,51 +1,11 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  getMsAssessmentCategoryById,
-  saveMsAssessmentCategory,
-} from "@/services/service_api";
 import { useToast } from "@/hooks/use-toast";
-import {
-  saveMsAssessmentCategoryDto,
-  saveMsAssessmentCategoryZod,
-} from "@/lib/types/MsAssessmentCategory.types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Terminal, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { MsVesselType } from "@/lib/types/Master.types";
-import { getMsVesselType } from "@/services/service_api_master";
-import {
-  getMsShipSection,
-  getMsShipSectionByVslType,
-} from "@/services/service_api_shipSection";
 import { createTrVesselAssessmentZod } from "@/lib/types/TrVesselAssessment.types";
 import { createTrVesselAssessmentDto } from "../../../lib/types/TrVesselAssessment.types";
 import {

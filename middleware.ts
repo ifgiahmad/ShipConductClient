@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
+  console.log("🟢 Middleware is running!");
   const token = request.cookies.get("authToken")?.value;
   console.log("Token from middleware:", token);
   console.log(token);
@@ -15,9 +16,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/api/:path*",
     "/vesselAssessment/:path*",
     "/vesselDrill/:path*",
-    "//",
     "/assessmentCompare/:path*",
     "/assessmentCategory/:path*",
     "/shipSection/:path*",

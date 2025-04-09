@@ -50,8 +50,9 @@ export const uploadPhoto = async (
   item: Partial<TrVesselAssessmentDetail>
 ): Promise<AxiosResponse<TrVesselAssessmentDetail>> => {
   const formData = new FormData();
-
   if (item.photo) formData.append("file", item.photo);
+  if (item.photo2) formData.append("file2", item.photo2);
+  if (item.photo3) formData.append("file3", item.photo3);
   if (item.id) formData.append("id", item.id.toString());
   if (item.photoDescription)
     formData.append("photoDescription", item.photoDescription.toString());

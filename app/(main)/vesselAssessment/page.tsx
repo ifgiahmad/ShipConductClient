@@ -3,7 +3,10 @@ import React, { useEffect, useState, useCallback } from "react";
 import { ColumnDef, CellContext } from "@tanstack/react-table";
 import DataTableVesselAssessment from "@/components/Data-Table/data-table-vesselAssessment";
 import { TrVesselAssessment } from "@/lib/types/TrVesselAssessment.types";
-import { getTrVesselAssessment } from "@/services/service_api_vesselAssessment";
+import {
+  generateReportVesselAssessmentById,
+  getTrVesselAssessment,
+} from "@/services/service_api_vesselAssessment";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import TrVesselAssessmentForm from "./vesselAssessmentForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +65,15 @@ const VesselAssessmentPage: React.FC = () => {
     if (mode === "cancel") setIsCancelOpen(true);
   };
 
+  const handleDownload = async (id: number) => {
+    try {
+      await generateReportVesselAssessmentById(id); // Ganti dengan ID yang sesuai
+      alert("File berhasil diunduh!");
+    } catch (error) {
+      alert("Gagal mengunduh file.");
+    }
+  };
+
   const columns: ColumnDef<TrVesselAssessment>[] = [
     {
       header: "Actions",
@@ -97,6 +109,18 @@ const VesselAssessmentPage: React.FC = () => {
                   >
                     Edit
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      try {
+                        await generateReportVesselAssessmentById(row.id);
+                        alert("File berhasil diunduh!");
+                      } catch (error) {
+                        alert("Gagal mengunduh file.");
+                      }
+                    }}
+                  >
+                    Export Excel
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() =>
@@ -115,11 +139,13 @@ const VesselAssessmentPage: React.FC = () => {
     },
     { header: "Vessel Type", accessorKey: "vslType" },
     { header: "Vessel Name", accessorKey: "vslName" },
+    { header: "Vessel Mate", accessorKey: "vslMate" },
     { header: "Period Name", accessorKey: "periodName" },
     { header: "Score Item General", accessorKey: "scoreItemGeneral" },
     { header: "Downtime General", accessorKey: "downtimeGeneral" },
     { header: "Score General", accessorKey: "scoreGeneral" },
     { header: "Status", accessorKey: "status" },
+    { header: "Percentage Upload", accessorKey: "percentageUpload" },
     {
       accessorKey: "linkShared",
       header: "Link Share",

@@ -55,6 +55,7 @@ export const uploadVideoForCrew = async (
   if (item.id) formData.append("id", item.id.toString());
   if (item.videoDescription)
     formData.append("videoDescription", item.videoDescription.toString());
+  console.log(formData);
   try {
     const response = await api.post(
       `api/vesselDrillForCrew/saveVideo`,
@@ -65,6 +66,7 @@ export const uploadVideoForCrew = async (
         },
       }
     );
+    console.log(response);
     return response;
   } catch (error) {
     console.error("Error uploading video:", error);

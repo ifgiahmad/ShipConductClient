@@ -18,9 +18,14 @@ export type TrVesselAssessmentDetail = {
   fileName?: string;
   smallFileLink?: string;
   normalFileLink?: string;
+  fileName2?: string;
+  smallFileLink2?: string;
+  normalFileLink2?: string;
+  fileName3?: string;
+  smallFileLink3: string;
+  normalFileLink3?: string;
   photoDescription?: string;
   isDeleted?: boolean;
-  /* excludeCount?: boolean; */
   uploadedBy?: string;
   uploadedDate?: Date;
   assessedBy?: string;
@@ -31,6 +36,8 @@ export type TrVesselAssessmentDetail = {
   modifiedDate?: Date;
   mode?: string;
   photo?: File | null;
+  photo2?: File | null;
+  photo3?: File | null;
   itemSamplePhoto?: string;
 };
 
@@ -54,6 +61,12 @@ export const saveTrVesselAssessmentDetailZod = z.object({
   fileName: z.string().optional(),
   smallFileLink: z.string().optional(),
   normalFileLink: z.string().optional(),
+  fileName2: z.string().optional(),
+  smallFileLink2: z.string().optional(),
+  normalFileLink2: z.string().optional(),
+  fileName3: z.string().optional(),
+  smallFileLink3: z.string().optional(),
+  normalFileLink3: z.string().optional(),
   photoDescription: z.string().optional(),
   isDeleted: z.boolean().optional(),
   uploadedBy: z.string().optional(),
@@ -65,7 +78,8 @@ export const saveTrVesselAssessmentDetailZod = z.object({
   modifiedBy: z.string().optional(),
   modifiedDate: z.date().optional(),
   photo: z.instanceof(File).nullable().optional(),
-  /*  excludeCount: z.boolean().optional(), */
+  photo2: z.instanceof(File).nullable().optional(),
+  photo3: z.instanceof(File).nullable().optional(),
 });
 
 export const UploadPhotoTrVesselAssessmentDetailZod = z
@@ -76,18 +90,26 @@ export const UploadPhotoTrVesselAssessmentDetailZod = z
     itemId: z.number().min(1, "Item is required"),
     shipSection: z.string().min(1, "Ship Section is required"),
     photo: z.instanceof(File).nullable().optional(),
+    photo2: z.instanceof(File).nullable().optional(),
+    photo3: z.instanceof(File).nullable().optional(),
     fileName: z.string().optional(),
     smallFileLink: z.string().optional(),
     normalFileLink: z.string().optional(),
+    fileName2: z.string().optional(),
+    smallFileLink2: z.string().optional(),
+    normalFileLink2: z.string().optional(),
+    fileName3: z.string().optional(),
+    smallFileLink3: z.string().optional(),
+    normalFileLink3: z.string().optional(),
   })
   .refine(
     (data) =>
       data.photoDescription ||
-      data.photo ||
-      data.smallFileLink ||
-      data.normalFileLink,
+      ((data.photo || data.smallFileLink || data.normalFileLink) &&
+        (data.photo2 || data.smallFileLink2 || data.normalFileLink2)),
     {
-      message: "Salah satu antara foto atau photoDescription harus diisi.",
+      message:
+        "Jumlah Photo Yang DiUpload Minimal 2 atau Jika item tidak ada dikapal berikan keterangan di photo description",
     }
   );
 

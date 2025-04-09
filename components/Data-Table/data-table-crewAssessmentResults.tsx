@@ -109,7 +109,7 @@ function DataTableCrewAssessmentResults<TData>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4">
+      {/* <div className="flex items-center justify-between py-4">
         <div>
           <span>Total rows: {totalRowCount}</span>
           <span className="ml-4">Filtered rows: {filteredRowCount}</span>
@@ -146,7 +146,7 @@ function DataTableCrewAssessmentResults<TData>({
             Next
           </Button>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }
