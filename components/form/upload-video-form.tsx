@@ -22,10 +22,7 @@ import {
   uploadVideoTrVesselDrillDetailZod,
 } from "@/lib/types/TrVesselDrillDetail.types";
 import { toast } from "@/hooks/use-toast";
-/* import { pdfjs } from "react-pdf"; */
-/* import "react-pdf/dist/esm/Page/AnnotationLayer.css"; */
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
-/* pdfjs.GlobalWorkerOptions.workerSrc = "../../app/assets/pdf.worker.min.js"; */
 
 interface UploadVideoFormProps {
   onClose: () => void;
@@ -63,6 +60,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
 
   const {
     setValue,
+    setError,
     control,
     handleSubmit,
     formState: { errors },
@@ -74,6 +72,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
   const [numPages, setNumPages] = useState<number | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isModalOpenDoc, setModalOpenDoc] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -210,7 +209,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
     }
   };
 
-  const onDetailSubmit = async (data: uploadVideoTrVesselDrillDetailDto) => {
+  /*  const onDetailSubmit = async (data: uploadVideoTrVesselDrillDetailDto) => {
     setLoading(true);
     try {
       const response = await uploadVideoForCrew(data);
@@ -239,7 +238,57 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
     } finally {
       setLoading(false);
     }
+  }; */
+
+  const onDetailSubmit = async (data: uploadVideoTrVesselDrillDetailDto) => {
+    if (!data.doc) {
+      setError("docName", {
+        type: "manual",
+        message: "Document is required.",
+      });
+      return false;
+    }
+
+    setLoading(true);
+    setUploadProgress(0);
+
+    try {
+      const response = await uploadVideoForCrew(data, (progressEvent) => {
+        if (progressEvent.total) {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percent);
+        }
+      });
+
+      if (response.status === 200) {
+        toast({
+          description: "Video Drill Detail updated successfully.",
+        });
+        return true;
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to upload video.",
+        });
+        return false;
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Error uploading video: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`,
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
     <FormProvider {...methods}>
       <form
@@ -292,6 +341,17 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
               className="rounded-md border border-gray-300"
               style={{ maxWidth: "620px", height: "auto" }}
             />
+          </div>
+        )}
+        {loading && (
+          <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+            <div
+              className="bg-green-600 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+            <p className="text-sm mt-1 text-gray-600 text-center">
+              {uploadProgress}%
+            </p>
           </div>
         )}
 
