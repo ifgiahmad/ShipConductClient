@@ -23,6 +23,7 @@ export function middleware(request: NextRequest) {
   }
 
   const token = request.cookies.get("authToken")?.value;
+  console.log(token);
   if (!token) {
     return NextResponse.redirect(new URL("/auth", request.url));
   }
@@ -32,6 +33,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     /*  "/api/:path*", */
     "/vesselAssessment/:path*",
     "/vesselDrill/:path*",

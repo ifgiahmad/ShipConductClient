@@ -31,16 +31,6 @@ import { cn } from "@/lib/utils";
 import { format, parse } from "date-fns";
 import { TrVesselDrillDetail } from "@/lib/types/TrVesselDrillDetail.types";
 import VesselDrillDetailForm from "./vesselDrillDetailForm";
-import { UserRole } from "@/lib/type";
-import { getUser } from "@/services/auth";
-import { TrVesselDrill } from "@/lib/types/TrVesselDrill.types";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   getTrVesselDrillById,
@@ -55,7 +45,7 @@ interface TrVesselDrillFormProps {
   id: number;
 }
 
-const DialogEditVesselDrill = ({
+const DialogViewVesselDrill = ({
   onClose,
   onSave,
   id,
@@ -430,31 +420,6 @@ const DialogEditVesselDrill = ({
                   >
                     Back
                   </Button>
-                  {status === "READY" ? (
-                    <>
-                      {" "}
-                      <Button
-                        type="submit"
-                        className="w-full md:w-auto bg-orange-700 hover:bg-orange-500"
-                        disabled={loading}
-                      >
-                        {loading ? "Close..." : "Close"}
-                      </Button>
-                    </>
-                  ) : status === "OPEN" ? (
-                    <>
-                      {" "}
-                      <Button
-                        type="submit"
-                        className="w-full md:w-auto bg-orange-700 hover:bg-orange-500"
-                        disabled={loading}
-                      >
-                        {loading ? "Generate Link..." : "Generate Link"}
-                      </Button>
-                    </>
-                  ) : (
-                    <></>
-                  )}
                 </div>
               </form>
             </FormProvider>
@@ -496,4 +461,4 @@ const DialogEditVesselDrill = ({
   );
 };
 
-export default DialogEditVesselDrill;
+export default DialogViewVesselDrill;

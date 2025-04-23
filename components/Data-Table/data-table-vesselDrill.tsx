@@ -26,12 +26,11 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { Dialog } from "@radix-ui/react-dialog";
-import { DialogContent, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
+import DialogDownloadVesselAssessment from "@/app/(main)/vesselAssessment/DialogDownloadAssessment";
 
 interface HasId {
   id: number;
@@ -41,17 +40,11 @@ interface HasId {
 interface DataTableProps<TData extends HasId> {
   data: TData[];
   columns: ColumnDef<TData>[];
-  modalContent: React.ReactNode;
-  onSaveData: () => void;
-  mode: string;
 }
 
 function DataTableVesselDrill<TData extends HasId>({
   data,
   columns,
-  modalContent,
-  onSaveData,
-  mode,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -59,9 +52,13 @@ function DataTableVesselDrill<TData extends HasId>({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editMode, setEditMode] = useState<string | null>(null);
+
+  const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+
+  const handleOpenDownloadDialog = () => {
+    setIsDownloadOpen(true);
+  };
 
   const table = useReactTable({
     data,
@@ -77,27 +74,16 @@ function DataTableVesselDrill<TData extends HasId>({
       sorting,
       columnFilters,
       columnVisibility,
+      globalFilter,
+    },
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(filterValue.toLowerCase());
     },
   });
 
-  const urlAdd = "/vesselDrill/add";
-  const urlEdit = "/vesselDrill/editById/";
-
-  const handleOpenModal = (_id: number, _mode: string) => {
-    setEditId(_id);
-    setEditMode(_mode);
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setEditId(null);
-  };
-
-  const handleSaveModal = () => {
-    setModalOpen(false);
-    onSaveData();
-  };
+  const urlAdd = "/VesselDrill/add";
 
   const totalRowCount = data.length;
   const filteredRowCount = table.getRowModel().rows.length;
@@ -105,66 +91,53 @@ function DataTableVesselDrill<TData extends HasId>({
   return (
     <>
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter Vessel Name..."
-          value={(table.getColumn("vslName")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("vslName")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
         <Link href={urlAdd}>
           <Button
-            className="ml-2 bg-green-900 hover:bg-green-600"
+            className="mr-2 bg-green-900 hover:bg-green-600"
             variant={"default"}
           >
             Add Data
           </Button>
         </Link>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Show Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          className="bg-yellow-600 hover:bg-yellow-300"
+          onClick={() => handleOpenDownloadDialog()}
+        >
+          Download
+        </Button>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-auto h-auto max-h-[90vh]">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-gray-200 sticky top-0 z-10 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                    <div className="flex flex-col items-center">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+
+                      {/* Input pencarian untuk filter per kolom */}
+                      {header.column.getCanFilter() ? (
+                        <Input
+                          type="text"
+                          value={
+                            (header.column.getFilterValue() as string) ?? ""
+                          }
+                          onChange={(e) =>
+                            header.column.setFilterValue(e.target.value)
+                          }
+                          placeholder={`Search ${header.column.id}`}
+                          className="mt-1 w-full text-sm px-2 py-1 border rounded-md text-center"
+                        />
+                      ) : null}
+                    </div>
                   </TableHead>
                 ))}
-                <TableHead>Actions</TableHead>
               </TableRow>
             ))}
           </TableHeader>
@@ -183,34 +156,6 @@ function DataTableVesselDrill<TData extends HasId>({
                       )}
                     </TableCell>
                   ))}
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">...</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {row.original.status === "CANCEL" ||
-                        row.original.status === "CLOSED" ? (
-                          <></>
-                        ) : (
-                          <>
-                            <DropdownMenuItem>
-                              <Link href={`${urlEdit + row.original.id}`}>
-                                Edit
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "CANCEL")
-                              }
-                            >
-                              Cancel
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -264,15 +209,16 @@ function DataTableVesselDrill<TData extends HasId>({
           </Button>
         </div>
       </div>
-      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="lg:max-w-[800px] max-h-[600px] overflow-auto">
-          <DialogTitle>{"Drill Detail"}</DialogTitle>
-          {React.cloneElement(modalContent as React.ReactElement, {
-            onClose: handleCloseModal,
-            onSave: handleSaveModal,
-            id: editId,
-            mode: editMode,
-          })}
+      {/* Dialog Edit */}
+      <Dialog open={isDownloadOpen} onOpenChange={setIsDownloadOpen}>
+        <DialogContent className="w-full max-w-lg h-auto overflow-auto">
+          <DialogTitle>Download Document</DialogTitle>
+          <DialogDownloadVesselAssessment
+            onClose={() => setIsDownloadOpen(false)}
+            onSave={() => {
+              setIsDownloadOpen(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
     </>

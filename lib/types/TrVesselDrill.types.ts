@@ -5,7 +5,6 @@ export type TrVesselDrill = {
   vslType?: string;
   vslCode?: string;
   vslName?: string;
-  /* interval?: string; */
   periodDate?: Date;
   finalDate?: Date;
   grade?: string;
@@ -15,6 +14,8 @@ export type TrVesselDrill = {
   linkCode?: string;
   createdBy?: string;
   modifiedBy?: string;
+  percentageUpload?: string;
+  periodName?: string;
 };
 
 export const createTrVesselDrillZod = z.object({

@@ -478,14 +478,14 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Grade Description</FormLabel>
-                  {/* <FormControl>
+                  <FormControl>
                     <Textarea
                       placeholder="Grade Description"
                       {...field}
                       className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                  </FormControl> */}
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  </FormControl>
+                  {/* <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select Grade Description" />
                     </SelectTrigger>
@@ -527,7 +527,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                         DOCKING
                       </SelectItem>
                     </SelectContent>
-                  </Select>
+                  </Select> */}
                   <FormMessage>{errors.gradeDescription?.message}</FormMessage>
                 </FormItem>
               )}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useReactTable,
   ColumnDef,
@@ -35,30 +35,24 @@ import { DialogContent, DialogTitle } from "../ui/dialog";
 
 interface HasId {
   id: number;
-  normalFileLink?: string;
+  status?: string;
 }
 
-interface DataTableDrillDetailProps<TData extends HasId> {
+interface DataTableProps<TData extends HasId> {
   data: TData[];
   columns: ColumnDef<TData>[];
   modalContent: React.ReactNode;
-  idHeader: number;
-  vslType: string;
   onSaveData: () => void;
-  status: string;
   mode: string;
 }
 
-function DataTableDrillDetail<TData extends HasId>({
+function _DataTableVesselDrill<TData extends HasId>({
   data,
   columns,
   modalContent,
-  idHeader,
   onSaveData,
-  vslType,
-  status,
   mode,
-}: DataTableDrillDetailProps<TData>) {
+}: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -67,9 +61,7 @@ function DataTableDrillDetail<TData extends HasId>({
     React.useState<VisibilityState>({});
   const [isModalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [editIdHeader, setEditIdHeader] = useState<number | null>(null);
   const [editMode, setEditMode] = useState<string | null>(null);
-  const [editVslType, setEditVslType] = useState<string | null>(null);
 
   const table = useReactTable({
     data,
@@ -88,10 +80,8 @@ function DataTableDrillDetail<TData extends HasId>({
     },
   });
 
-  useEffect(() => {
-    setEditIdHeader(idHeader);
-    setEditVslType(vslType);
-  }, [idHeader, vslType]);
+  const urlAdd = "/vesselDrill/add";
+  const urlEdit = "/vesselDrill/editById/";
 
   const handleOpenModal = (_id: number, _mode: string) => {
     setEditId(_id);
@@ -116,21 +106,21 @@ function DataTableDrillDetail<TData extends HasId>({
     <>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter items..."
-          value={
-            (table.getColumn("itemName")?.getFilterValue() as string) ?? ""
-          }
+          placeholder="Filter Vessel Name..."
+          value={(table.getColumn("vslName")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("item")?.setFilterValue(event.target.value)
+            table.getColumn("vslName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
-        <Button
-          className="ml-2 bg-green-900 hover:bg-green-600"
-          onClick={() => handleOpenModal(0, "CREATE")}
-        >
-          Add Data
-        </Button>
+        <Link href={urlAdd}>
+          <Button
+            className="ml-2 bg-green-900 hover:bg-green-600"
+            variant={"default"}
+          >
+            Add Data
+          </Button>
+        </Link>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -199,38 +189,22 @@ function DataTableDrillDetail<TData extends HasId>({
                         <Button variant="outline">...</Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        {row.original.normalFileLink ? (
-                          <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "INPUT GRADE")
-                              }
-                            >
-                              Input Grade
-                            </DropdownMenuItem>
-                          </>
+                        {row.original.status === "CANCEL" ||
+                        row.original.status === "CLOSED" ? (
+                          <></>
                         ) : (
                           <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "EDIT")
-                              }
-                            >
-                              Edit
+                            <DropdownMenuItem>
+                              <Link href={`${urlEdit + row.original.id}`}>
+                                Edit
+                              </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
-                                handleOpenModal(row.original.id, "DELETE")
+                                handleOpenModal(row.original.id, "CANCEL")
                               }
                             >
-                              Delete
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "UPLOAD VIDEO")
-                              }
-                            >
-                              Upload Video
+                              Cancel
                             </DropdownMenuItem>
                           </>
                         )}
@@ -291,14 +265,12 @@ function DataTableDrillDetail<TData extends HasId>({
         </div>
       </div>
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="lg:max-w-[1000px] max-h-[700px] overflow-auto">
+        <DialogContent className="lg:max-w-[800px] max-h-[600px] overflow-auto">
           <DialogTitle>{"Drill Detail"}</DialogTitle>
           {React.cloneElement(modalContent as React.ReactElement, {
             onClose: handleCloseModal,
             onSave: handleSaveModal,
             id: editId,
-            idHeader: editIdHeader,
-            vslType: editVslType,
             mode: editMode,
           })}
         </DialogContent>
@@ -307,4 +279,4 @@ function DataTableDrillDetail<TData extends HasId>({
   );
 }
 
-export default DataTableDrillDetail;
+export default _DataTableVesselDrill;

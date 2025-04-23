@@ -158,7 +158,12 @@ const DialogDownloadVesselAssessment = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="LINK ASSESSMENT">Link Assessment</SelectItem>
-          <SelectItem value="RESULT ASSESSMENT">Result Assessment</SelectItem>
+          <SelectItem value="PERCENTAGE UPLOAD">Percentage Upload</SelectItem>
+          <SelectItem value="ASSESSMENT RESULTS">Assessment Results</SelectItem>
+          <SelectItem value="DRILL RESULTS">Drill Results</SelectItem>
+          <SelectItem value="BREAKDOWN SCORE VESSEL">
+            Breakdown Score Vessel
+          </SelectItem>
         </SelectContent>
       </Select>
 
