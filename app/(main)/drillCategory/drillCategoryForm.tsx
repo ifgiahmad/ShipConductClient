@@ -73,10 +73,7 @@ const DrillCategoryForm = ({
     string | undefined
   >();
   const [selectedItem, setSelectedItem] = useState<string | undefined>();
-  /* const [shipSection, setShipSection] = useState<MsShipSection[]>([]);
-  const [selectedShipSection, setSelectedShipSection] = useState<
-    string | undefined
-  >(); */
+
   const [interval, setInterval] = useState<MsInterval[]>([]);
   const [item, setItem] = useState<MsItem[]>([]);
   const [selectedInterval, setSelectedInterval] = useState<
@@ -146,13 +143,7 @@ const DrillCategoryForm = ({
 
     fetchData();
     fetchVessel();
-  }, [
-    id,
-    setValue,
-    setSelectedInterval,
-    /*  setSelectedShipSection, */
-    setSelectedVesselType,
-  ]);
+  }, [id, setValue, setSelectedInterval, setSelectedVesselType]);
 
   const fetchVessel = async () => {
     try {
@@ -161,7 +152,9 @@ const DrillCategoryForm = ({
       const intervalData = await getMsInterval();
       setInterval(intervalData);
       const itemData: MsItem[] = await getMsItem();
-      const filteredItems = itemData.filter((item) => item.type === "Drill");
+      const filteredItems = itemData.filter(
+        (item) => item.type === "Drill" || item.type === "ReportSafety"
+      );
       setItem(filteredItems);
     } catch (error) {
       console.error("Error fetching vessel and interval data:", error);
@@ -173,33 +166,11 @@ const DrillCategoryForm = ({
       console.warn("No vessel type provided for fetching ship sections.");
       return;
     }
-
-    /*  try {
-      const data = await getMsShipSectionByVslType(vslType);
-      setShipSection(data);
-    } catch (error) {
-      console.error(
-        "Error fetching ship section for vessel type:",
-        vslType,
-        error
-      );
-    } */
   };
 
   const handleSearchChange = (type: string, value: string) => {
     setSearchTerms((prev) => ({ ...prev, [type]: value }));
   };
-
-  /* const handleShipSectionSelect = (value: string) => {
-    const selectedShipSection = shipSection.find(
-      (shipSection) => shipSection.sectionName === value
-    );
-    if (selectedShipSection) {
-      setSelectedShipSection(selectedShipSection.sectionName);
-    } else {
-      setSelectedShipSection("");
-    }
-  }; */
 
   const onSubmit: SubmitHandler<DataModel> = async (data) => {
     data.mode = mode;

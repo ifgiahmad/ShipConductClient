@@ -83,58 +83,54 @@ function DataTableVesselDrill<TData extends HasId>({
     },
   });
 
-  const urlAdd = "/VesselDrill/add";
+  const urlAdd = "/vesselDrill/add";
 
   const totalRowCount = data.length;
   const filteredRowCount = table.getRowModel().rows.length;
 
   return (
     <>
-      <div className="flex items-center py-4">
-        <Link href={urlAdd}>
-          <Button
-            className="mr-2 bg-green-900 hover:bg-green-600"
-            variant={"default"}
-          >
+      {/* Action Buttons */}
+      <div className="flex items-center py-2 gap-2 text-xs">
+        <Link href="/vesselDrill/add">
+          <Button className="bg-green-900 hover:bg-green-600 h-7 px-3 text-xs">
             Add Data
           </Button>
         </Link>
         <Button
-          className="bg-yellow-600 hover:bg-yellow-300"
-          onClick={() => handleOpenDownloadDialog()}
+          className="bg-yellow-600 hover:bg-yellow-300 h-7 px-3 text-xs"
+          onClick={() => setIsDownloadOpen(true)}
         >
           Download
         </Button>
       </div>
-      <div className="rounded-md border overflow-auto h-auto max-h-[90vh]">
+
+      {/* Table Container */}
+      <div className="rounded-md border overflow-auto max-h-[80vh] text-xs">
         <Table>
           <TableHeader className="bg-gray-200 sticky top-0 z-10 shadow-md">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+            {table.getHeaderGroups().map((group) => (
+              <TableRow key={group.id}>
+                {group.headers.map((header) => (
+                  <TableHead key={header.id} className="px-2 py-1">
                     <div className="flex flex-col items-center">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-
-                      {/* Input pencarian untuk filter per kolom */}
-                      {header.column.getCanFilter() ? (
+                      {!header.isPlaceholder &&
+                        flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      {header.column.getCanFilter() && (
                         <Input
-                          type="text"
                           value={
                             (header.column.getFilterValue() as string) ?? ""
                           }
                           onChange={(e) =>
                             header.column.setFilterValue(e.target.value)
                           }
-                          placeholder={`Search ${header.column.id}`}
-                          className="mt-1 w-full text-sm px-2 py-1 border rounded-md text-center"
+                          placeholder={`Search`}
+                          className="mt-1 w-full text-xs px-2 py-0.5 h-6 border rounded text-center"
                         />
-                      ) : null}
+                      )}
                     </div>
                   </TableHead>
                 ))}
@@ -142,14 +138,11 @@ function DataTableVesselDrill<TData extends HasId>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="px-2 py-1">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -162,7 +155,7 @@ function DataTableVesselDrill<TData extends HasId>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length + 1}
-                  className="h-24 text-center"
+                  className="h-20 text-center"
                 >
                   No results.
                 </TableCell>
@@ -171,53 +164,56 @@ function DataTableVesselDrill<TData extends HasId>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4">
+
+      {/* Pagination & Info */}
+      <div className="flex justify-between items-center py-2 text-xs">
         <div>
-          <span>Total rows: {totalRowCount}</span>
-          <span className="ml-4">Filtered rows: {filteredRowCount}</span>
+          <span>Total: {data.length}</span>
+          <span className="ml-3">
+            Filtered: {table.getRowModel().rows.length}
+          </span>
         </div>
-        <div className="flex items-center space-x-2">
-          <label className="mr-2">Rows per page:</label>
+        <div className="flex items-center gap-2">
+          <label className="whitespace-nowrap">Rows per page:</label>
           <select
             value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-            className="border rounded-md px-2 py-1"
+            onChange={(e) => table.setPageSize(Number(e.target.value))}
+            className="border rounded px-1 py-0.5 text-xs h-6"
           >
-            <option value={10}>10</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
+            {[10, 50, 100].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
           </select>
-        </div>
-        <div className="space-x-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
+            onClick={table.previousPage}
             disabled={!table.getCanPreviousPage()}
+            className="h-6 px-2 text-xs"
           >
-            Previous
+            Prev
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
+            onClick={table.nextPage}
             disabled={!table.getCanNextPage()}
+            className="h-6 px-2 text-xs"
           >
             Next
           </Button>
         </div>
       </div>
-      {/* Dialog Edit */}
+
+      {/* Dialog */}
       <Dialog open={isDownloadOpen} onOpenChange={setIsDownloadOpen}>
-        <DialogContent className="w-full max-w-lg h-auto overflow-auto">
-          <DialogTitle>Download Document</DialogTitle>
+        <DialogContent className="w-full max-w-lg overflow-auto">
+          <DialogTitle className="text-sm">Download Document</DialogTitle>
           <DialogDownloadVesselAssessment
             onClose={() => setIsDownloadOpen(false)}
-            onSave={() => {
-              setIsDownloadOpen(false);
-            }}
+            onSave={() => setIsDownloadOpen(false)}
           />
         </DialogContent>
       </Dialog>

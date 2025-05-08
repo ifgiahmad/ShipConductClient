@@ -22,41 +22,26 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import { Dialog } from "@radix-ui/react-dialog";
-import { DialogContent, DialogTitle } from "../ui/dialog";
 
 interface HasId {
   id: number;
+  status?: string;
+  linkCode?: string;
 }
 
-interface DataTableAssessmentCategoryProps<TData extends HasId> {
+interface DataTableProps<TData extends HasId> {
   data: TData[];
   columns: ColumnDef<TData>[];
-  modalContent: React.ReactNode;
-  onSaveData: () => void;
 }
 
 function DataTableAssessmentCategory<TData extends HasId>({
   data,
   columns,
-  modalContent,
-  onSaveData,
-}: DataTableAssessmentCategoryProps<TData>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editMode, setEditMode] = useState<string | null>(null);
+}: DataTableProps<TData>) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [globalFilter, setGlobalFilter] = useState<string>("");
 
   const table = useReactTable({
     data,
@@ -72,116 +57,74 @@ function DataTableAssessmentCategory<TData extends HasId>({
       sorting,
       columnFilters,
       columnVisibility,
+      globalFilter,
+    },
+    globalFilterFn: (row, columnId, filterValue) => {
+      return String(row.getValue(columnId))
+        .toLowerCase()
+        .includes(filterValue.toLowerCase());
     },
   });
 
-  const handleOpenModal = (_id: number, _mode: string) => {
-    setEditId(_id);
-    setEditMode(_mode);
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setEditId(null);
-  };
-
-  const handleSaveModal = () => {
-    setModalOpen(false);
-    onSaveData();
-  };
-
-  const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this item?")) {
-      // Implement delete logic here, e.g., call to API
-    }
-  };
-
+  const urlAdd = "/assessmentCategory/add";
   const totalRowCount = data.length;
   const filteredRowCount = table.getRowModel().rows.length;
 
   return (
     <>
-      <div className="flex items-center justify-between py-4">
-        <Input
-          placeholder="Filter items..."
-          value={(table.getColumn("item")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("item")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <Button
-          className="ml-2 bg-green-900 hover:bg-green-600"
-          onClick={() => handleOpenModal(0, "CREATE")}
-        >
-          Add Data
-        </Button>
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+      <div className="rounded border overflow-auto text-xs max-h-[80vh] mt-2">
+        <Table className="text-xs">
+          <TableHeader className="bg-gray-100 sticky top-0 z-10 shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                  <TableHead key={header.id} className="px-2 py-1 text-xs">
+                    <div className="flex flex-col items-center justify-center">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      {header.column.getCanFilter() && (
+                        <Input
+                          type="text"
+                          value={
+                            (header.column.getFilterValue() as string) ?? ""
+                          }
+                          onChange={(e) =>
+                            header.column.setFilterValue(e.target.value)
+                          }
+                          placeholder={`Search`}
+                          className="mt-1 w-full text-xs px-1 py-0.5 border rounded text-center"
+                        />
+                      )}
+                    </div>
                   </TableHead>
                 ))}
-                <TableHead>Actions</TableHead>
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="px-2 py-1">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
                       )}
                     </TableCell>
                   ))}
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">...</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleOpenModal(row.original.id, "EDIT")
-                          }
-                        >
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() =>
-                            handleOpenModal(row.original.id, "DELETE")
-                          }
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length + 1}
-                  className="h-24 text-center"
+                  colSpan={columns.length}
+                  className="text-center py-6"
                 >
                   No results.
                 </TableCell>
@@ -190,29 +133,28 @@ function DataTableAssessmentCategory<TData extends HasId>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4">
+
+      <div className="flex items-center justify-between py-2 text-xs">
         <div>
           <span>Total rows: {totalRowCount}</span>
-          <span className="ml-4">Filtered rows: {filteredRowCount}</span>
+          <span className="ml-4">Filtered: {filteredRowCount}</span>
         </div>
         <div className="flex items-center space-x-2">
-          <label className="mr-2">Rows per page:</label>
+          <label className="text-xs">Rows per page:</label>
           <select
             value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-            className="border rounded-md px-2 py-1"
+            onChange={(e) => table.setPageSize(Number(e.target.value))}
+            className="border rounded px-2 py-0.5 text-xs"
           >
             <option value={10}>10</option>
+            <option value={25}>25</option>
             <option value={50}>50</option>
-            <option value={100}>100</option>
           </select>
         </div>
-        <div className="space-x-2">
+        <div className="space-x-1">
           <Button
             variant="outline"
-            size="sm"
+            className="px-2 py-1 text-xs"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -220,7 +162,7 @@ function DataTableAssessmentCategory<TData extends HasId>({
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            className="px-2 py-1 text-xs"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -228,17 +170,6 @@ function DataTableAssessmentCategory<TData extends HasId>({
           </Button>
         </div>
       </div>
-      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="md:max-w-[800px]">
-          <DialogTitle>Assessment Category</DialogTitle>
-          {React.cloneElement(modalContent as React.ReactElement, {
-            onClose: handleCloseModal,
-            onSave: handleSaveModal,
-            id: editId,
-            mode: editMode,
-          })}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

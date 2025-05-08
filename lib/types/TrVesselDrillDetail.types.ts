@@ -4,6 +4,7 @@ export type TrVesselDrillDetail = {
   id: number;
   vesselDrillId?: number;
   itemName?: string;
+  itemType?: string;
   itemId?: number;
   interval?: string;
   intervalId?: number;
@@ -28,10 +29,23 @@ export type TrVesselDrillDetail = {
   mode?: string;
   video?: File | null;
   doc?: File | null;
+  doc2?: File | null;
+  docName2?: string;
+  docLink2?: string;
+  doc3?: File | null;
+  docName3?: string;
+  docLink3?: string;
+  doc4?: File | null;
+  docName4?: string;
+  docLink4?: string;
+  doc5?: File | null;
+  docName5?: string;
+  docLink5?: string;
 };
 
 export const saveTrVesselDrillDetailZod = z.object({
   itemName: z.string().min(1, "Item is required"),
+  itemType: z.string().optional(),
   interval: z.string().min(1, "Interval is required"),
   itemId: z.number().min(1, "Item is required"),
   intervalId: z.number().min(1, "Interval is required"),
@@ -58,6 +72,18 @@ export const saveTrVesselDrillDetailZod = z.object({
   modifiedDate: z.date().optional(),
   video: z.instanceof(File).nullable().optional(),
   doc: z.instanceof(File).nullable().optional(),
+  doc2: z.instanceof(File).nullable().optional(),
+  docName2: z.string().optional(),
+  docLink2: z.string().optional(),
+  doc3: z.instanceof(File).nullable().optional(),
+  docName3: z.string().optional(),
+  docLink3: z.string().optional(),
+  doc4: z.instanceof(File).nullable().optional(),
+  docName4: z.string().optional(),
+  docLink4: z.string().optional(),
+  doc5: z.instanceof(File).nullable().optional(),
+  docName5: z.string().optional(),
+  docLink5: z.string().optional(),
 });
 
 export const uploadVideoTrVesselDrillDetailZod = z
@@ -65,9 +91,9 @@ export const uploadVideoTrVesselDrillDetailZod = z
     id: z.number().optional(),
     videoDescription: z.string().optional(),
     itemName: z.string().min(1, "Item is required"),
+    itemType: z.string().optional(),
     interval: z.string().min(1, "Interval is required"),
     intervalId: z.number().min(1, "Interval is required"),
-    /*  shipSection: z.string().min(1, "Ship Section is required"), */
     video: z.instanceof(File).nullable().optional(),
     doc: z.instanceof(File).nullable().optional(),
     fileName: z.string().optional(),
@@ -75,13 +101,29 @@ export const uploadVideoTrVesselDrillDetailZod = z
     smallFileLink: z.string().optional(),
     normalFileLink: z.string().optional(),
     docLink: z.string().optional(),
+    doc2: z.instanceof(File).nullable().optional(),
+    docLink2: z.string().optional(),
+    docName2: z.string().optional(),
+    doc3: z.instanceof(File).nullable().optional(),
+    docLink3: z.string().optional(),
+    docName3: z.string().optional(),
+    doc4: z.instanceof(File).nullable().optional(),
+    docLink4: z.string().optional(),
+    docName4: z.string().optional(),
+    doc5: z.instanceof(File).nullable().optional(),
+    docLink5: z.string().optional(),
+    docName5: z.string().optional(),
   })
   .refine(
-    (data) =>
-      data.videoDescription ||
-      data.video ||
-      data.smallFileLink ||
-      data.normalFileLink,
+    (data) => {
+      if (data.itemType !== "Drill") return true; // Jika bukan Drill, validasi dilewati
+      return (
+        data.videoDescription ||
+        data.video ||
+        data.smallFileLink ||
+        data.normalFileLink
+      );
+    },
     {
       message: "Salah satu antara video atau videoDescription harus diisi.",
     }

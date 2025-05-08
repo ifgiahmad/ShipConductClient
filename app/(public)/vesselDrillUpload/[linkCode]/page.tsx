@@ -69,6 +69,7 @@ const VesselDrillUploadForm = () => {
     },
   });
   const [detail, setDetail] = useState<TrVesselDrillDetail[]>([]);
+  const [detailReport, setDetailReport] = useState<TrVesselDrillDetail[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [month, setMonth] = useState<string | undefined>();
   const [year, setYear] = useState<number | undefined>();
@@ -90,8 +91,7 @@ const VesselDrillUploadForm = () => {
 
   const columnsDetail = [
     { header: "Item", accessorKey: "itemName" },
-    /*  { header: "Ship Section", accessorKey: "shipSection" }, */
-    {
+    /* {
       header: "Video",
       accessorKey: "normalFileLink",
       cell: ({ row }: { row: { original: TrVesselDrillDetail } }) =>
@@ -105,8 +105,26 @@ const VesselDrillUploadForm = () => {
         ) : (
           <></>
         ),
+    }, */
+    {
+      header: "File",
+      accessorKey: "normalFileLink",
+      cell: ({ row }: { row: { original: TrVesselDrillDetail } }) =>
+        row.original.normalFileLink ? (
+          <>
+            <span>Video Uploaded</span>
+            <video
+              src={row.original.normalFileLink}
+              controls
+              poster={row.original.normalFileLink}
+              style={{ width: "120px", height: "auto" }}
+            />
+          </>
+        ) : (
+          <></>
+        ),
     },
-    { header: "Video Description", accessorKey: "photoDescription" },
+    { header: "File Description", accessorKey: "videoDescription" },
   ];
 
   const monthNames = [
@@ -190,6 +208,12 @@ const VesselDrillUploadForm = () => {
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselDrillDetailForCrew(Number(id));
+    const filteredDetail = dataDetail.filter(
+      (item) => item.itemType === "Drill"
+    );
+    const filteredData = dataDetail.filter(
+      (item) => item.itemType === "ReportSafety"
+    );
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
     const groupedData = dataDetail.reduce((acc, item) => {
@@ -199,7 +223,8 @@ const VesselDrillUploadForm = () => {
     }, {} as Record<string, TrVesselDrillDetail[]>);
 
     /* setDetail(groupedData);  */
-    setDetail(dataDetail);
+    setDetail(filteredDetail);
+    setDetailReport(filteredData);
   };
 
   const handleSaveDetail = () => {
@@ -246,8 +271,8 @@ const VesselDrillUploadForm = () => {
     <>
       <div>
         <Card className="mb-2">
-          <CardHeader>
-            <CardTitle className="flex justify-center">
+          <CardHeader className="p-2">
+            <CardTitle className="flex justify-center text-md">
               {vesselName} Vessel Drill Period {month} {year}
             </CardTitle>
           </CardHeader>
@@ -269,8 +294,8 @@ const VesselDrillUploadForm = () => {
         <>
           <div style={{ height: "70vh", overflowY: "auto" }}>
             <Card>
-              <CardHeader>
-                <CardTitle>Drill Detail</CardTitle>
+              <CardHeader className="p-2">
+                <CardTitle className="text-md">Drill Detail</CardTitle>
               </CardHeader>
               <CardContent>
                 <DataTableVesselDrillUpload
@@ -285,6 +310,30 @@ const VesselDrillUploadForm = () => {
                       idList={idList}
                     />
                   }
+                  type="VIDEO"
+                  onClose={() => handleCloseDetail()}
+                  onSaveData={() => handleSaveDetail()}
+                />
+              </CardContent>
+            </Card>
+            <Card className="mt-2">
+              <CardHeader className="p-2">
+                <CardTitle className="text-md">Report Safety Detail</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DataTableVesselDrillUpload
+                  data={detailReport}
+                  columns={columnsDetail}
+                  modalContent={
+                    <UploadVideoForm
+                      onClose={() => {}}
+                      onSave={() => {}}
+                      id={0}
+                      idHeader={Number(id)}
+                      idList={idList}
+                    />
+                  }
+                  type="DOC"
                   onClose={() => handleCloseDetail()}
                   onSaveData={() => handleSaveDetail()}
                 />

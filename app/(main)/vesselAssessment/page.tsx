@@ -137,10 +137,10 @@ const VesselAssessmentPage: React.FC = () => {
         );
       },
     },
-    { header: "Vessel Type", accessorKey: "vslType" },
-    { header: "Vessel Name", accessorKey: "vslName" },
-    { header: "Vessel Mate", accessorKey: "vslMate" },
-    { header: "Period Name", accessorKey: "periodName" },
+    { header: "Vsl. Type", accessorKey: "vslType" },
+    { header: "Vsl. Name", accessorKey: "vslName" },
+    { header: "Vsl. Mate", accessorKey: "vslMate" },
+    { header: "Period", accessorKey: "periodName" },
     { header: "Score Item General", accessorKey: "scoreItemGeneral" },
     { header: "Downtime General", accessorKey: "downtimeGeneral" },
     { header: "Score General", accessorKey: "scoreGeneral" },
@@ -178,8 +178,10 @@ const VesselAssessmentPage: React.FC = () => {
     <>
       <div>
         <Card className="mb-2">
-          <CardHeader>
-            <CardTitle>List Data Vessel Assessment</CardTitle>
+          <CardHeader className="p-2">
+            <CardTitle className="text-sm">
+              List Data Vessel Assessment
+            </CardTitle>
           </CardHeader>
         </Card>
       </div>

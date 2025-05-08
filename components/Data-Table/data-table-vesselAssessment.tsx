@@ -91,54 +91,28 @@ function DataTableVesselAssessment<TData extends HasId>({
 
   return (
     <>
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-2 gap-2 text-xs">
         <Link href={urlAdd}>
           <Button
-            className="mr-2 bg-green-900 hover:bg-green-600"
+            className="bg-green-900 hover:bg-green-600 h-7 px-3 text-xs"
             variant={"default"}
           >
             Add Data
           </Button>
         </Link>
         <Button
-          className="bg-yellow-600 hover:bg-yellow-300"
+          className="bg-yellow-600 hover:bg-yellow-300 h-7 px-3 text-xs"
           onClick={() => handleOpenDownloadDialog()}
         >
           Download
         </Button>
-
-        {/*  <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Show Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu> */}
       </div>
-      <div className="rounded-md border overflow-auto h-auto max-h-[90vh]">
-        <Table>
+
+      <div className="rounded border overflow-auto text-xs max-h-[80vh] mt-2">
+        <Table className="text-xs [&_td]:p-1 [&_th]:p-1">
           <TableHeader className="bg-gray-200 sticky top-0 z-10 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="h-6">
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
                     <div className="flex flex-col items-center">
@@ -149,7 +123,6 @@ function DataTableVesselAssessment<TData extends HasId>({
                             header.getContext()
                           )}
 
-                      {/* Input pencarian untuk filter per kolom */}
                       {header.column.getCanFilter() ? (
                         <Input
                           type="text"
@@ -159,8 +132,8 @@ function DataTableVesselAssessment<TData extends HasId>({
                           onChange={(e) =>
                             header.column.setFilterValue(e.target.value)
                           }
-                          placeholder={`Search ${header.column.id}`}
-                          className="mt-1 w-full text-sm px-2 py-1 border rounded-md text-center"
+                          placeholder={`Search `}
+                          className="mt-1 w-full text-xs px-2 py-0.5 h-6 border rounded text-center"
                         />
                       ) : null}
                     </div>
@@ -169,15 +142,17 @@ function DataTableVesselAssessment<TData extends HasId>({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+                  className="h-6"
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="p-1">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -199,7 +174,8 @@ function DataTableVesselAssessment<TData extends HasId>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4">
+
+      <div className="flex items-center justify-between py-4 text-xs">
         <div>
           <span>Total rows: {totalRowCount}</span>
           <span className="ml-4">Filtered rows: {filteredRowCount}</span>
@@ -208,10 +184,8 @@ function DataTableVesselAssessment<TData extends HasId>({
           <label className="mr-2">Rows per page:</label>
           <select
             value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}
-            className="border rounded-md px-2 py-1"
+            onChange={(e) => table.setPageSize(Number(e.target.value))}
+            className="border rounded-md px-2 py-1 text-xs"
           >
             <option value={10}>10</option>
             <option value={50}>50</option>
@@ -237,6 +211,7 @@ function DataTableVesselAssessment<TData extends HasId>({
           </Button>
         </div>
       </div>
+
       {/* Dialog Edit */}
       <Dialog open={isDownloadOpen} onOpenChange={setIsDownloadOpen}>
         <DialogContent className="w-full max-w-lg h-auto overflow-auto">

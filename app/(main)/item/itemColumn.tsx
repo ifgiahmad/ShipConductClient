@@ -22,6 +22,13 @@ export const getItemColumns = ({
     ),
   },
   {
+    accessorKey: "type",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Type" />
+    ),
+    cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
+  },
+  /* {
     accessorKey: "fileLink",
     header: "Photo",
     cell: ({ row }) => (
@@ -31,7 +38,7 @@ export const getItemColumns = ({
         style={{ width: "100px", height: "auto" }}
       />
     ),
-  },
+  }, */
 
   {
     id: "actions",

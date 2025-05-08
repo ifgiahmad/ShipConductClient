@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const columns: ColumnDef<MsItem>[] = [
   { header: "Item Name", accessorKey: "itemName" },
-  {
+  { header: "Type", accessorKey: "type" },
+  /* {
     accessorKey: "fileLink",
     header: "Photo",
     cell: ({ row }) => (
@@ -19,7 +20,7 @@ const columns: ColumnDef<MsItem>[] = [
         style={{ width: "100px", height: "auto" }}
       />
     ),
-  },
+  }, */
 ];
 
 const ItemPage: React.FC = () => {

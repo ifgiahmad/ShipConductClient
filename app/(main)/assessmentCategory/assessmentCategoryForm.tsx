@@ -10,6 +10,7 @@ import {
 import {
   getMsAssessmentCategoryById,
   saveMsAssessmentCategory,
+  uploadPhoto,
 } from "@/services/service_api";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -96,6 +97,7 @@ const AssessmentCategoryForm = ({
     item: "",
     roleCategory: "",
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const methods = useForm<saveMsAssessmentCategoryDto>({
     resolver: zodResolver(saveMsAssessmentCategoryZod),
@@ -116,7 +118,12 @@ const AssessmentCategoryForm = ({
     },
   });
 
-  const { setValue, control, handleSubmit } = methods;
+  const {
+    setValue,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = methods;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -124,6 +131,7 @@ const AssessmentCategoryForm = ({
         try {
           const data = await getMsAssessmentCategoryById(id);
           console.log(data);
+          console.log(mode);
 
           setValue("categorySection", data.categorySection);
 
@@ -160,6 +168,7 @@ const AssessmentCategoryForm = ({
             setValue("roleCategoryId", data.roleCategoryId);
             setSelectedRoleCategory(data.roleCategory);
           }
+          setImagePreview(data.fileLink || null);
         } catch (error) {
           console.error("Error fetching assessment category data:", error);
         }
@@ -241,10 +250,16 @@ const AssessmentCategoryForm = ({
       setSelectedShipSection(selectedShipSection.sectionName); // Pastikan ini benar
       setValue("categorySection", selectedShipSection.categorySection || "");
       setValue("shipSectionId", selectedShipSection.id || 0);
-    } /* else {
-      setSelectedShipSection("");
-      setValue("categorySection", "");
-    } */
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setValue("fileName", file.name);
+      setValue("photo", file);
+      setImagePreview(URL.createObjectURL(file)); // Update the preview when a file is selected
+    }
   };
 
   const onSubmit: SubmitHandler<DataModel> = async (data) => {
@@ -252,9 +267,30 @@ const AssessmentCategoryForm = ({
     data.mode = mode;
     try {
       const response = await saveMsAssessmentCategory(data);
-      if (response.status === 200) {
-        onSave();
-        toast({ description: "Assessment Category updated successfully." });
+      console.log(response);
+      if (response.status === "OK") {
+        if (data.photo) {
+          data.id = response.returnId;
+          const resPhoto = await uploadPhoto(data);
+          console.log(resPhoto);
+          if (resPhoto.status === 200) {
+            onSave();
+            toast({
+              description:
+                "Assessment Category and Photo updated successfully.",
+            });
+            return true;
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Photo Item failed to Save.",
+            });
+          }
+        } else {
+          onSave();
+          toast({ description: "Assessment Category updated successfully." });
+        }
       } else {
         toast({
           variant: "destructive",
@@ -277,23 +313,26 @@ const AssessmentCategoryForm = ({
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 gap-6"
+        className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-4"
       >
-        {mode === "DELETE" ? (
-          <Alert>
-            <Terminal className="h-4 w-4" />
-            <AlertTitle>Delete Data!</AlertTitle>
-            <AlertDescription>
-              Are you sure you want to delete this data?
-            </AlertDescription>
-          </Alert>
+        {mode === "Delete" ? (
+          <div className="md:col-span-2">
+            <Alert>
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Delete Data!</AlertTitle>
+              <AlertDescription>
+                Are you sure you want to delete this data?
+              </AlertDescription>
+            </Alert>
+          </div>
         ) : (
           <>
+            {/* Vessel Type */}
             <FormField
               control={control}
               name="vslType"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Vessel Type</FormLabel>
                   <Select
                     onValueChange={(value) => {
@@ -336,11 +375,12 @@ const AssessmentCategoryForm = ({
               )}
             />
 
+            {/* Item */}
             <FormField
               control={control}
               name="item"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Item</FormLabel>
                   <Select
                     onValueChange={(value) => {
@@ -391,18 +431,20 @@ const AssessmentCategoryForm = ({
                 </FormItem>
               )}
             />
+
+            {/* Ship Section */}
             <FormField
               control={control}
               name="shipSection"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Ship Section</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      field.onChange(value); // Bind form value with field
-                      handleShipSectionSelect(value); // Handle additional side effects
+                      field.onChange(value);
+                      handleShipSectionSelect(value);
                     }}
-                    value={field.value} // Controlled value from react-hook-form
+                    value={field.value}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Ship Section" />
@@ -436,11 +478,13 @@ const AssessmentCategoryForm = ({
                 </FormItem>
               )}
             />
+
+            {/* Category Section */}
             <FormField
               control={control}
               name="categorySection"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Category Section</FormLabel>
                   <Input
                     readOnly
@@ -452,23 +496,23 @@ const AssessmentCategoryForm = ({
                 </FormItem>
               )}
             />
+
+            {/* Interval */}
             <FormField
               control={control}
               name="interval"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Interval</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      if (value) {
-                        const _selectedInterval = interval.find(
-                          (v) => v.id.toString() === value
-                        );
-                        if (_selectedInterval) {
-                          setSelectedInterval(_selectedInterval.interval); // Simpan nama item ke state
-                          setValue("interval", _selectedInterval.interval); // Simpan nama item ke itemDrill
-                          setValue("intervalId", _selectedInterval.id); // Simpan ID item ke itemId
-                        }
+                      const _selectedInterval = interval.find(
+                        (v) => v.id.toString() === value
+                      );
+                      if (_selectedInterval) {
+                        setSelectedInterval(_selectedInterval.interval);
+                        setValue("interval", _selectedInterval.interval);
+                        setValue("intervalId", _selectedInterval.id);
                       }
                     }}
                     value={
@@ -509,28 +553,23 @@ const AssessmentCategoryForm = ({
                 </FormItem>
               )}
             />
+
+            {/* Role Category */}
             <FormField
               control={control}
               name="roleCategory"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Role Category</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      if (value) {
-                        const _selectedRoleCategory = roleCategory.find(
-                          (v) => v.id.toString() === value
-                        );
-                        if (_selectedRoleCategory) {
-                          setSelectedRoleCategory(
-                            _selectedRoleCategory.roleCategory
-                          );
-                          setValue(
-                            "roleCategory",
-                            _selectedRoleCategory.roleCategory
-                          );
-                          setValue("roleCategoryId", _selectedRoleCategory.id); // Simpan ID item ke itemId
-                        }
+                      const _selected = roleCategory.find(
+                        (v) => v.id.toString() === value
+                      );
+                      if (_selected) {
+                        setSelectedRoleCategory(_selected.roleCategory);
+                        setValue("roleCategory", _selected.roleCategory);
+                        setValue("roleCategoryId", _selected.id);
                       }
                     }}
                     value={
@@ -571,65 +610,78 @@ const AssessmentCategoryForm = ({
                 </FormItem>
               )}
             />
+
+            {/* Start Month */}
             <FormField
               control={control}
               name="startMonth"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-1">
                   <FormLabel>Start Month</FormLabel>
                   <Select
-                    value={String(field.value)} // Konversi angka ke string
-                    onValueChange={(val) => field.onChange(Number(val))} // Konversi string ke angka
+                    value={String(field.value)}
+                    onValueChange={(val) => field.onChange(Number(val))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Month" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem key="January" value="1">
-                        January
-                      </SelectItem>
-                      <SelectItem key="February" value="2">
-                        February
-                      </SelectItem>
-                      <SelectItem key="March" value="3">
-                        March
-                      </SelectItem>
-                      <SelectItem key="April" value="4">
-                        April
-                      </SelectItem>
-                      <SelectItem key="May" value="5">
-                        May
-                      </SelectItem>
-                      <SelectItem key="June" value="6">
-                        June
-                      </SelectItem>
-                      <SelectItem key="July" value="7">
-                        July
-                      </SelectItem>
-                      <SelectItem key="August" value="8">
-                        August
-                      </SelectItem>
-                      <SelectItem key="September" value="9">
-                        September
-                      </SelectItem>
-                      <SelectItem key="October" value="10">
-                        October
-                      </SelectItem>
-                      <SelectItem key="November" value="11">
-                        November
-                      </SelectItem>
-                      <SelectItem key="December" value="12">
-                        December
-                      </SelectItem>
+                      {[
+                        "January",
+                        "February",
+                        "March",
+                        "April",
+                        "May",
+                        "June",
+                        "July",
+                        "August",
+                        "September",
+                        "October",
+                        "November",
+                        "December",
+                      ].map((month, idx) => (
+                        <SelectItem key={month} value={(idx + 1).toString()}>
+                          {month}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {/* Image Preview */}
+            {imagePreview && (
+              <div className="md:col-span-2">
+                <img
+                  src={imagePreview}
+                  alt="Photo Preview"
+                  className="w-80 h-60 rounded-md border border-gray-300"
+                />
+              </div>
+            )}
+
+            {/* Upload File */}
+            <div className="md:col-span-2">
+              <FormItem className="space-y-1">
+                <FormLabel>Upload Photo</FormLabel>
+                <FormControl>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </FormControl>
+                <FormMessage>{errors.fileName?.message}</FormMessage>
+              </FormItem>
+            </div>
           </>
         )}
-        <DialogFooter>
+
+        {/* Buttons */}
+        <div className="md:col-span-2 flex justify-end gap-4 mt-4">
           <Button type="button" variant="outline" onClick={onClose}>
             Close
           </Button>
@@ -638,9 +690,9 @@ const AssessmentCategoryForm = ({
             variant="default"
             className="bg-green-900 hover:bg-green-600"
           >
-            {mode === "DELETE" ? "Delete" : "Save"}
+            {mode === "Delete" ? "Delete" : "Save"}
           </Button>
-        </DialogFooter>
+        </div>
       </form>
     </FormProvider>
   );

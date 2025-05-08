@@ -15,33 +15,33 @@ import ThemeToggler from "./ThemeToggler";
 
 const Navbar = () => {
   return (
-    <header className="bg-teal-600 p-4">
-      <div className="bg-emerald-900 dark:bg-green-900 text-white py-2 px-5 flex justify-between">
-        <div className="flex flex-col items-center bg-white p-1 rounded-md">
+    <header className="bg-teal-600">
+      <div className="bg-emerald-900 dark:bg-green-900 text-white px-6 py-3 flex items-center justify-between">
+        {/* Logo & Title */}
+        <div className="flex items-center space-x-3 bg-white p-2 rounded-md">
           <Image
             src={logo}
             alt="ShipConduct"
-            className="h-10 mr-2"
-            width={60}
-            height={80}
+            width={50}
+            height={50}
+            className="object-contain"
           />
-          <div className="text-green-950 font-bold">
+          <span className="text-green-950 font-bold text-sm sm:text-base lg:text-lg leading-tight">
             PT. Lintas Maritim Indonesia
-          </div>
+          </span>
         </div>
-        <div className="flex items-center">
+
+        {/* Right Section: Theme Toggle & User Dropdown */}
+        <div className="flex items-center space-x-4">
           <ThemeToggler />
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none">
               <Avatar>
-                <AvatarImage
-                  src=/* "https://github.com/shadcn.png" */ ""
-                  alt="@shadcn"
-                ></AvatarImage>
+                <AvatarImage src="" alt="@shadcn" />
                 <AvatarFallback className="text-black">BT</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>

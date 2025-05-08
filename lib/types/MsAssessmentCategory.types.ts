@@ -22,6 +22,9 @@ export type MsAssessmentCategory = {
   deleted: boolean;
   startMonth: number;
   startMonthString: string;
+  fileName?: string;
+  fileLink?: string;
+  photo?: File | null;
 };
 
 export const saveMsAssessmentCategoryZod = z.object({
@@ -41,6 +44,8 @@ export const saveMsAssessmentCategoryZod = z.object({
   deleted: z.boolean().optional(),
   startMonth: z.number().min(1, "Start Month is required"),
   startMonthString: z.string().optional(),
+  photo: z.instanceof(File).nullable().optional(),
+  fileName: z.string().optional(),
 });
 
 export type saveMsAssessmentCategoryDto = z.infer<

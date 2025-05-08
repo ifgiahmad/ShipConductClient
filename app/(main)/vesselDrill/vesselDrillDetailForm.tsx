@@ -119,9 +119,15 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
     criteria: "",
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [docPreview, setDocPreview] = useState<string | null>(null);
+  const [isModalOpenDoc, setModalOpenDoc] = useState(false);
 
   const handleSearchChange = (type: string, value: string) => {
     setSearchTerms((prev) => ({ ...prev, [type]: value }));
+  };
+
+  const handleCloseDocument = () => {
+    setModalOpenDoc(false);
   };
 
   const handlePrevious = () => {
@@ -261,6 +267,13 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
         setImagePreview(data.normalFileLink || null);
         if (currentMode === "" || currentMode === null) {
           setCurrentMode(data.fileName ? "INPUT GRADE" : "UPLOAD VIDEO");
+        }
+
+        if (data.docLink) {
+          setDocPreview(data.docLink);
+          setValue("docName", data.docName);
+        } else {
+          setDocPreview(null);
         }
 
         if (vslType) {
@@ -446,6 +459,33 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                 />
               </div>
             )}
+            {docPreview && (
+              <div className="mt-4 flex items-center space-x-4">
+                <FormField
+                  name="docName"
+                  control={control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          readOnly
+                          placeholder="document"
+                          {...field}
+                          className="w-full max-w-xs border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="button"
+                  onClick={() => setModalOpenDoc(true)}
+                  className="inline-flex justify-center rounded-md border shadow-sm bg-blue-600 hover:bg-blue-500 text-white"
+                >
+                  View Document
+                </Button>
+              </div>
+            )}
             <FormField
               control={control}
               name="grade"
@@ -553,26 +593,6 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                 </FormItem>
               )}
             />
-
-            {/* Ship Section Field */}
-            {/*  <FormField
-              name="shipSection"
-              control={control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ship Section</FormLabel>
-                  <FormControl>
-                    <Input
-                      readOnly
-                      placeholder="Ship Section"
-                      {...field}
-                      className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                    />
-                  </FormControl>
-                  <FormMessage>{errors.shipSection?.message}</FormMessage>
-                </FormItem>
-              )}
-            /> */}
 
             {/* Image Preview Section */}
             {imagePreview && (
@@ -820,6 +840,31 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               Add
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isModalOpenDoc} onOpenChange={handleCloseDocument}>
+        <DialogContent className="lg:max-w-[1200px] max-h-[800px] overflow-auto">
+          <DialogTitle>Dokumen Drill</DialogTitle>
+
+          {docPreview && (
+            <div className="flex justify-center mt-4">
+              {/*  <iframe
+                src={docPreview}
+                width="600"
+                height="400"
+                className="mt-4"
+              /> */}
+              <iframe
+                src={`https://docs.google.com/gview?url=${encodeURIComponent(
+                  docPreview
+                )}&embedded=true`}
+                width="1000"
+                height="700"
+                className="mt-4"
+                loading="lazy"
+              />
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </FormProvider>

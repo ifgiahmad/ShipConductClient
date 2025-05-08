@@ -36,6 +36,8 @@ import { TrVesselDrillDetail } from "@/lib/types/TrVesselDrillDetail.types";
 import { getTrVesselDrillDetail } from "@/services/service_api_vesselDrillDetail";
 import VesselDrillDetailForm from "../../vesselDrillDetailForm";
 import DataTableDrillDetail from "@/components/Data-Table/data-table-vesselDrillDetail";
+import { Tabs } from "@/components/ui/tabs";
+import { TabsList } from "@radix-ui/react-tabs";
 
 const EditVesselDrillForm = () => {
   const router = useRouter();
@@ -168,7 +170,7 @@ const EditVesselDrillForm = () => {
     } else {
       data.mode = "CLOSED";
     }
-    /*  if ((data.mode === "CLOSED" && data.grade) || data.mode !== "CLOSED") { */
+
     try {
       const ret = await saveTrVesselDrill(data);
       if (ret.status === 200) {
@@ -194,13 +196,6 @@ const EditVesselDrillForm = () => {
     } finally {
       setLoading(false);
     }
-    /*  } else {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Grade must be filled",
-      });
-    } */
   };
 
   return (
@@ -374,24 +369,6 @@ const EditVesselDrillForm = () => {
                       </FormItem>
                     )}
                   />
-                  {/* <FormField
-                    name="interval"
-                    control={control}
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-1">
-                        <FormLabel>Interval</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Interval"
-                            {...field}
-                            readOnly
-                            className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                          />
-                        </FormControl>
-                        <FormMessage>{errors.interval?.message}</FormMessage>
-                      </FormItem>
-                    )}
-                  /> */}
                 </Card>
                 <Card className="p-2">
                   <FormField
@@ -431,26 +408,6 @@ const EditVesselDrillForm = () => {
                     )}
                   />
                 </Card>
-                {/*  <Card className="p-2">
-                  <FormField
-                    name="grade"
-                    control={control}
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-1">
-                        <FormLabel>Grade</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Grade"
-                            {...field}
-                            readOnly
-                            className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                          />
-                        </FormControl>
-                        <FormMessage>{errors.grade?.message}</FormMessage>
-                      </FormItem>
-                    )}
-                  />
-                </Card> */}
                 <div className="md:col-span-3 flex justify-end mt-4">
                   <Button
                     type="button"
@@ -495,6 +452,9 @@ const EditVesselDrillForm = () => {
             <CardTitle>Vessel Drill Detail</CardTitle>
           </CardHeader>
           <CardContent>
+            <Tabs defaultValue="drill">
+              <TabsList></TabsList>
+            </Tabs>
             <DataTableDrillDetail
               data={detail}
               columns={columnsDetail}

@@ -1,110 +1,103 @@
 "use client";
+
 import {
   Command,
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command";
-import {
-  LayoutDashboard,
-  Calculator,
-  Ship,
-  Settings,
-  User,
-} from "lucide-react";
+import { LayoutDashboard, Calculator, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils"; // pastikan fungsi util ini tersedia
 
 const Sidebar = () => {
   const pathname = usePathname();
 
+  const menuItems = [
+    {
+      group: "Activity",
+      items: [
+        {
+          href: "/vesselAssessment",
+          label: "Vessel Assessment",
+          icon: Calculator,
+        },
+        {
+          href: "/vesselDrill",
+          label: "Vessel Safety Reports",
+          icon: Calculator,
+        },
+        {
+          href: "/assessmentCompare",
+          label: "Assessment Comparison",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      group: "Master",
+      items: [
+        {
+          href: "/assessmentCategory",
+          label: "Assessment Category",
+          icon: Settings,
+        },
+        {
+          href: "/drillCategory",
+          label: "Drill Category",
+          icon: Settings,
+        },
+        {
+          href: "/shipSection",
+          label: "Ship Section",
+          icon: Settings,
+        },
+        {
+          href: "/interval",
+          label: "Interval",
+          icon: Settings,
+        },
+        {
+          href: "/item",
+          label: "Item",
+          icon: Settings,
+        },
+      ],
+    },
+  ];
+
   return (
     <Command className="bg-secondary rounded-none">
       <CommandInput placeholder="Type a command or search..." />
-      <CommandList className="max-h-[400px]">
+      <CommandList className="max-h-[400px] overflow-y-auto">
         <CommandEmpty>No results found.</CommandEmpty>
 
-        <CommandGroup heading="Activity">
-          <CommandItem
-            className={`${
-              pathname.includes("/vesselAssessment") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <Calculator className="mr-2 h-4 w-4" />
-            <Link href="/vesselAssessment">Vessel Assessment</Link>
-          </CommandItem>
-
-          <CommandItem
-            className={`${
-              pathname.includes("/vesselDrill") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <Calculator className="mr-2 h-4 w-4" />
-            <Link href="/vesselDrill">Vessel Drill</Link>
-          </CommandItem>
-
-          <CommandItem
-            className={`${
-              pathname.includes("/assessmentCompare") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <Link href="/assessmentCompare">Assessment Comparison</Link>
-          </CommandItem>
-        </CommandGroup>
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Master">
-          <CommandItem
-            className={`${
-              pathname.includes("/assessmentCategory") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <Link href="/assessmentCategory">Assessment Category</Link>
-          </CommandItem>
-          <CommandItem
-            className={`${
-              pathname.includes("/drillCategory") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <Link href="/drillCategory">Drill Category</Link>
-          </CommandItem>
-
-          <CommandItem
-            className={`${
-              pathname.includes("/shipSection") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <Link href="/shipSection">Ship Section</Link>
-          </CommandItem>
-
-          <CommandItem
-            className={`${
-              pathname.includes("/interval") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <Link href="/interval">Interval</Link>
-          </CommandItem>
-
-          <CommandItem
-            className={`${
-              pathname.includes("/item") ? "bg-slate-400" : ""
-            } hover:bg-slate-400`}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            <Link href="/item">Item</Link>
-          </CommandItem>
-        </CommandGroup>
+        {menuItems.map((group, index) => (
+          <div key={group.group}>
+            <CommandGroup heading={group.group}>
+              {group.items.map(({ href, label, icon: Icon }) => (
+                <CommandItem
+                  key={href}
+                  asChild
+                  className={cn(
+                    pathname.startsWith(href) ? "bg-slate-400 text-black" : "",
+                    "hover:bg-slate-300 cursor-pointer"
+                  )}
+                >
+                  <Link href={href} className="flex items-center w-full gap-2">
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
+                  </Link>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            {index < menuItems.length - 1 && <CommandSeparator />}
+          </div>
+        ))}
       </CommandList>
     </Command>
   );

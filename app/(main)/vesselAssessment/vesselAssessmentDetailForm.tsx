@@ -242,7 +242,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     if (file) {
       setValue("fileName", file.name);
       setValue("photo", file);
-      setImagePreview(URL.createObjectURL(file)); // Update the preview when a file is selected
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -316,6 +316,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
     fetchItem();
 
     async function getPreviousData(Id: Number) {
+      console.log(Id);
       try {
         const data = await getPreviousTrVesselAssessmentDetail(Number(Id));
         console.log(data);
@@ -1061,14 +1062,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ship Section</FormLabel>
-                      {/*  <Select
-                    onValueChange={(value) => {
-                      setSelectedShipSection(value);
-                      setValue("shipSection", value);
-                      field.onChange(value);
-                    }}
-                    value={selectedShipSection || field.value}
-                  > */}
+
                       <Select
                         onValueChange={(value) => {
                           field.onChange(value); // Bind form value with field
@@ -1155,7 +1149,7 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                   onClick={onClose}
                   className="mt-3 inline-flex justify-center rounded-md border shadow-sm px-4 py-2 bg-white hover:bg-gray-200 text-gray-700"
                 >
-                  Close
+                  Back
                 </Button>
                 <Button
                   type="button"
@@ -1206,20 +1200,6 @@ const VesselAssessmentDetailForm: React.FC<VesselAssessmentDetailFormProps> = ({
                             </div>
                           ))}
                         </div>
-                        {/* {gradeCriteria.map((item) => (
-                          <div key={item.id}>
-                            <Checkbox
-                              checked={selectedGradeCriteria.includes(
-                                item.criteria
-                              )}
-                              onCheckedChange={() =>
-                                handleCheckboxChange(item.criteria)
-                              }
-                              className="mr-2"
-                            />
-                            <span>{item.criteria}</span>
-                          </div>
-                        ))} */}
                       </>
                     ) : (
                       <>

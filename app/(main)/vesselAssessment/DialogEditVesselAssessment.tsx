@@ -275,7 +275,8 @@ const DialogEditVesselAssessment = ({
         console.log(dataVslMate);
         setDataVslMate(dataVslMate);
 
-        if (dataVslMate && data.vslType !== "TB") {
+        //Di Comment Karena Permintaan DPA agar bisa menilai walaupun Barge belum dinilia
+        /* if (dataVslMate && data.vslType !== "TB") {
           if (user) {
             if (user?.roleCode === "DPA") {
               if (!dataVslMate.closedDpaby) {
@@ -287,11 +288,11 @@ const DialogEditVesselAssessment = ({
               }
             } else if (user?.roleCode === "CRW-MS") {
               if (!dataVslMate.closedMsby) {
-                setAllowInputGrade(false);
+                104
               }
             }
           }
-        }
+        } */
       }
 
       if (user) {
@@ -389,7 +390,7 @@ const DialogEditVesselAssessment = ({
   return (
     <>
       <div style={{ height: "80vh", overflowY: "auto" }}>
-        {getValues("vslType") === "TB" &&
+        {/*  {getValues("vslType") === "TB" &&
         getValues("vslMate") !== "" &&
         !isClosed ? (
           <Card className="mb-2">
@@ -400,8 +401,8 @@ const DialogEditVesselAssessment = ({
           </Card>
         ) : (
           <></>
-        )}
-        {getValues("vslType") !== "TB" &&
+        )} */}
+        {/*  {getValues("vslType") !== "TB" &&
         getValues("vslMate") !== null &&
         allowInputGrade === false &&
         !isClosed ? (
@@ -413,7 +414,7 @@ const DialogEditVesselAssessment = ({
           </Card>
         ) : (
           <></>
-        )}
+        )} */}
         <Card className="mb-2">
           <CardHeader>
             <CardTitle>Vessel Assessment</CardTitle>
@@ -651,7 +652,7 @@ const DialogEditVesselAssessment = ({
                               </FormItem>
                             )}
                           />
-                          <FormField
+                          {/*  <FormField
                             name="downtimeDaysGeneral"
                             control={control}
                             render={({ field }) => (
@@ -690,7 +691,7 @@ const DialogEditVesselAssessment = ({
                                 </FormMessage>
                               </FormItem>
                             )}
-                          />
+                          /> */}
                         </Card>
                       </>
                     ) : (
@@ -705,7 +706,7 @@ const DialogEditVesselAssessment = ({
                     onClick={onClose}
                     className="inline-flex justify-center rounded-md border shadow-sm px-4 py-2 bg-white hover:bg-gray-200 text-gray-700"
                   >
-                    Close
+                    Back
                   </Button>
 
                   {(status === "CLOSED" ||

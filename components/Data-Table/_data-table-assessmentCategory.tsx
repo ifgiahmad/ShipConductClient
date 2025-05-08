@@ -1,4 +1,4 @@
-"use client";
+/* "use client";
 import React, { useState } from "react";
 import {
   useReactTable,
@@ -21,29 +21,33 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { DialogContent, DialogTitle, Dialog } from "../ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { Dialog } from "@radix-ui/react-dialog";
+import { DialogContent, DialogTitle } from "../ui/dialog";
 
 interface HasId {
   id: number;
 }
 
-interface DataTableVesselDrillUploadProps<TData extends HasId> {
+interface DataTableAssessmentCategoryProps<TData extends HasId> {
   data: TData[];
   columns: ColumnDef<TData>[];
   modalContent: React.ReactNode;
-  type: string;
   onSaveData: () => void;
-  onClose: () => void;
 }
 
-function DataTableVesselDrillUpload<TData extends HasId>({
+function DataTableAssessmentCategory<TData extends HasId>({
   data,
   columns,
   modalContent,
-  type,
   onSaveData,
-  onClose,
-}: DataTableVesselDrillUploadProps<TData>) {
+}: DataTableAssessmentCategoryProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -52,7 +56,7 @@ function DataTableVesselDrillUpload<TData extends HasId>({
     React.useState<VisibilityState>({});
   const [isModalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [editIdHeader, setEditIdHeader] = useState<number | null>(null);
+  const [editMode, setEditMode] = useState<string | null>(null);
 
   const table = useReactTable({
     data,
@@ -68,18 +72,18 @@ function DataTableVesselDrillUpload<TData extends HasId>({
       sorting,
       columnFilters,
       columnVisibility,
-      pagination: { pageIndex: 0, pageSize: 100 },
     },
   });
 
-  const handleOpenModal = (_id: number) => {
+  const handleOpenModal = (_id: number, _mode: string) => {
     setEditId(_id);
+    setEditMode(_mode);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
-    onClose();
+    setEditId(null);
   };
 
   const handleSaveModal = () => {
@@ -87,18 +91,38 @@ function DataTableVesselDrillUpload<TData extends HasId>({
     onSaveData();
   };
 
+  const handleDelete = (id: number) => {
+    if (confirm("Are you sure you want to delete this item?")) {
+      // Implement delete logic here, e.g., call to API
+    }
+  };
+
   const totalRowCount = data.length;
   const filteredRowCount = table.getRowModel().rows.length;
 
   return (
     <>
-      <div className="w-full overflow-x-auto">
-        <Table className="min-w-full">
-          {/* Header hanya tampil di layar sm ke atas */}
-          <TableHeader className="hidden sm:table-header-group bg-gray-200 sticky top-0 z-10 shadow-md">
+      <div className="flex items-center justify-between py-4">
+        <Input
+          placeholder="Filter items..."
+          value={(table.getColumn("item")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("item")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <Button
+          className="ml-2 bg-green-900 hover:bg-green-600"
+          onClick={() => handleOpenModal(0, "CREATE")}
+        >
+          Add Data
+        </Button>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                <TableHead>Actions</TableHead>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder
@@ -109,47 +133,48 @@ function DataTableVesselDrillUpload<TData extends HasId>({
                         )}
                   </TableHead>
                 ))}
+                <TableHead>Actions</TableHead>
               </TableRow>
             ))}
           </TableHeader>
-
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="border sm:border-none block sm:table-row rounded-md sm:rounded-none shadow-sm sm:shadow-none mb-2 sm:mb-0"
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  <TableCell className="block sm:table-cell text-xs sm:text-sm p-3 sm:p-2">
-                    <span className="sm:hidden font-bold block mb-1">
-                      Actions:
-                    </span>
-                    <Button
-                      className="bg-orange-700 hover:bg-orange-400 text-white h-7 px-3 text-xs sm:text-xs"
-                      onClick={() => handleOpenModal(row.original.id)}
-                    >
-                      {type === "VIDEO" ? "Upload Video" : "Upload Document"}
-                    </Button>
-                  </TableCell>
-
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="block sm:table-cell text-xs sm:text-sm p-3 sm:p-2"
-                    >
-                      <span className="sm:hidden font-bold block mb-1">
-                        {typeof cell.column.columnDef.header === "string"
-                          ? cell.column.columnDef.header
-                          : ""}
-                        :
-                      </span>
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
                       )}
                     </TableCell>
                   ))}
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline">...</Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleOpenModal(row.original.id, "EDIT")
+                          }
+                        >
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleOpenModal(row.original.id, "DELETE")
+                          }
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -165,36 +190,29 @@ function DataTableVesselDrillUpload<TData extends HasId>({
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination & Row Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-2 sm:gap-0">
-        <div className="text-xs sm:text-sm">
+      <div className="flex items-center justify-between py-4">
+        <div>
           <span>Total rows: {totalRowCount}</span>
-          <span className="ml-2 sm:ml-4">
-            Filtered rows: {filteredRowCount}
-          </span>
+          <span className="ml-4">Filtered rows: {filteredRowCount}</span>
         </div>
-
         <div className="flex items-center space-x-2">
-          <label className="text-xs sm:text-sm">Rows per page:</label>
+          <label className="mr-2">Rows per page:</label>
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => {
               table.setPageSize(Number(e.target.value));
             }}
-            className="border rounded-md px-2 py-1 text-xs sm:text-sm"
+            className="border rounded-md px-2 py-1"
           >
+            <option value={10}>10</option>
+            <option value={50}>50</option>
             <option value={100}>100</option>
-            <option value={150}>150</option>
-            <option value={200}>200</option>
           </select>
         </div>
-
-        <div className="flex space-x-2">
+        <div className="space-x-2">
           <Button
             variant="outline"
             size="sm"
-            className="text-xs sm:text-sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -203,7 +221,6 @@ function DataTableVesselDrillUpload<TData extends HasId>({
           <Button
             variant="outline"
             size="sm"
-            className="text-xs sm:text-sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
@@ -211,16 +228,14 @@ function DataTableVesselDrillUpload<TData extends HasId>({
           </Button>
         </div>
       </div>
-
-      {/* Upload Modal */}
       <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="md:max-w-[800px] max-h-[800px] overflow-auto">
-          <DialogTitle>Upload Video</DialogTitle>
+        <DialogContent className="md:max-w-[800px]">
+          <DialogTitle>Assessment Category</DialogTitle>
           {React.cloneElement(modalContent as React.ReactElement, {
             onClose: handleCloseModal,
             onSave: handleSaveModal,
             id: editId,
-            idHeader: editIdHeader,
+            mode: editMode,
           })}
         </DialogContent>
       </Dialog>
@@ -228,4 +243,5 @@ function DataTableVesselDrillUpload<TData extends HasId>({
   );
 }
 
-export default DataTableVesselDrillUpload;
+export default DataTableAssessmentCategory;
+ */

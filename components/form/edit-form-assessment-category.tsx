@@ -77,7 +77,7 @@ export default function EditFormAssessmentItem({
     try {
       const ret = await saveMsAssessmentCategory(values);
       console.log(ret);
-      if (ret.status === 200) {
+      if (ret.status === "OK") {
         setIsOpen(false);
       } else {
         toast.error("Failed to save data");

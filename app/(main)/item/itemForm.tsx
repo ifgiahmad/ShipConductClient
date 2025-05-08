@@ -20,7 +20,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -88,7 +87,7 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
     try {
       const response = await saveMsItem(data);
       if (response.status === "OK") {
-        if (data.photo) {
+        /*  if (data.photo) {
           data.id = response.returnId;
           const resPhoto = await uploadPhoto(data);
           console.log(resPhoto);
@@ -108,7 +107,9 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
         } else {
           onSave();
           toast({ description: "Item updated successfully." });
-        }
+        } */
+        onSave();
+        toast({ description: "Item updated successfully." });
       } else {
         toast({
           variant: "destructive",
@@ -127,7 +128,7 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  /* const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setValue("fileName", file.name);
@@ -135,7 +136,7 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
       setImagePreview(URL.createObjectURL(file)); // Update the preview when a file is selected
     }
   };
-
+ */
   return (
     <FormProvider {...methods}>
       <form
@@ -170,10 +171,8 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
                 <FormItem>
                   <FormLabel>Item Type</FormLabel>
                   <Select
-                    /*  onValueChange={field.onChange}
-                    defaultValue={field.value} */
-                    value={String(field.value)} // Konversi angka ke string
-                    onValueChange={(val) => field.onChange} // Konversi string ke angka
+                    value={String(field.value)}
+                    onValueChange={(val) => field.onChange(val)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Choose Item Type" />
@@ -181,13 +180,16 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
                     <SelectContent>
                       <SelectItem value="Drill">Drill</SelectItem>
                       <SelectItem value="Assessment">Assessment</SelectItem>
+                      <SelectItem value="ReportSafety">
+                        Report Safety
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {imagePreview && (
+            {/*  {imagePreview && (
               <div className="mb-4">
                 <img
                   src={imagePreview}
@@ -198,9 +200,9 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
                 />
               </div>
             )}
-
+ */}
             {/* Upload Photo Field */}
-            <FormItem>
+            {/*  <FormItem>
               <FormLabel>Upload Photo</FormLabel>
               <FormControl>
                 <input
@@ -211,7 +213,7 @@ const ItemForm = ({ onClose, onSave, id, mode }: ItemFormProps) => {
                 />
               </FormControl>
               <FormMessage>{errors.fileName?.message}</FormMessage>
-            </FormItem>
+            </FormItem> */}
           </>
         )}
         <DialogFooter>

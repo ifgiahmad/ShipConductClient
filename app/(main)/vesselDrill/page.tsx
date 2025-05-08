@@ -6,7 +6,7 @@ import { TrVesselDrill } from "@/lib/types/TrVesselDrill.types";
 import { getTrVesselDrill } from "@/services/service_api_vesselDrill";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { format } from "date-fns";
-import TrVesselDrillForm from "./_vesselDrillForm";
+import TrVesselDrillForm from "./vesselDrillForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { generateReportVesselAssessmentById } from "@/services/service_api_vesselAssessment";
 import {
@@ -154,11 +154,11 @@ const VesselDrillPage: React.FC = () => {
         );
       },
     },
-    { header: "Vessel Type", accessorKey: "vslType" },
-    { header: "Vessel Name", accessorKey: "vslName" },
-    { header: "Period Name", accessorKey: "periodName" },
+    { header: "Vsl. Type", accessorKey: "vslType" },
+    { header: "Vsl. Name", accessorKey: "vslName" },
+    { header: "Period", accessorKey: "periodName" },
     { header: "Status", accessorKey: "status" },
-    { header: "Percentage Upload", accessorKey: "percentageUpload" },
+    { header: "Percent Upload", accessorKey: "percentageUpload" },
     {
       accessorKey: "linkShared",
       header: "Link Share",
@@ -200,8 +200,8 @@ const VesselDrillPage: React.FC = () => {
     <>
       <div>
         <Card className="mb-2">
-          <CardHeader>
-            <CardTitle>List Data Vessel Drill</CardTitle>
+          <CardHeader className="p-2">
+            <CardTitle className="text-sm">List Data Vessel Drill</CardTitle>
           </CardHeader>
         </Card>
       </div>
