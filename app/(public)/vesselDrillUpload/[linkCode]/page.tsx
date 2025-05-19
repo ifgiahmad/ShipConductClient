@@ -27,22 +27,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { format, parse, setYear } from "date-fns";
+
 import { TrVesselDrillDetail } from "@/lib/types/TrVesselDrillDetail.types";
 import { getTrVesselDrillDetail } from "@/services/service_api_vesselDrillDetail";
 import DataTableCrewUpload from "@/components/Data-Table/data-table-crewUpload";
 import UploadVideoForm from "@/components/form/upload-video-form";
 import { ColumnDef } from "@tanstack/react-table";
 import {
+  getPreviousLastVesselDrillByVslCodeForCrew,
   getTrVesselDrillByLinkForCrew,
   getTrVesselDrillDetailForCrew,
   saveTrVesselDrillForCrew,
 } from "@/services/service_api_vesselDrillForCrew";
 import DataTableVesselDrillUpload from "@/components/Data-Table/data-table-vesselDrillUpload";
+import { reportWebVitals } from "next/dist/build/templates/pages";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const VesselDrillUploadForm = () => {
   const router = useRouter();
@@ -69,7 +68,11 @@ const VesselDrillUploadForm = () => {
     },
   });
   const [detail, setDetail] = useState<TrVesselDrillDetail[]>([]);
+  const [detailPrev, setDetailPrev] = useState<TrVesselDrillDetail[]>([]);
   const [detailReport, setDetailReport] = useState<TrVesselDrillDetail[]>([]);
+  const [detailReportPrev, setDetailReportPrev] = useState<
+    TrVesselDrillDetail[]
+  >([]);
   const [status, setStatus] = useState<string | null>(null);
   const [month, setMonth] = useState<string | undefined>();
   const [year, setYear] = useState<number | undefined>();
@@ -79,6 +82,7 @@ const VesselDrillUploadForm = () => {
 
   const {
     setValue,
+    getValues,
     control,
     handleSubmit,
     formState: { errors },
@@ -110,21 +114,77 @@ const VesselDrillUploadForm = () => {
       header: "File",
       accessorKey: "normalFileLink",
       cell: ({ row }: { row: { original: TrVesselDrillDetail } }) =>
-        row.original.normalFileLink ? (
+        row.original.itemType === "Drill" && row.original.normalFileLink ? (
           <>
-            <span>Video Uploaded</span>
-            <video
-              src={row.original.normalFileLink}
-              controls
-              poster={row.original.normalFileLink}
-              style={{ width: "120px", height: "auto" }}
-            />
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Video Uploaded
+            </span>
+          </>
+        ) : row.original.itemType === "ReportSafety" && row.original.docLink ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Document Uploaded
+            </span>
           </>
         ) : (
           <></>
         ),
     },
     { header: "File Description", accessorKey: "videoDescription" },
+  ];
+
+  const columnsDetailPrev = [
+    { header: "Item", accessorKey: "itemName" },
+
+    {
+      header: "File",
+      accessorKey: "normalFileLink",
+      cell: ({ row }: { row: { original: TrVesselDrillDetail } }) =>
+        row.original.itemType === "Drill" && row.original.normalFileLink ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Video Uploaded
+            </span>
+          </>
+        ) : row.original.itemType === "ReportSafety" && row.original.docLink ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Document Uploaded
+            </span>
+          </>
+        ) : (
+          <></>
+        ),
+    },
+    { header: "Feed back", accessorKey: "gradeDescription" },
   ];
 
   const monthNames = [
@@ -195,8 +255,18 @@ const VesselDrillUploadForm = () => {
     };
     fetchData();
     fetchDetail();
+    fetchDetailPrevious();
     setBaseUrl(`${window.location.protocol}//${window.location.host}/`);
-  }, [id, setId, setVesselName, setMonth, setYear, setValue, setStatus]);
+  }, [
+    id,
+    setId,
+    setVesselName,
+    setMonth,
+    setYear,
+    setValue,
+    getValues,
+    setStatus,
+  ]);
 
   useEffect(() => {
     const today = new Date();
@@ -225,6 +295,27 @@ const VesselDrillUploadForm = () => {
     /* setDetail(groupedData);  */
     setDetail(filteredDetail);
     setDetailReport(filteredData);
+  };
+
+  const fetchDetailPrevious = async () => {
+    if (getValues("vslCode")) {
+      const data = await getPreviousLastVesselDrillByVslCodeForCrew(
+        getValues("vslCode")
+      );
+      if (data) {
+        const dataDetail = await getTrVesselDrillDetailForCrew(Number(data.id));
+        if (dataDetail.length > 0) {
+          const filteredDetail = dataDetail.filter(
+            (item) => item.itemType === "Drill"
+          );
+          const filteredData = dataDetail.filter(
+            (item) => item.itemType === "ReportSafety"
+          );
+          setDetailPrev(filteredDetail);
+          setDetailReportPrev(filteredData);
+        }
+      }
+    }
   };
 
   const handleSaveDetail = () => {
@@ -273,10 +364,115 @@ const VesselDrillUploadForm = () => {
         <Card className="mb-2">
           <CardHeader className="p-2">
             <CardTitle className="flex justify-center text-md">
-              {vesselName} Vessel Drill Period {month} {year}
+              {vesselName} Vessel Drill Periode {month} {year}
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {isOutOfPeriod ? (
+              <>
+                {" "}
+                <p className="text-red-500 text-center">
+                  Penilaian ini sudah diluar dari periode.
+                </p>
+              </>
+            ) : (
+              <>
+                <Tabs defaultValue="currentAssessment">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="currentAssessment">
+                      Periode Saat ini
+                    </TabsTrigger>
+                    <TabsTrigger value="previousAssessment">
+                      Feedback Periode Sebelumnya
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="currentAssessment">
+                    <div style={{ height: "70vh", overflowY: "auto" }}>
+                      <Card>
+                        <CardHeader className="p-2">
+                          <CardTitle className="text-md">
+                            Drill Detail
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <DataTableVesselDrillUpload
+                            data={detail}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadVideoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idList}
+                              />
+                            }
+                            type="VIDEO"
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CardContent>
+                      </Card>
+                      <Card className="mt-2">
+                        <CardHeader className="p-2">
+                          <CardTitle className="text-md">
+                            Report Safety Detail
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <DataTableVesselDrillUpload
+                            data={detailReport}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadVideoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idList}
+                              />
+                            }
+                            type="DOC"
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="previousAssessment">
+                    <div style={{ height: "70vh", overflowY: "auto" }}>
+                      <Card>
+                        <CardHeader className="p-2">
+                          <CardTitle className="text-md">
+                            Drill Periode Sebelumnya
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <DataTableVesselDrillUpload
+                            data={detailPrev}
+                            columns={columnsDetailPrev}
+                            modalContent={
+                              <UploadVideoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idList}
+                              />
+                            }
+                            type="VIDEO"
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </>
+            )}
+
             <FormProvider {...methods}>
               <form
                 onSubmit={handleSubmit(onSubmit)}
@@ -286,62 +482,6 @@ const VesselDrillUploadForm = () => {
           </CardContent>
         </Card>
       </div>
-      {isOutOfPeriod ? (
-        <p className="text-red-500 text-center">
-          Penilaian ini sudah diluar dari periode.
-        </p>
-      ) : (
-        <>
-          <div style={{ height: "70vh", overflowY: "auto" }}>
-            <Card>
-              <CardHeader className="p-2">
-                <CardTitle className="text-md">Drill Detail</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DataTableVesselDrillUpload
-                  data={detail}
-                  columns={columnsDetail}
-                  modalContent={
-                    <UploadVideoForm
-                      onClose={() => {}}
-                      onSave={() => {}}
-                      id={0}
-                      idHeader={Number(id)}
-                      idList={idList}
-                    />
-                  }
-                  type="VIDEO"
-                  onClose={() => handleCloseDetail()}
-                  onSaveData={() => handleSaveDetail()}
-                />
-              </CardContent>
-            </Card>
-            <Card className="mt-2">
-              <CardHeader className="p-2">
-                <CardTitle className="text-md">Report Safety Detail</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <DataTableVesselDrillUpload
-                  data={detailReport}
-                  columns={columnsDetail}
-                  modalContent={
-                    <UploadVideoForm
-                      onClose={() => {}}
-                      onSave={() => {}}
-                      id={0}
-                      idHeader={Number(id)}
-                      idList={idList}
-                    />
-                  }
-                  type="DOC"
-                  onClose={() => handleCloseDetail()}
-                  onSaveData={() => handleSaveDetail()}
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </>
-      )}
     </>
   );
 };

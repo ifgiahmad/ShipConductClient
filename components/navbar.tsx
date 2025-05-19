@@ -37,8 +37,8 @@ const Navbar = () => {
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none">
               <Avatar>
-                <AvatarImage src="" alt="@shadcn" />
-                <AvatarFallback className="text-black">BT</AvatarFallback>
+                <AvatarImage src="/sailor.png" alt="User Avatar" />
+                <AvatarFallback className="text-black">LO</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

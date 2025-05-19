@@ -115,7 +115,6 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
     async function getDataById(id: number) {
       try {
         const data = await getTrVesselDrillDetailByIdForCrew(id);
-        console.log(data);
         setValue("itemName", data.itemName ?? "");
         setValue("itemType", data.itemType ?? "");
         setValue("fileName", data.fileName ?? "");
@@ -339,8 +338,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
     }
   };
 
-  const onDetailSubmit = async (data: uploadVideoTrVesselDrillDetailDto) => {
-    console.log(data);
+  /* const onDetailSubmit = async (data: uploadVideoTrVesselDrillDetailDto) => {
     if (!data.doc) {
       setError("docName", {
         type: "manual",
@@ -361,6 +359,61 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
           setUploadProgress(percent);
         }
       });
+
+      console.log(response);
+
+      if (response.status === 200) {
+        toast({
+          description: "File updated successfully.",
+        });
+        return true;
+        onSave();
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to upload file.",
+        });
+        return false;
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Error uploading file: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`,
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }; */
+
+  const onDetailSubmit = async (data: uploadVideoTrVesselDrillDetailDto) => {
+    if (!data.doc) {
+      setError("docName", {
+        type: "manual",
+        message: "Document is required.",
+      });
+      return false;
+    }
+
+    setLoading(true);
+    setUploadProgress(0);
+
+    try {
+      const response = await uploadVideoForCrew(data, (progressEvent) => {
+        if (progressEvent.total) {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percent);
+        }
+      });
+
+      // ✅ Aman: response sudah tersedia di sini
+      console.log("Upload response:", response);
 
       if (response.status === 200) {
         toast({
@@ -386,6 +439,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
       return false;
     } finally {
       setLoading(false);
+      handleCloseModal();
     }
   };
 
@@ -537,7 +591,7 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
                 <FormControl>
                   <input
                     type="file"
-                    accept="pdf/*"
+                    accept="application/pdf"
                     onChange={handleDocChange}
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
@@ -658,7 +712,9 @@ const UploadVideoForm: React.FC<UploadVideoFormProps> = ({
             {selectedDocPreview && (
               <div className="flex justify-center mt-4">
                 <iframe
-                  src={selectedDocPreview}
+                  src={`https://docs.google.com/gview?url=${encodeURIComponent(
+                    selectedDocPreview
+                  )}&embedded=true`}
                   width="100%"
                   height="400"
                   className="rounded"

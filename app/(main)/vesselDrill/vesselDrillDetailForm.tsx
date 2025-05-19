@@ -89,10 +89,28 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
       modifiedBy: "",
       mode: "",
       isDeleted: false,
+      video: null,
+      doc: null,
+      doc2: null,
+      docLink2: "",
+      docName2: "",
+      doc3: null,
+      docLink3: "",
+      docName3: "",
+      doc4: null,
+      docLink4: "",
+      docName4: "",
+      doc5: null,
+      docLink5: "",
+      docName5: "",
     },
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [docPreview2, setDocPreview2] = useState<string | null>(null);
+  const [docPreview3, setDocPreview3] = useState<string | null>(null);
+  const [docPreview4, setDocPreview4] = useState<string | null>(null);
+  const [docPreview5, setDocPreview5] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [shipSection, setShipSection] = useState<MsShipSection[]>([]);
   const [selectedShipSection, setSelectedShipSection] = useState<
@@ -104,8 +122,6 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
   >();
   const [gradeCriteria, setGradeCriteria] = useState<MsGradeCriteria[]>([]);
 
-  /* const [selectedGradeCriteria, setSelectedGradeCriteria] = useState([]);
-   */
   const [selectedGradeCriteria, setSelectedGradeCriteria] = useState<string[]>(
     []
   );
@@ -121,6 +137,17 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [docPreview, setDocPreview] = useState<string | null>(null);
   const [isModalOpenDoc, setModalOpenDoc] = useState(false);
+  const [selectedDocPreview, setSelectedDocPreview] = useState<string | null>(
+    null
+  );
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const extraDocFields = [
+    "docName2",
+    "docName3",
+    "docName4",
+    "docName5",
+  ] as const;
+  const extraDocPreviews = [docPreview2, docPreview3, docPreview4, docPreview5];
 
   const handleSearchChange = (type: string, value: string) => {
     setSearchTerms((prev) => ({ ...prev, [type]: value }));
@@ -128,6 +155,11 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
 
   const handleCloseDocument = () => {
     setModalOpenDoc(false);
+  };
+
+  const handleOpenDocument = (selectedDoc: string) => {
+    setModalOpenDoc(true);
+    setSelectedDocPreview(selectedDoc);
   };
 
   const handlePrevious = () => {
@@ -199,16 +231,129 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setValue("fileName", file.name);
-      setValue("video", file);
-      setImagePreview(URL.createObjectURL(file)); // Update the preview when a file is selected
+      const fileType = file.type;
+      if (fileType.startsWith("video/")) {
+        setValue("fileName", file.name);
+        setValue("video", file);
+        setImagePreview(URL.createObjectURL(file));
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid File Type",
+          description: "Please upload a valid video file.",
+        });
+        setValue("fileName", "");
+        setValue("video", null);
+        setImagePreview(null);
+      }
+    } else {
+      setValue("fileName", "");
+      setValue("video", null);
+      setImagePreview(null);
     }
+  };
+
+  const handleDocChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.type === "application/pdf") {
+        setValue("docName", file.name);
+        setValue("doc", file);
+        setDocPreview(URL.createObjectURL(file)); // Menyiapkan URL untuk ditampilkan
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Invalid File Type",
+          description: "Please upload a valid PDF file.",
+        });
+        setValue("docName", "");
+        setValue("doc", null);
+        setDocPreview(null);
+      }
+    } else {
+      setValue("docName", "");
+      setValue("doc", null);
+      setDocPreview(null);
+    }
+  };
+
+  const handleDocChange2 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file?.type === "application/pdf") {
+      setValue("docName2", file.name);
+      setValue("doc2", file);
+      setDocPreview2(URL.createObjectURL(file));
+    } else {
+      showInvalidFileToast();
+      setValue("docName2", "");
+      setValue("doc2", null);
+      setDocPreview2(null);
+    }
+  };
+
+  const handleDocChange3 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file?.type === "application/pdf") {
+      setValue("docName3", file.name);
+      setValue("doc3", file);
+      setDocPreview3(URL.createObjectURL(file));
+    } else {
+      showInvalidFileToast();
+      setValue("docName3", "");
+      setValue("doc3", null);
+      setDocPreview3(null);
+    }
+  };
+
+  const handleDocChange4 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file?.type === "application/pdf") {
+      setValue("docName4", file.name);
+      setValue("doc4", file);
+      setDocPreview4(URL.createObjectURL(file));
+    } else {
+      showInvalidFileToast();
+      setValue("docName4", "");
+      setValue("doc4", null);
+      setDocPreview4(null);
+    }
+  };
+
+  const handleDocChange5 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file?.type === "application/pdf") {
+      setValue("docName5", file.name);
+      setValue("doc5", file);
+      setDocPreview5(URL.createObjectURL(file));
+    } else {
+      showInvalidFileToast();
+      setValue("docName5", "");
+      setValue("doc5", null);
+      setDocPreview5(null);
+    }
+  };
+
+  const extraDocHandlers = [
+    handleDocChange2,
+    handleDocChange3,
+    handleDocChange4,
+    handleDocChange5,
+  ];
+
+  const showInvalidFileToast = () => {
+    toast({
+      variant: "destructive",
+      title: "Invalid File Type",
+      description: "Please upload a valid PDF file.",
+    });
   };
 
   const {
     setValue,
+    setError,
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = methods;
 
@@ -250,6 +395,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
       try {
         const data = await getTrVesselDrillDetailById(Number(Id));
         setValue("itemName", data.itemName ?? "");
+        setValue("itemType", data.itemType ?? "");
         setValue("interval", data.interval ?? "");
         setValue("itemId", data.itemId ?? 0);
         setValue("intervalId", data.intervalId ?? 0);
@@ -261,12 +407,10 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
         setValue("normalFileLink", data.normalFileLink ?? "");
         setValue("videoDescription", data.videoDescription ?? "");
         setValue("vesselDrillId", data.vesselDrillId ?? 0);
-        /*  setValue("shipSection", data.shipSection ?? "");
-
-        setSelectedShipSection(data.shipSection || ""); */
-        setImagePreview(data.normalFileLink || null);
-        if (currentMode === "" || currentMode === null) {
-          setCurrentMode(data.fileName ? "INPUT GRADE" : "UPLOAD VIDEO");
+        if (data.normalFileLink) {
+          setImagePreview(data.normalFileLink);
+        } else {
+          setImagePreview(null);
         }
 
         if (data.docLink) {
@@ -274,6 +418,30 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
           setValue("docName", data.docName);
         } else {
           setDocPreview(null);
+        }
+        if (data.docLink2) {
+          setDocPreview2(data.docLink2);
+          setValue("docName2", data.docName2);
+        } else {
+          setDocPreview2(null);
+        }
+        if (data.docLink3) {
+          setDocPreview3(data.docLink3);
+          setValue("docName3", data.docName3);
+        } else {
+          setDocPreview3(null);
+        }
+        if (data.docLink4) {
+          setDocPreview4(data.docLink4);
+          setValue("docName4", data.docName4);
+        } else {
+          setDocPreview4(null);
+        }
+        if (data.docLink5) {
+          setDocPreview5(data.docLink5);
+          setValue("docName5", data.docName5);
+        } else {
+          setDocPreview5(null);
         }
 
         if (vslType) {
@@ -302,13 +470,6 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
       );
       return;
     }
-
-    /*  try {
-      const data = await getMsGradeCriteriaByGrade(grade, categorySection);
-      setGradeCriteria(data);
-    } catch (error) {
-      console.error("Error fetching grade criteria:", error);
-    } */
   };
 
   const fetchInterval = async () => {
@@ -431,60 +592,174 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                 </FormItem>
               )}
             />
-            {/*  <FormField
-              name="shipSection"
-              control={control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ship Section</FormLabel>
-                  <FormControl>
-                    <Input
-                      readOnly
-                      placeholder="Ship Section"
-                      {...field}
-                      className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </FormControl>
-                  <FormMessage>{errors.shipSection?.message}</FormMessage>
-                </FormItem>
-              )}
-            /> */}
-            {imagePreview && (
-              <div className="mb-4 flex justify-center">
-                <video
-                  src={imagePreview}
-                  controls
-                  className="rounded-md border border-gray-300"
-                  style={{ maxWidth: "320px", height: "auto" }}
-                />
-              </div>
-            )}
-            {docPreview && (
-              <div className="mt-4 flex items-center space-x-4">
-                <FormField
-                  name="docName"
-                  control={control}
-                  render={({ field }) => (
+
+            {/* Video Upload (Drill Only) */}
+            {getValues("itemType") === "Drill" && (
+              <>
+                <Card className="p-2 mt-2">
+                  <CardContent>
+                    {imagePreview && (
+                      <div className="mb-4 flex justify-center">
+                        <video
+                          src={imagePreview}
+                          controls
+                          className="rounded-md border border-gray-300"
+                          style={{ maxWidth: "100%", height: "auto" }}
+                        />
+                      </div>
+                    )}
+
+                    {loading && (
+                      <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                        <div
+                          className="bg-green-600 h-3 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                        <p className="text-sm mt-1 text-gray-600 text-center">
+                          {uploadProgress}%
+                        </p>
+                      </div>
+                    )}
+
                     <FormItem>
+                      <FormLabel>Upload Video</FormLabel>
                       <FormControl>
-                        <Input
-                          readOnly
-                          placeholder="document"
-                          {...field}
-                          className="w-full max-w-xs border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={handleFileChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         />
                       </FormControl>
+                      <FormMessage>{errors.fileName?.message}</FormMessage>
                     </FormItem>
+
+                    <FormField
+                      name="videoDescription"
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Video Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Video Description"
+                              {...field}
+                              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </FormControl>
+                          <FormMessage>
+                            {errors.videoDescription?.message}
+                          </FormMessage>
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            <Card>
+              <CardContent>
+                {/* Dokumen Upload */}
+                {docPreview && (
+                  <div className="mt-2 flex items-center space-x-4">
+                    <FormField
+                      name="docName"
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              readOnly
+                              placeholder="Document"
+                              {...field}
+                              className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => handleOpenDocument(docPreview)}
+                      className="bg-blue-600 hover:bg-blue-500 text-white"
+                    >
+                      View Document
+                    </Button>
+                  </div>
+                )}
+
+                <FormItem>
+                  <FormLabel>Upload Document</FormLabel>
+                  <FormControl>
+                    <input
+                      type="file"
+                      accept="pdf/*"
+                      onChange={handleDocChange}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                  </FormControl>
+                  <FormMessage>{errors.docName?.message}</FormMessage>
+                </FormItem>
+              </CardContent>
+            </Card>
+
+            {/* Tambahan Dokumen untuk SafetyReport */}
+            {getValues("itemType") === "ReportSafety" && (
+              <Card className="mt-4">
+                <CardContent className="space-y-4">
+                  {extraDocPreviews.map(
+                    (preview, i) =>
+                      preview && (
+                        <div
+                          key={i}
+                          className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4"
+                        >
+                          <FormField
+                            name={extraDocFields[i]}
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="w-full md:max-w-xs mt-2">
+                                <FormControl>
+                                  <Input
+                                    readOnly
+                                    placeholder="Document"
+                                    {...field}
+                                    className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => handleOpenDocument(preview!)}
+                            className="inline-flex justify-center rounded-md border shadow-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-2"
+                          >
+                            View Document
+                          </Button>
+                        </div>
+                      )
                   )}
-                />
-                <Button
-                  type="button"
-                  onClick={() => setModalOpenDoc(true)}
-                  className="inline-flex justify-center rounded-md border shadow-sm bg-blue-600 hover:bg-blue-500 text-white"
-                >
-                  View Document
-                </Button>
-              </div>
+
+                  {extraDocHandlers.map((handler, i) => (
+                    <FormItem key={i}>
+                      <FormLabel>{`Upload Document ${i + 2}`}</FormLabel>
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="application/pdf"
+                          onChange={handler}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </FormControl>
+                      <FormMessage>
+                        {errors[extraDocFields[i]]?.message}
+                      </FormMessage>
+                    </FormItem>
+                  ))}
+                </CardContent>
+              </Card>
             )}
             <FormField
               control={control}
@@ -525,49 +800,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                       className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </FormControl>
-                  {/* <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Grade Description" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        key="Dokumentasi video sudah sesuai skenario namun tidak ada penjelasan mengenai video drill"
-                        value="Dokumentasi video sudah sesuai skenario namun tidak ada penjelasan mengenai video drill"
-                      >
-                        Dokumentasi video sudah sesuai skenario namun tidak ada
-                        penjelasan mengenai video drill
-                      </SelectItem>
-                      <SelectItem
-                        key="Tidak ada video drill dianggap tidak drill"
-                        value="Tidak ada video drill dianggap tidak drill"
-                      >
-                        Tidak ada video drill dianggap tidak drill
-                      </SelectItem>
-                      <SelectItem
-                        key="Dokumentasi video Drill sudah di jelaskan dengan baik, namun tidak ada emergency Drill Alarm"
-                        value="Dokumentasi video Drill sudah di jelaskan dengan baik, namun tidak ada emergency Drill Alarm"
-                      >
-                        Dokumentasi video Drill sudah di jelaskan dengan baik,
-                        namun tidak ada emergency Drill Alarm
-                      </SelectItem>
-                      <SelectItem
-                        key="Dokumentasi video Drill sudah di jelaskan dengan baik"
-                        value="Dokumentasi video Drill sudah di jelaskan dengan baik"
-                      >
-                        Dokumentasi video Drill sudah di jelaskan dengan baik
-                      </SelectItem>
-                      <SelectItem
-                        key="Penjelasan di video tidak lengkap dan salah membunyikan emergency Fire Drill Alarm."
-                        value="Penjelasan di video tidak lengkap dan salah membunyikan emergency Fire Drill Alarm."
-                      >
-                        Penjelasan di video tidak lengkap dan salah membunyikan
-                        emergency Fire Drill Alarm.
-                      </SelectItem>
-                      <SelectItem key="DOCKING" value="DOCKING">
-                        DOCKING
-                      </SelectItem>
-                    </SelectContent>
-                  </Select> */}
+
                   <FormMessage>{errors.gradeDescription?.message}</FormMessage>
                 </FormItem>
               )}
@@ -594,49 +827,174 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               )}
             />
 
-            {/* Image Preview Section */}
-            {imagePreview && (
-              <div className="mb-4">
-                <img
-                  src={imagePreview}
-                  alt="Photo Preview"
-                  className="w-80 h-60 rounded-md border border-gray-300"
-                  width={0}
-                  height={0}
-                />
-              </div>
+            {/* Video Upload (Drill Only) */}
+            {getValues("itemType") === "Drill" && (
+              <>
+                <Card className="p-2 mt-2">
+                  <CardContent>
+                    {imagePreview && (
+                      <div className="mb-4 flex justify-center">
+                        <video
+                          src={imagePreview}
+                          controls
+                          className="rounded-md border border-gray-300"
+                          style={{ maxWidth: "100%", height: "auto" }}
+                        />
+                      </div>
+                    )}
+
+                    {loading && (
+                      <div className="w-full bg-gray-200 rounded-full h-3 mt-2">
+                        <div
+                          className="bg-green-600 h-3 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                        <p className="text-sm mt-1 text-gray-600 text-center">
+                          {uploadProgress}%
+                        </p>
+                      </div>
+                    )}
+
+                    <FormItem>
+                      <FormLabel>Upload Video</FormLabel>
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={handleFileChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </FormControl>
+                      <FormMessage>{errors.fileName?.message}</FormMessage>
+                    </FormItem>
+
+                    <FormField
+                      name="videoDescription"
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Video Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Video Description"
+                              {...field}
+                              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                          </FormControl>
+                          <FormMessage>
+                            {errors.videoDescription?.message}
+                          </FormMessage>
+                        </FormItem>
+                      )}
+                    />
+                  </CardContent>
+                </Card>
+              </>
             )}
 
-            <FormItem>
-              <FormLabel>Upload Video</FormLabel>
-              <FormControl>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-              </FormControl>
-              <FormMessage>{errors.fileName?.message}</FormMessage>
-            </FormItem>
+            <Card>
+              <CardContent>
+                {/* Dokumen Upload */}
+                {docPreview && (
+                  <div className="mt-2 flex items-center space-x-4">
+                    <FormField
+                      name="docName"
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              readOnly
+                              placeholder="Document"
+                              {...field}
+                              className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => handleOpenDocument(docPreview)}
+                      className="bg-blue-600 hover:bg-blue-500 text-white"
+                    >
+                      View Document
+                    </Button>
+                  </div>
+                )}
 
-            <FormField
-              name="videoDescription"
-              control={control}
-              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Video Description</FormLabel>
+                  <FormLabel>Upload Document</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Video Description"
-                      {...field}
-                      className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <input
+                      type="file"
+                      accept="pdf/*"
+                      onChange={handleDocChange}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                   </FormControl>
-                  <FormMessage>{errors.videoDescription?.message}</FormMessage>
+                  <FormMessage>{errors.docName?.message}</FormMessage>
                 </FormItem>
-              )}
-            />
+              </CardContent>
+            </Card>
+
+            {/* Tambahan Dokumen untuk SafetyReport */}
+            {getValues("itemType") === "ReportSafety" && (
+              <Card className="mt-4">
+                <CardContent className="space-y-4">
+                  {extraDocPreviews.map(
+                    (preview, i) =>
+                      preview && (
+                        <div
+                          key={i}
+                          className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4"
+                        >
+                          <FormField
+                            name={extraDocFields[i]}
+                            control={control}
+                            render={({ field }) => (
+                              <FormItem className="w-full md:max-w-xs mt-2">
+                                <FormControl>
+                                  <Input
+                                    readOnly
+                                    placeholder="Document"
+                                    {...field}
+                                    className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => handleOpenDocument(preview!)}
+                            className="inline-flex justify-center rounded-md border shadow-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-2"
+                          >
+                            View Document
+                          </Button>
+                        </div>
+                      )
+                  )}
+
+                  {extraDocHandlers.map((handler, i) => (
+                    <FormItem key={i}>
+                      <FormLabel>{`Upload Document ${i + 2}`}</FormLabel>
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="application/pdf"
+                          onChange={handler}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </FormControl>
+                      <FormMessage>
+                        {errors[extraDocFields[i]]?.message}
+                      </FormMessage>
+                    </FormItem>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </>
         ) : (
           <>
@@ -703,52 +1061,6 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                 </FormItem>
               )}
             />
-
-            {/*  <FormField
-              control={control}
-              name="shipSection"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ship Section</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value); // Bind form value with field
-                      handleShipSectionSelect(value); // Handle additional side effects
-                    }}
-                    value={field.value} // Controlled value from react-hook-form
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Ship Section" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <div className="p-2">
-                        <Input
-                          type="text"
-                          placeholder="Search Ship Section..."
-                          value={searchTerms.ship}
-                          onChange={(e) =>
-                            handleSearchChange("ship", e.target.value)
-                          }
-                          className="w-full p-2 border rounded-md"
-                        />
-                      </div>
-                      {shipSection
-                        .filter((s) =>
-                          s.sectionName
-                            ?.toLowerCase()
-                            .includes(searchTerms.ship.toLowerCase())
-                        )
-                        .map((s) => (
-                          <SelectItem key={s.id} value={s.sectionName}>
-                            {s.sectionName}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
           </>
         )}
 
@@ -842,18 +1154,12 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Dialog open={isModalOpenDoc} onOpenChange={handleCloseDocument}>
+      {/*  <Dialog open={isModalOpenDoc} onOpenChange={handleCloseDocument}>
         <DialogContent className="lg:max-w-[1200px] max-h-[800px] overflow-auto">
           <DialogTitle>Dokumen Drill</DialogTitle>
 
           {docPreview && (
             <div className="flex justify-center mt-4">
-              {/*  <iframe
-                src={docPreview}
-                width="600"
-                height="400"
-                className="mt-4"
-              /> */}
               <iframe
                 src={`https://docs.google.com/gview?url=${encodeURIComponent(
                   docPreview
@@ -862,6 +1168,23 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                 height="700"
                 className="mt-4"
                 loading="lazy"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog> */}
+      <Dialog open={isModalOpenDoc} onOpenChange={handleCloseDocument}>
+        <DialogContent className="lg:max-w-[1200px] max-h-[800px] overflow-auto">
+          <DialogTitle>Dokumen Drill</DialogTitle>
+          {selectedDocPreview && (
+            <div className="flex justify-center mt-4">
+              <iframe
+                src={`https://docs.google.com/gview?url=${encodeURIComponent(
+                  selectedDocPreview
+                )}&embedded=true`}
+                width="100%"
+                height="400"
+                className="rounded"
               />
             </div>
           )}

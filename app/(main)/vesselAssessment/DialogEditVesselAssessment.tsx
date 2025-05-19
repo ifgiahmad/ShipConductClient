@@ -48,6 +48,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TrVesselAssessmentFormProps {
   onClose: () => void;
@@ -102,6 +103,9 @@ const DialogEditVesselAssessment = ({
     },
   });
   const [detail, setDetail] = useState<TrVesselAssessmentDetail[]>([]);
+  const [detailBarge, setDetailBarge] = useState<TrVesselAssessmentDetail[]>(
+    []
+  );
   const [dataVslMate, setDataVslMate] = useState<TrVesselAssessment>();
   const [status, setStatus] = useState<string | null>(null);
   const [idHeader, setIdHeader] = useState<number | null>(null);
@@ -266,14 +270,15 @@ const DialogEditVesselAssessment = ({
       setStatus(data.status ?? "");
 
       if (data.vslMate) {
-        console.log("asd");
         const dataVslMate = await getTrVesselAssessmentByNameAndPeriod(
           data.vslMate || "",
           data.month || 0,
           data.year || 0
         );
-        console.log(dataVslMate);
         setDataVslMate(dataVslMate);
+        if (dataVslMate) {
+          await fetchDetailBarge(dataVslMate.id);
+        }
 
         //Di Comment Karena Permintaan DPA agar bisa menilai walaupun Barge belum dinilia
         /* if (dataVslMate && data.vslType !== "TB") {
@@ -323,6 +328,14 @@ const DialogEditVesselAssessment = ({
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselAssessmentDetail(Number(id));
     setDetail(dataDetail);
+
+    const ids = dataDetail.map((detail: { id: number }) => detail.id);
+    setIdList(ids);
+  };
+
+  const fetchDetailBarge = async (idBarge: number) => {
+    const dataDetail = await getTrVesselAssessmentDetail(Number(idBarge));
+    setDetailBarge(dataDetail);
 
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
@@ -622,7 +635,7 @@ const DialogEditVesselAssessment = ({
                     )}
                   />
                 </Card>
-                {getValues("vslType") === "TB" &&
+                {/* {getValues("vslType") === "TB" &&
                 getValues("vslMate") !== "" ? (
                   <></>
                 ) : (
@@ -630,29 +643,29 @@ const DialogEditVesselAssessment = ({
                     {(user?.superUser || user?.roleCode === "DPA") &&
                     allowInputGrade &&
                     !isClosed ? (
-                      <>
-                        <Card className="p-2">
-                          <FormField
-                            name="scoreItemGeneral"
-                            control={control}
-                            render={({ field }) => (
-                              <FormItem className="md:col-span-1">
-                                <FormLabel>Score Item General</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Score Item General"
-                                    {...field}
-                                    readOnly
-                                    className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
-                                  />
-                                </FormControl>
-                                <FormMessage>
-                                  {errors.scoreItemGeneral?.message}
-                                </FormMessage>
-                              </FormItem>
-                            )}
+                      <> */}
+                <Card className="p-2">
+                  <FormField
+                    name="scoreItemGeneral"
+                    control={control}
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-1">
+                        <FormLabel>Score Item General</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Score Item General"
+                            {...field}
+                            readOnly
+                            className="w-full border border-gray-300 bg-gray-200 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
                           />
-                          {/*  <FormField
+                        </FormControl>
+                        <FormMessage>
+                          {errors.scoreItemGeneral?.message}
+                        </FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                  {/*  <FormField
                             name="downtimeDaysGeneral"
                             control={control}
                             render={({ field }) => (
@@ -692,13 +705,13 @@ const DialogEditVesselAssessment = ({
                               </FormItem>
                             )}
                           /> */}
-                        </Card>
-                      </>
+                </Card>
+                {/* </>
                     ) : (
                       <></>
                     )}
                   </>
-                )}
+                )} */}
 
                 <div className="md:col-span-4 flex justify-end items-center mt-4 gap-2">
                   <Button
@@ -742,30 +755,78 @@ const DialogEditVesselAssessment = ({
             <CardTitle>Vessel Assessment Detail</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTableAssessmentDetail
-              data={detail}
-              columns={columnsDetail}
-              modalContent={
-                <VesselAssessmentDetailForm
-                  onClose={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                  onSave={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                  id={0}
-                  idHeader={Number(idHeader)}
-                  vslType={String(vslType)}
-                  mode={""}
-                  idList={idList}
-                />
-              }
-              idHeader={Number(idHeader)}
-              vslType={String(vslType)}
-              onSaveData={() => handleSaveDetail()}
-              allowInputGrade={allowInputGrade}
-              isClosed={isClosed}
-            />
+            <Tabs defaultValue="vessel">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="vessel">
+                  Vessel - {getValues("vslName")}
+                </TabsTrigger>
+                {getValues("vslMate") ? (
+                  <>
+                    <TabsTrigger value="barge">
+                      Barge - {getValues("vslMate")}
+                    </TabsTrigger>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </TabsList>
+              <TabsContent value="vessel">
+                <>
+                  <DataTableAssessmentDetail
+                    data={detail}
+                    columns={columnsDetail}
+                    modalContent={
+                      <VesselAssessmentDetailForm
+                        onClose={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        onSave={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        id={0}
+                        idHeader={Number(idHeader)}
+                        vslType={String(vslType)}
+                        mode={""}
+                        idList={idList}
+                      />
+                    }
+                    idHeader={Number(idHeader)}
+                    vslType={String(vslType)}
+                    onSaveData={() => handleSaveDetail()}
+                    allowInputGrade={allowInputGrade}
+                    isClosed={isClosed}
+                  />
+                </>
+              </TabsContent>
+              <TabsContent value="barge">
+                <>
+                  <DataTableAssessmentDetail
+                    data={detailBarge}
+                    columns={columnsDetail}
+                    modalContent={
+                      <VesselAssessmentDetailForm
+                        onClose={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        onSave={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        id={0}
+                        idHeader={Number(idHeader)}
+                        vslType={String(vslType)}
+                        mode={""}
+                        idList={idList}
+                      />
+                    }
+                    idHeader={Number(idHeader)}
+                    vslType={String(vslType)}
+                    onSaveData={() => handleSaveDetail()}
+                    allowInputGrade={allowInputGrade}
+                    isClosed={isClosed}
+                  />
+                </>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

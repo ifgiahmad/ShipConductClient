@@ -20,6 +20,7 @@ const DialogDownloadVesselAssessment = ({
   onSave,
 }: DownloadAssessmentFormProps) => {
   const currentYear = new Date().getFullYear();
+  const [loading, setLoading] = useState(false);
   const years = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
   const months = [
     { label: "Januari", value: "1" },
@@ -89,6 +90,7 @@ const DialogDownloadVesselAssessment = ({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setLoading(true);
 
     const { documentType, month, year } = formData;
 
@@ -140,6 +142,7 @@ const DialogDownloadVesselAssessment = ({
         }`,
       });
     }
+    setLoading(false);
   };
 
   return (
@@ -204,8 +207,14 @@ const DialogDownloadVesselAssessment = ({
       </Select>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full bg-green-900 hover:bg-green-600">
+      {/*  <Button type="submit" className="w-full bg-green-900 hover:bg-green-600">
         Download
+      </Button> */}
+      <Button
+        className="w-full bg-green-800 hover:bg-green-400"
+        disabled={loading}
+      >
+        {loading ? "Downloading..." : "Download"}
       </Button>
     </form>
   );

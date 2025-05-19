@@ -38,6 +38,7 @@ import {
 } from "../../../services/service_api_vesselDrill";
 import { getTrVesselDrillDetail } from "@/services/service_api_vesselDrillDetail";
 import DataTableDrillDetail from "@/components/Data-Table/data-table-vesselDrillDetail";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TrVesselDrillFormProps {
   onClose: () => void;
@@ -72,7 +73,8 @@ const DialogViewVesselDrill = ({
       vslCode: "",
     },
   });
-  const [detail, setDetail] = useState<TrVesselDrillDetail[]>([]);
+  const [drillDetail, setDrillDetail] = useState<TrVesselDrillDetail[]>([]);
+  const [reportDetail, setReportDetail] = useState<TrVesselDrillDetail[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [idHeader, setIdHeader] = useState<number | null>(null);
   const [vslType, setVslType] = useState<string | null>(null);
@@ -154,8 +156,12 @@ const DialogViewVesselDrill = ({
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselDrillDetail(Number(id));
-    console.log(dataDetail);
-    setDetail(dataDetail);
+    const drillDetail = dataDetail.filter((item) => item.itemType === "Drill");
+    const reportDetail = dataDetail.filter(
+      (item) => item.itemType === "ReportSafety"
+    );
+    setDrillDetail(drillDetail);
+    setReportDetail(reportDetail);
 
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
@@ -427,33 +433,71 @@ const DialogViewVesselDrill = ({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Vessel Drill Detail</CardTitle>
+            <CardTitle>Vessel Report Safety Detail</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTableDrillDetail
-              data={detail}
-              columns={columnsDetail}
-              modalContent={
-                <VesselDrillDetailForm
-                  onClose={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                  onSave={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                  id={0}
-                  idHeader={Number(idHeader)}
-                  vslType={String(vslType)}
-                  mode={""}
-                  idList={idList}
-                />
-              }
-              idHeader={Number(idHeader)}
-              vslType={String(vslType)}
-              onSaveData={() => handleSaveDetail()}
-              status={status ?? ""}
-              mode={""}
-            />
+            <Tabs defaultValue="drill">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="drill">Drill</TabsTrigger>
+                <TabsTrigger value="reportSafety">Report Safety</TabsTrigger>
+              </TabsList>
+              <TabsContent value="drill">
+                <>
+                  <DataTableDrillDetail
+                    data={drillDetail}
+                    columns={columnsDetail}
+                    modalContent={
+                      <VesselDrillDetailForm
+                        onClose={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        onSave={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        id={0}
+                        idHeader={Number(idHeader)}
+                        vslType={String(vslType)}
+                        mode={""}
+                        idList={idList}
+                      />
+                    }
+                    idHeader={Number(idHeader)}
+                    vslType={String(vslType)}
+                    onSaveData={() => handleSaveDetail()}
+                    status={status ?? ""}
+                    mode={""}
+                  />
+                </>
+              </TabsContent>
+              <TabsContent value="reportSafety">
+                <>
+                  <DataTableDrillDetail
+                    data={reportDetail}
+                    columns={columnsDetail}
+                    modalContent={
+                      <VesselDrillDetailForm
+                        onClose={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        onSave={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        id={0}
+                        idHeader={Number(idHeader)}
+                        vslType={String(vslType)}
+                        mode={""}
+                        idList={idList}
+                      />
+                    }
+                    idHeader={Number(idHeader)}
+                    vslType={String(vslType)}
+                    onSaveData={() => handleSaveDetail()}
+                    status={status ?? ""}
+                    mode={""}
+                  />
+                </>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

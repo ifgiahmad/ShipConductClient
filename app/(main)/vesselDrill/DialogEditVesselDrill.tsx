@@ -48,6 +48,7 @@ import {
 } from "../../../services/service_api_vesselDrill";
 import { getTrVesselDrillDetail } from "@/services/service_api_vesselDrillDetail";
 import DataTableDrillDetail from "@/components/Data-Table/data-table-vesselDrillDetail";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TrVesselDrillFormProps {
   onClose: () => void;
@@ -82,7 +83,8 @@ const DialogEditVesselDrill = ({
       vslCode: "",
     },
   });
-  const [detail, setDetail] = useState<TrVesselDrillDetail[]>([]);
+  const [drillDetail, setDrillDetail] = useState<TrVesselDrillDetail[]>([]);
+  const [reportDetail, setReportDetail] = useState<TrVesselDrillDetail[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [idHeader, setIdHeader] = useState<number | null>(null);
   const [vslType, setVslType] = useState<string | null>(null);
@@ -104,21 +106,40 @@ const DialogEditVesselDrill = ({
     { header: "Grade", accessorKey: "grade" },
     { header: "Grade Description", accessorKey: "gradeDescription" },
     {
-      header: "Video",
+      header: "File",
       accessorKey: "normalFileLink",
       cell: ({ row }: { row: { original: TrVesselDrillDetail } }) =>
-        row.original.normalFileLink ? (
-          <video
-            src={row.original.normalFileLink}
-            controls
-            poster={row.original.normalFileLink}
-            style={{ width: "120px", height: "auto" }}
-          />
+        row.original.itemType === "Drill" && row.original.normalFileLink ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Video Uploaded
+            </span>
+          </>
+        ) : row.original.itemType === "ReportSafety" && row.original.docLink ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Document Uploaded
+            </span>
+          </>
         ) : (
           <></>
         ),
     },
-    { header: "Video Description", accessorKey: "videoDescription" },
+    { header: "File Description", accessorKey: "videoDescription" },
   ];
 
   useEffect(() => {
@@ -164,8 +185,12 @@ const DialogEditVesselDrill = ({
 
   const fetchDetail = async () => {
     const dataDetail = await getTrVesselDrillDetail(Number(id));
-    console.log(dataDetail);
-    setDetail(dataDetail);
+    const drillDetail = dataDetail.filter((item) => item.itemType === "Drill");
+    const reportDetail = dataDetail.filter(
+      (item) => item.itemType === "ReportSafety"
+    );
+    setDrillDetail(drillDetail);
+    setReportDetail(reportDetail);
 
     const ids = dataDetail.map((detail: { id: number }) => detail.id);
     setIdList(ids);
@@ -216,7 +241,7 @@ const DialogEditVesselDrill = ({
       <div style={{ height: "80vh", overflowY: "auto" }}>
         <Card className="mb-2">
           <CardHeader>
-            <CardTitle>Vessel Drill</CardTitle>
+            <CardTitle>Vessel Safety Reports</CardTitle>
           </CardHeader>
           <CardContent>
             <FormProvider {...methods}>
@@ -462,33 +487,71 @@ const DialogEditVesselDrill = ({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Vessel Drill Detail</CardTitle>
+            <CardTitle>Vessel Safety Reports Detail</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTableDrillDetail
-              data={detail}
-              columns={columnsDetail}
-              modalContent={
-                <VesselDrillDetailForm
-                  onClose={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                  onSave={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                  id={0}
-                  idHeader={Number(idHeader)}
-                  vslType={String(vslType)}
-                  mode={""}
-                  idList={idList}
-                />
-              }
-              idHeader={Number(idHeader)}
-              vslType={String(vslType)}
-              onSaveData={() => handleSaveDetail()}
-              status={status ?? ""}
-              mode={""}
-            />
+            <Tabs defaultValue="drill">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="drill">Drill</TabsTrigger>
+                <TabsTrigger value="reportSafety">Safety Reports</TabsTrigger>
+              </TabsList>
+              <TabsContent value="drill">
+                <>
+                  <DataTableDrillDetail
+                    data={drillDetail}
+                    columns={columnsDetail}
+                    modalContent={
+                      <VesselDrillDetailForm
+                        onClose={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        onSave={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        id={0}
+                        idHeader={Number(idHeader)}
+                        vslType={String(vslType)}
+                        mode={""}
+                        idList={idList}
+                      />
+                    }
+                    idHeader={Number(idHeader)}
+                    vslType={String(vslType)}
+                    onSaveData={() => handleSaveDetail()}
+                    status={status ?? ""}
+                    mode={""}
+                  />
+                </>
+              </TabsContent>
+              <TabsContent value="reportSafety">
+                <>
+                  <DataTableDrillDetail
+                    data={reportDetail}
+                    columns={columnsDetail}
+                    modalContent={
+                      <VesselDrillDetailForm
+                        onClose={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        onSave={function (): void {
+                          throw new Error("Function not implemented.");
+                        }}
+                        id={0}
+                        idHeader={Number(idHeader)}
+                        vslType={String(vslType)}
+                        mode={""}
+                        idList={idList}
+                      />
+                    }
+                    idHeader={Number(idHeader)}
+                    vslType={String(vslType)}
+                    onSaveData={() => handleSaveDetail()}
+                    status={status ?? ""}
+                    mode={""}
+                  />
+                </>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

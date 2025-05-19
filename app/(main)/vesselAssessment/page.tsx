@@ -39,7 +39,13 @@ const VesselAssessmentPage: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     const result = await getTrVesselAssessment();
-    setData(result);
+    const filterResult = result.filter(
+      (detail) =>
+        detail.vslType !== "OB" &&
+        detail.vslType !== "DB" &&
+        detail.vslType !== "BG"
+    );
+    setData(filterResult);
   }, []);
 
   const fetchUser = useCallback(async () => {

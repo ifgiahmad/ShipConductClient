@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import DataTableCrewAssessmentResults from "@/components/Data-Table/data-table-crewAssessmentResults";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TrVesselAssessmentFormProps {
   onClose: () => void;
@@ -82,10 +83,19 @@ const DialogViewVesselAssessment = ({
   const [detailGeneral, setDetailGeneral] = useState<
     TrVesselAssessmentDetail[]
   >([]);
+  const [detailGeneralBarge, setDetailGeneralBarge] = useState<
+    TrVesselAssessmentDetail[]
+  >([]);
   const [detailMarine, setDetailMarine] = useState<TrVesselAssessmentDetail[]>(
     []
   );
+  const [detailMarineBarge, setDetailMarineBarge] = useState<
+    TrVesselAssessmentDetail[]
+  >([]);
   const [detailTechnical, setDetailTechnical] = useState<
+    TrVesselAssessmentDetail[]
+  >([]);
+  const [detailTechnicalBarge, setDetailTechnicalBarge] = useState<
     TrVesselAssessmentDetail[]
   >([]);
   const [status, setStatus] = useState<string | null>(null);
@@ -95,11 +105,19 @@ const DialogViewVesselAssessment = ({
   const [totalScoreTechnicalItem, setTotalScoreTechnicalItem] = useState<
     number | undefined
   >();
+  const [totalScoreTechnicalItemBarge, setTotalScoreTechnicalItemBarge] =
+    useState<number | undefined>();
   const [totalScoreMarineItem, setTotalScoreMarineItem] = useState<
+    number | undefined
+  >();
+  const [totalScoreMarineItemBarge, setTotalScoreMarineItemBarge] = useState<
     number | undefined
   >();
 
   const [totalScoreGeneralItem, setTotalScoreGeneralItem] = useState<
+    number | undefined
+  >();
+  const [totalScoreGeneralItemBarge, setTotalScoreGeneralItemBarge] = useState<
     number | undefined
   >();
 
@@ -139,8 +157,12 @@ const DialogViewVesselAssessment = ({
     Record<string, number>
   >({});
 
+  const [averagesShipSectionDetailBarge, setAveragesShipSectionDetailBarge] =
+    useState<Record<string, number>>({});
+
   const {
     setValue,
+    getValues,
     formState: { errors },
   } = methods;
 
@@ -155,6 +177,12 @@ const DialogViewVesselAssessment = ({
   const [idListTechnical, setIdListTechnical] = useState<number[]>([]);
   const [idListMarine, setIdListMarine] = useState<number[]>([]);
 
+  const [idListGeneralBarge, setIdListGeneralBarge] = useState<number[]>([]);
+  const [idListTechnicalBarge, setIdListTechnicalBarge] = useState<number[]>(
+    []
+  );
+  const [idListMarineBarge, setIdListMarineBarge] = useState<number[]>([]);
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [dataVslMate, setDataVslMate] = useState<TrVesselAssessment>();
 
@@ -165,29 +193,6 @@ const DialogViewVesselAssessment = ({
   const columnsDetail = [
     { header: "Item", accessorKey: "item" },
     { header: "Ship Section", accessorKey: "shipSection" },
-    /*  {
-      header: "Photo",
-      accessorKey: "normalFileLink",
-      cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => (
-        <div style={{ textAlign: "center" }}>
-          {row.original.smallFileLink && (
-            <img
-              src={row.original.normalFileLink}
-              alt=""
-              style={{
-                width: "2000px",
-                height: "auto",
-                cursor: "pointer",
-                marginBottom: "8px",
-              }}
-              onClick={() =>
-                handleImageSampleClick(row.original.normalFileLink || "")
-              }
-            />
-          )}
-        </div>
-      ),
-    }, */
     {
       header: "Photo",
       cell: ({ row }: { row: { original: TrVesselAssessmentDetail } }) => {
@@ -287,6 +292,7 @@ const DialogViewVesselAssessment = ({
         setValue("vslType", data.vslType ?? "");
         setValue("description", data.description);
         setValue("status", data.status);
+        setValue("vslMate", data.vslMate);
         setStatus(data.status ?? "");
         setId(data.id ?? 0);
         setVesselName(data.vslName ?? "");
@@ -311,6 +317,8 @@ const DialogViewVesselAssessment = ({
         setDataVslMate(dataVslMate);
 
         if (dataVslMate) {
+          console.log(dataVslMate);
+          await fetchDetailBarge(dataVslMate.id);
           const dataDetailVslMate = await getTrVesselAssessmentDetailForCrew(
             Number(dataVslMate?.id)
           );
@@ -475,6 +483,113 @@ const DialogViewVesselAssessment = ({
 
       data.forEach(({ shipSection, grade }) => {
         if (!shipSection) {
+          console.warn("Invalid Section found, skipping entry:", {
+            shipSection,
+            grade,
+          });
+          return;
+        }
+
+        if (!sectionMap[shipSection]) {
+          sectionMap[shipSection] = { total: 0, count: 0 };
+        }
+        sectionMap[shipSection].total += grade;
+        sectionMap[shipSection].count += 1;
+      });
+
+      const averages: Record<string, number> = {};
+      for (const section in sectionMap) {
+        averages[section] = parseFloat(
+          (sectionMap[section].total / sectionMap[section].count).toFixed(2)
+        );
+      }
+      return averages;
+    }
+  };
+
+  const fetchDetailBarge = async (idBarge: number) => {
+    const dataDetail = await getTrVesselAssessmentDetailForCrew(
+      Number(idBarge)
+    );
+    dataDetail.sort((a, b) =>
+      (a.shipSection ?? "").localeCompare(b.shipSection ?? "")
+    );
+
+    const ids = dataDetail.map((detail: { id: number }) => detail.id);
+    setIdList(ids);
+    const groupedData = dataDetail.reduce((acc, item) => {
+      const section = item.shipSection ?? "Unknown";
+      (acc[section] = acc[section] || []).push(item);
+      return acc;
+    }, {} as Record<string, TrVesselAssessmentDetail[]>);
+
+    if (dataDetail.length > 0) {
+      const filteredDataDetailGeneral = dataDetail.filter(
+        (detail) => detail.roleCategory === "GENERAL"
+      );
+
+      const totalScoreGeneral = filteredDataDetailGeneral.reduce(
+        (sum, detail) => {
+          return sum + detail.grade;
+        },
+        0
+      );
+      setTotalScoreGeneralItemBarge(totalScoreGeneral);
+
+      const idsGeneral = filteredDataDetailGeneral.map(
+        (detail: { id: number }) => detail.id
+      );
+      setIdListGeneralBarge(idsGeneral);
+
+      const filteredDataDetailMarine = dataDetail.filter(
+        (detail) => detail.roleCategory === "MARINE"
+      );
+      const totalScoreMarine = filteredDataDetailMarine.reduce(
+        (sum, detail) => {
+          return sum + detail.grade;
+        },
+        0
+      );
+      setTotalScoreMarineItemBarge(totalScoreMarine);
+
+      const idsMarine = filteredDataDetailMarine.map(
+        (detail: { id: number }) => detail.id
+      );
+      setIdListMarineBarge(idsMarine);
+
+      const filteredDataDetailTechnical = dataDetail.filter(
+        (detail) => detail.roleCategory === "TECHNICAL"
+      );
+
+      const totalScoreTechnical = filteredDataDetailTechnical.reduce(
+        (sum, detail) => {
+          return sum + detail.grade;
+        },
+        0
+      );
+      setTotalScoreTechnicalItemBarge(totalScoreTechnical);
+
+      const idsTechnical = filteredDataDetailTechnical.map(
+        (detail: { id: number }) => detail.id
+      );
+      setIdListTechnicalBarge(idsTechnical);
+
+      setDetailGeneralBarge(filteredDataDetailGeneral);
+      setDetailMarineBarge(filteredDataDetailMarine);
+      setDetailTechnicalBarge(filteredDataDetailTechnical);
+
+      setAveragesShipSectionDetailBarge(
+        calculateAverageGradeByShipSection(filteredDataDetailGeneral)
+      );
+    }
+
+    function calculateAverageGradeByShipSection(
+      data: TrVesselAssessmentDetail[]
+    ): Record<string, number> {
+      const sectionMap: Record<string, { total: number; count: number }> = {};
+
+      data.forEach(({ shipSection, grade }) => {
+        if (!shipSection) {
           console.warn("Invalid categorySection found, skipping entry:", {
             shipSection,
             grade,
@@ -520,7 +635,12 @@ const DialogViewVesselAssessment = ({
     })
   );
 
-  console.log(detailShipsection);
+  const detailShipsectionBarge = Object.entries(
+    averagesShipSectionDetailBarge
+  ).map(([key, value]) => ({
+    categorySection: key,
+    shipSectionGrade: value,
+  }));
 
   const columnsDetailShipsection = [
     { header: "Ship Section", accessorKey: "categorySection" },
@@ -537,253 +657,457 @@ const DialogViewVesselAssessment = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <>
-              <div style={{ height: "70vh", overflowY: "auto" }}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Assessment Results</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Card>
-                      <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
-                        <Collapsible>
-                          <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
-                            <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
-                              General
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="flex items-center"
-                            >
-                              <ChevronsUpDown className="h-4 w-4 transition-transform" />
-                              <span className="sr-only">Toggle</span>
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="p-4 bg-gray-50">
-                            <Card>
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle>Score Ship Section</CardTitle>
-                                  <CardContent>
-                                    <DataTableCrewAssessmentResults
-                                      data={detailShipsection}
-                                      columns={columnsDetailShipsection}
-                                    />
-                                  </CardContent>
-                                </CardHeader>
-                              </Card>
-                              <Card className="mt-2">
-                                <CardHeader>
-                                  <CardTitle>Score Assessment</CardTitle>
-                                  <CardContent>
-                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mt-2">
-                                      <Card className="p-2">
+            <Tabs defaultValue="vessel">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="vessel">
+                  Vessel - {getValues("vslName")}
+                </TabsTrigger>
+                {getValues("vslMate") ? (
+                  <>
+                    <TabsTrigger value="barge">
+                      Barge - {getValues("vslMate")}
+                    </TabsTrigger>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </TabsList>
+              <TabsContent value="vessel">
+                <>
+                  <div style={{ height: "70vh", overflowY: "auto" }}>
+                    <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                          <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                            General
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex items-center"
+                          >
+                            <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                            <span className="sr-only">Toggle</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="p-4 bg-gray-50">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Score Ship Section</CardTitle>
+                              <CardContent>
+                                <DataTableCrewAssessmentResults
+                                  data={detailShipsection}
+                                  columns={columnsDetailShipsection}
+                                />
+                              </CardContent>
+                            </CardHeader>
+                          </Card>
+                          <Card className="mt-2">
+                            <CardHeader>
+                              <CardTitle>Score Assessment</CardTitle>
+                              <CardContent>
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mt-2">
+                                  <Card className="p-2">
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneral">
+                                        Total Score Vessel{" "}
+                                        {getValues("vslName")}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="totalScoreGeneral"
+                                        placeholder="Total Score General"
+                                        value={totalScoreGeneralItem}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {dataVslMate ? (
+                                      <>
                                         <div className="grid w-full max-w-sm items-center gap-1.5">
-                                          <Label htmlFor="totalScoreGeneral">
-                                            Total Score
+                                          <Label htmlFor="totalScoreGeneralVslMate">
+                                            Total Score Barge{" "}
+                                            {dataVslMate?.vslName}
                                           </Label>
                                           <Input
                                             type="number"
-                                            id="totalScoreGeneral"
+                                            id="totalScoreGeneralVslMate"
+                                            placeholder="Total Score General"
+                                            value={totalScoreGeneralItemVslMate}
+                                            readOnly
+                                          />
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <></>
+                                    )}
+
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="averageScoreGeneral">
+                                        Average Score
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="averageScoreGeneral"
+                                        placeholder="Average Score General"
+                                        value={averageScoreGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                  </Card>
+                                  <Card className="p-2">
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="downtimeDayGeneral">
+                                        Downtime Day General
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="downtimeDayGeneral"
+                                        placeholder="Downtime Day General"
+                                        value={downtimeDayGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="downtimeGeneral">
+                                        Downtime General
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="downtimeGeneral"
+                                        placeholder="Downtime General"
+                                        value={downtimeGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                  </Card>
+                                  <Card className="p-2">
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="finalScoreGeneral">
+                                        Final Score General
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="finalScoreGeneral"
+                                        placeholder="Final Score General"
+                                        value={finalScoreGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                  </Card>
+                                </div>
+                              </CardContent>
+                            </CardHeader>
+                          </Card>
+                          <DataTableCrewUpload
+                            data={detailGeneral}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadPhotoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idListGeneral}
+                              />
+                            }
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                    <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                          <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                            Technical
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex items-center"
+                          >
+                            <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                            <span className="sr-only">Toggle</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="p-4 bg-gray-50">
+                          <DataTableCrewUpload
+                            data={detailTechnical}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadPhotoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idListTechnical}
+                              />
+                            }
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                    <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                          <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                            Marine
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex items-center"
+                          >
+                            <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                            <span className="sr-only">Toggle</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="p-4 bg-gray-50">
+                          <Card>
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3"></div>
+                          </Card>
+                          <DataTableCrewUpload
+                            data={detailMarine}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadPhotoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idListMarine}
+                              />
+                            }
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                  </div>
+                </>
+              </TabsContent>
+              <TabsContent value="barge">
+                <>
+                  <div style={{ height: "70vh", overflowY: "auto" }}>
+                    <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                          <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                            General
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex items-center"
+                          >
+                            <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                            <span className="sr-only">Toggle</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="p-4 bg-gray-50">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Score Ship Section</CardTitle>
+                              <CardContent>
+                                <DataTableCrewAssessmentResults
+                                  data={detailShipsectionBarge}
+                                  columns={columnsDetailShipsection}
+                                />
+                              </CardContent>
+                            </CardHeader>
+                          </Card>
+                          <Card className="mt-2">
+                            <CardHeader>
+                              <CardTitle>Score Assessment</CardTitle>
+                              <CardContent>
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-3 mt-2">
+                                  <Card className="p-2">
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
+                                        Total Score Barge {dataVslMate?.vslName}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="totalScoreGeneral"
+                                        placeholder="Total Score General"
+                                        value={totalScoreGeneralItemBarge}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {dataVslMate ? (
+                                      <>
+                                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                                          <Label htmlFor="totalScoreGeneralVslMate">
+                                            Total Score Vessel{" "}
+                                            {getValues("vslName")}
+                                          </Label>
+                                          <Input
+                                            type="number"
+                                            id="totalScoreGeneralVslMate"
                                             placeholder="Total Score General"
                                             value={totalScoreGeneralItem}
                                             readOnly
                                           />
                                         </div>
-                                        {dataVslMate ? (
-                                          <>
-                                            <div className="grid w-full max-w-sm items-center gap-1.5">
-                                              <Label htmlFor="totalScoreGeneralVslMate">
-                                                Total Score Vessel{" "}
-                                                {dataVslMate?.vslName}
-                                              </Label>
-                                              <Input
-                                                type="number"
-                                                id="totalScoreGeneralVslMate"
-                                                placeholder="Total Score General"
-                                                value={
-                                                  totalScoreGeneralItemVslMate
-                                                }
-                                                readOnly
-                                              />
-                                            </div>
-                                          </>
-                                        ) : (
-                                          <></>
-                                        )}
+                                      </>
+                                    ) : (
+                                      <></>
+                                    )}
 
-                                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                                          <Label htmlFor="averageScoreGeneral">
-                                            Average Score
-                                          </Label>
-                                          <Input
-                                            type="number"
-                                            id="averageScoreGeneral"
-                                            placeholder="Average Score General"
-                                            value={averageScoreGeneral}
-                                            readOnly
-                                          />
-                                        </div>
-                                      </Card>
-                                      <Card className="p-2">
-                                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                                          <Label htmlFor="downtimeDayGeneral">
-                                            Downtime Day General
-                                          </Label>
-                                          <Input
-                                            type="number"
-                                            id="downtimeDayGeneral"
-                                            placeholder="Downtime Day General"
-                                            value={downtimeDayGeneral}
-                                            readOnly
-                                          />
-                                        </div>
-                                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                                          <Label htmlFor="downtimeGeneral">
-                                            Downtime General
-                                          </Label>
-                                          <Input
-                                            type="number"
-                                            id="downtimeGeneral"
-                                            placeholder="Downtime General"
-                                            value={downtimeGeneral}
-                                            readOnly
-                                          />
-                                        </div>
-                                      </Card>
-                                      <Card className="p-2">
-                                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                                          <Label htmlFor="finalScoreGeneral">
-                                            Final Score General
-                                          </Label>
-                                          <Input
-                                            type="number"
-                                            id="finalScoreGeneral"
-                                            placeholder="Final Score General"
-                                            value={finalScoreGeneral}
-                                            readOnly
-                                          />
-                                        </div>
-                                      </Card>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="averageScoreGeneral">
+                                        Average Score
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="averageScoreGeneral"
+                                        placeholder="Average Score General"
+                                        value={averageScoreGeneral}
+                                        readOnly
+                                      />
                                     </div>
-                                  </CardContent>
-                                </CardHeader>
-                              </Card>
-                            </Card>
-
-                            <DataTableCrewUpload
-                              data={detailGeneral}
-                              columns={columnsDetail}
-                              modalContent={
-                                <UploadPhotoForm
-                                  onClose={() => {}}
-                                  onSave={() => {}}
-                                  id={0}
-                                  idHeader={Number(id)}
-                                  idList={idListGeneral}
-                                />
-                              }
-                              onClose={() => handleCloseDetail()}
-                              onSaveData={() => handleSaveDetail()}
-                            />
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
-                      <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
-                        <Collapsible>
-                          <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
-                            <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
-                              Technical
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="flex items-center"
-                            >
-                              <ChevronsUpDown className="h-4 w-4 transition-transform" />
-                              <span className="sr-only">Toggle</span>
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="p-4 bg-gray-50">
-                            <DataTableCrewUpload
-                              data={detailTechnical}
-                              columns={columnsDetail}
-                              modalContent={
-                                <UploadPhotoForm
-                                  onClose={() => {}}
-                                  onSave={() => {}}
-                                  id={0}
-                                  idHeader={Number(id)}
-                                  idList={idListTechnical}
-                                />
-                              }
-                              onClose={() => handleCloseDetail()}
-                              onSaveData={() => handleSaveDetail()}
-                            />
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
-                      <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
-                        <Collapsible>
-                          <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
-                            <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
-                              Marine
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="flex items-center"
-                            >
-                              <ChevronsUpDown className="h-4 w-4 transition-transform" />
-                              <span className="sr-only">Toggle</span>
-                            </Button>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent className="p-4 bg-gray-50">
-                            <Card>
-                              <div className="grid grid-cols-1 gap-6 md:grid-cols-3"></div>
-                            </Card>
-                            <DataTableCrewUpload
-                              data={detailMarine}
-                              columns={columnsDetail}
-                              modalContent={
-                                <UploadPhotoForm
-                                  onClose={() => {}}
-                                  onSave={() => {}}
-                                  id={0}
-                                  idHeader={Number(id)}
-                                  idList={idListMarine}
-                                />
-                              }
-                              onClose={() => handleCloseDetail()}
-                              onSaveData={() => handleSaveDetail()}
-                            />
-                          </CollapsibleContent>
-                        </Collapsible>
-                      </div>
-                    </Card>
-
-                    {selectedImage && (
-                      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                        <div className="bg-white p-4 rounded-lg shadow-lg">
-                          <img
-                            src={selectedImage}
-                            alt="Selected"
-                            className="max-w-[80vw] max-h-[80vh] w-auto h-auto"
+                                  </Card>
+                                  <Card className="p-2">
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="downtimeDayGeneral">
+                                        Downtime Day General
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="downtimeDayGeneral"
+                                        placeholder="Downtime Day General"
+                                        value={downtimeDayGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="downtimeGeneral">
+                                        Downtime General
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="downtimeGeneral"
+                                        placeholder="Downtime General"
+                                        value={downtimeGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                  </Card>
+                                  <Card className="p-2">
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="finalScoreGeneral">
+                                        Final Score General
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="finalScoreGeneral"
+                                        placeholder="Final Score General"
+                                        value={finalScoreGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                  </Card>
+                                </div>
+                              </CardContent>
+                            </CardHeader>
+                          </Card>
+                          <DataTableCrewUpload
+                            data={detailGeneralBarge}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadPhotoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idListGeneral}
+                              />
+                            }
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
                           />
-                          <button
-                            onClick={() => setSelectedImage(null)}
-                            className="mt-4 px-4 py-2 bg-cyan-800 text-white rounded"
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                    <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                          <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                            Technical
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex items-center"
                           >
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </>
+                            <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                            <span className="sr-only">Toggle</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="p-4 bg-gray-50">
+                          <DataTableCrewUpload
+                            data={detailTechnicalBarge}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadPhotoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idListTechnical}
+                              />
+                            }
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                    <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex justify-between items-center p-2 bg-gray-50 hover:bg-gray-100 rounded-t-md">
+                          <span className="font-bold text-gray-800 text-sm sm:text-base lg:text-lg">
+                            Marine
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex items-center"
+                          >
+                            <ChevronsUpDown className="h-4 w-4 transition-transform" />
+                            <span className="sr-only">Toggle</span>
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="p-4 bg-gray-50">
+                          <Card>
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3"></div>
+                          </Card>
+                          <DataTableCrewUpload
+                            data={detailMarineBarge}
+                            columns={columnsDetail}
+                            modalContent={
+                              <UploadPhotoForm
+                                onClose={() => {}}
+                                onSave={() => {}}
+                                id={0}
+                                idHeader={Number(id)}
+                                idList={idListMarine}
+                              />
+                            }
+                            onClose={() => handleCloseDetail()}
+                            onSaveData={() => handleSaveDetail()}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </div>
+                  </div>
+                </>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

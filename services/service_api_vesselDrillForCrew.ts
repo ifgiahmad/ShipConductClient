@@ -74,7 +74,7 @@ export const saveTrVesselDrillDetailForCrew = async (
   }
 }; */
 
-export const uploadVideoForCrew = async (
+/* export const uploadVideoForCrew = async (
   item: Partial<TrVesselDrillDetail>,
   onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
 ): Promise<AxiosResponse<TrVesselDrillDetail>> => {
@@ -107,6 +107,47 @@ export const uploadVideoForCrew = async (
     console.error("Error uploading video:", error);
     throw error;
   }
+}; */
+
+export const uploadVideoForCrew = async (
+  item: Partial<TrVesselDrillDetail>,
+  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
+): Promise<AxiosResponse<TrVesselDrillDetail>> => {
+  const formData = new FormData();
+
+  // Append file and other fields to FormData
+  if (item.video) formData.append("file", item.video);
+  if (item.doc) formData.append("doc", item.doc);
+  if (item.doc2) formData.append("doc2", item.doc2);
+  if (item.doc3) formData.append("doc3", item.doc3);
+  if (item.doc4) formData.append("doc4", item.doc4);
+  if (item.doc5) formData.append("doc5", item.doc5);
+  if (item.id) formData.append("id", item.id.toString());
+  if (item.videoDescription)
+    formData.append("videoDescription", item.videoDescription.toString());
+
+  // Optional: log form data for debugging
+  // for (let [key, value] of formData.entries()) {
+  //   console.log(`${key}:`, value);
+  // }
+
+  try {
+    const response = await api.post<TrVesselDrillDetail>(
+      "api/vesselDrillForCrew/saveVideo",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress,
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error uploading video:", error);
+    throw error;
+  }
 };
 
 export const getTrVesselDrillByLinkForCrew = async (
@@ -132,4 +173,13 @@ export const saveTrVesselDrillForCrew = async (
     console.error("Error saving Vessel Drill:", error);
     throw error;
   }
+};
+
+export const getPreviousLastVesselDrillByVslCodeForCrew = async (
+  vslCode: string
+): Promise<TrVesselDrill> => {
+  const response = await api.get<TrVesselDrill>(
+    `api/vesselDrillForCrew/getPreviousLastVesselDrillByVslCode?vslCode=${vslCode}`
+  );
+  return response.data;
 };

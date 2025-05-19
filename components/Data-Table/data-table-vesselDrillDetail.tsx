@@ -36,6 +36,7 @@ import { DialogContent, DialogTitle } from "../ui/dialog";
 interface HasId {
   id: number;
   normalFileLink?: string;
+  docLink?: string;
 }
 
 interface DataTableDrillDetailProps<TData extends HasId> {
@@ -125,12 +126,12 @@ function DataTableDrillDetail<TData extends HasId>({
           }
           className="max-w-sm"
         />
-        <Button
+        {/*  <Button
           className="ml-2 bg-green-900 hover:bg-green-600"
           onClick={() => handleOpenModal(0, "CREATE")}
         >
           Add Data
-        </Button>
+        </Button> */}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -199,7 +200,7 @@ function DataTableDrillDetail<TData extends HasId>({
                         <Button variant="outline">...</Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        {row.original.normalFileLink ? (
+                        {row.original.normalFileLink || row.original.docLink ? (
                           <>
                             <DropdownMenuItem
                               onClick={() =>
@@ -230,7 +231,7 @@ function DataTableDrillDetail<TData extends HasId>({
                                 handleOpenModal(row.original.id, "UPLOAD VIDEO")
                               }
                             >
-                              Upload Video
+                              Upload File
                             </DropdownMenuItem>
                           </>
                         )}

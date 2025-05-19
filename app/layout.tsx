@@ -17,9 +17,54 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  title: "Shipconduct",
+  description: "Aplikasi Penilaian Kapal",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "Shipconduct App",
+    description: "Aplikasi Penilaian Kapal",
+    url: "https://shipconduct.lintasmaritim.com/",
+    siteName: "Shipconduct App",
+    images: [
+      {
+        url: "https://shipconduct.lintasmaritim.com/logo.png", // ganti dengan gambar sebenarnya
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shipconduct App",
+    description: "Aplikasi Penilaian Kapal",
+    images: ["https://shipconduct.lintasmaritim.com/logo.png"],
+  },
+};
+
+/* export const metadata: Metadata = {
   title: "Shipconduct App",
   description: "Aplikasi Penilaian Kapal",
-};
+   icons: {
+    icon: "/favicon.png",
+  },
+  openGraph: {
+    title: "Shipconduct App",
+    description: "Aplikasi Penilaian Kapal",
+    url: "https://shipconduct.lintasmaritim.com/",
+    siteName: "Shipconduct App",
+    images: [
+      {
+        url: "/favicon.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+}; */
 
 export default function RootLayout({
   children,
