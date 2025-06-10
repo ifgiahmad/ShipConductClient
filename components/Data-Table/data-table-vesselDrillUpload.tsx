@@ -32,6 +32,7 @@ interface DataTableVesselDrillUploadProps<TData extends HasId> {
   columns: ColumnDef<TData>[];
   modalContent: React.ReactNode;
   type: string;
+  menu: string;
   onSaveData: () => void;
   onClose: () => void;
 }
@@ -41,6 +42,7 @@ function DataTableVesselDrillUpload<TData extends HasId>({
   columns,
   modalContent,
   type,
+  menu,
   onSaveData,
   onClose,
 }: DataTableVesselDrillUploadProps<TData>) {
@@ -98,7 +100,14 @@ function DataTableVesselDrillUpload<TData extends HasId>({
           <TableHeader className="hidden sm:table-header-group bg-gray-200 sticky top-0 z-10 shadow-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                <TableHead>Actions</TableHead>
+                {menu === "CURRENT" ? (
+                  <>
+                    <TableHead>Actions</TableHead>
+                  </>
+                ) : (
+                  <></>
+                )}
+
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
                     {header.isPlaceholder
@@ -121,17 +130,26 @@ function DataTableVesselDrillUpload<TData extends HasId>({
                   className="border sm:border-none block sm:table-row rounded-md sm:rounded-none shadow-sm sm:shadow-none mb-2 sm:mb-0"
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  <TableCell className="block sm:table-cell text-xs sm:text-sm p-3 sm:p-2">
-                    <span className="sm:hidden font-bold block mb-1">
-                      Actions:
-                    </span>
-                    <Button
-                      className="bg-orange-700 hover:bg-orange-400 text-white h-7 px-3 text-xs sm:text-xs"
-                      onClick={() => handleOpenModal(row.original.id)}
-                    >
-                      {type === "VIDEO" ? "Upload Video" : "Upload Document"}
-                    </Button>
-                  </TableCell>
+                  {menu === "CURRENT" ? (
+                    <>
+                      {" "}
+                      <TableCell className="block sm:table-cell text-xs sm:text-sm p-3 sm:p-2">
+                        <span className="sm:hidden font-bold block mb-1">
+                          Actions:
+                        </span>
+                        <Button
+                          className="bg-orange-700 hover:bg-orange-400 text-white h-7 px-3 text-xs sm:text-xs"
+                          onClick={() => handleOpenModal(row.original.id)}
+                        >
+                          {type === "VIDEO"
+                            ? "Upload Video"
+                            : "Upload Document"}
+                        </Button>
+                      </TableCell>
+                    </>
+                  ) : (
+                    <></>
+                  )}
 
                   {row.getVisibleCells().map((cell) => (
                     <TableCell

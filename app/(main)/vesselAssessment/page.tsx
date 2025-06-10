@@ -147,12 +147,12 @@ const VesselAssessmentPage: React.FC = () => {
     { header: "Vsl. Name", accessorKey: "vslName" },
     { header: "Vsl. Mate", accessorKey: "vslMate" },
     { header: "Period", accessorKey: "periodName" },
-    { header: "Score Item General", accessorKey: "scoreItemGeneral" },
-    { header: "Downtime General", accessorKey: "downtimeGeneral" },
-    { header: "Score General", accessorKey: "scoreGeneral" },
+    { header: "Vessel Score General", accessorKey: "scoreGeneralVessel" },
+    { header: "Barge Score General", accessorKey: "scoreGeneralBarge" },
+    { header: "Total Score General", accessorKey: "scoreItemGeneral" },
     { header: "Status", accessorKey: "status" },
     { header: "Percentage Upload", accessorKey: "percentageUpload" },
-    {
+    /* {
       accessorKey: "linkShared",
       header: "Link Share",
       cell: (info: CellContext<TrVesselAssessment, unknown>) => {
@@ -174,6 +174,48 @@ const VesselAssessmentPage: React.FC = () => {
                 </button>
               </CopyToClipboard>
             )}
+          </div>
+        );
+      },
+    }, */
+    {
+      accessorKey: "linkShared",
+      header: "Link Share",
+      cell: (info: CellContext<TrVesselAssessment, unknown>) => {
+        const [copiedKey, setCopiedKey] = React.useState<string | null>(null);
+
+        const rowData = info.row.original as TrVesselAssessment;
+        const link1 = rowData.linkShared;
+        const link2 = rowData.linkSharedVslMate;
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {[
+              { label: "Link 1", url: link1, key: "link1" },
+              { label: "Link 2", url: link2, key: "link2" },
+            ]
+              .filter((link) => !!link.url) // skip jika tidak ada URL
+              .map((link) => (
+                <div
+                  key={link.key}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    {link.url}
+                  </a>
+                  <CopyToClipboard
+                    text={link.url ?? ""}
+                    onCopy={() => setCopiedKey(link.key)}
+                  >
+                    <button
+                      className="bg-green-900 text-white hover:bg-green-700 ml-3 w-auto text-sm"
+                      style={{ marginLeft: "8px" }}
+                    >
+                      {copiedKey === link.key ? "Copied!" : "Copy"}
+                    </button>
+                  </CopyToClipboard>
+                </div>
+              ))}
           </div>
         );
       },

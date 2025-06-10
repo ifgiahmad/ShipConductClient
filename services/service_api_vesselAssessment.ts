@@ -148,6 +148,15 @@ export const getTrVesselAssessmentByNameAndPeriod = async (
   return response.data;
 };
 
+export const getViewVesselAssessmentById = async (
+  id: number
+): Promise<TrVesselAssessment> => {
+  const response = await api.get<TrVesselAssessment>(
+    `api/vesselAssessment/getViewVesselAssessmentById?Id=${id}`
+  );
+  return response.data;
+};
+
 export const saveTrVesselAssessment = async (
   item: Partial<TrVesselAssessment>
 ): Promise<AxiosResponse<SaveVesselAssessmentResponse>> => {

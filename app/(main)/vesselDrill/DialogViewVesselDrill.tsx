@@ -90,7 +90,7 @@ const DialogViewVesselDrill = ({
 
   const { toast } = useToast();
 
-  const columnsDetail = [
+  /*   const columnsDetail = [
     { header: "ItemName", accessorKey: "itemName" },
     { header: "Interval", accessorKey: "interval" },
     { header: "Grade", accessorKey: "grade" },
@@ -111,8 +111,49 @@ const DialogViewVesselDrill = ({
         ),
     },
     { header: "Video Description", accessorKey: "videoDescription" },
-  ];
+  ]; */
 
+  const columnsDetail = [
+    { header: "ItemName", accessorKey: "itemName" },
+    { header: "Interval", accessorKey: "interval" },
+    { header: "Grade", accessorKey: "grade" },
+    { header: "Grade Description", accessorKey: "gradeDescription" },
+    {
+      header: "File",
+      accessorKey: "normalFileLink",
+      cell: ({ row }: { row: { original: TrVesselDrillDetail } }) =>
+        row.original.itemType === "Drill" && row.original.normalFileLink ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Video Uploaded
+            </span>
+          </>
+        ) : row.original.itemType === "ReportSafety" && row.original.docLink ? (
+          <>
+            <span
+              style={{
+                backgroundColor: "green",
+                color: "white",
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Document Uploaded
+            </span>
+          </>
+        ) : (
+          <></>
+        ),
+    },
+    { header: "File Description", accessorKey: "videoDescription" },
+  ];
   useEffect(() => {
     fetchData();
     fetchDetail();

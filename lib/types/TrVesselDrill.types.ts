@@ -16,6 +16,7 @@ export type TrVesselDrill = {
   modifiedBy?: string;
   percentageUpload?: string;
   periodName?: string;
+  fleet?: string;
 };
 
 export const createTrVesselDrillZod = z.object({
@@ -38,6 +39,7 @@ export const createTrVesselDrillZod = z.object({
   linkCode: z.string().optional(),
   createdBy: z.string().optional(),
   modifiedBy: z.string().optional(),
+  fleet: z.string().optional(),
 });
 
 export type createTrVesselDrillDto = z.infer<typeof createTrVesselDrillZod>;

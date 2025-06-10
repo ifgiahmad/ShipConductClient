@@ -554,7 +554,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               </AlertDescription>
             </Alert>
           </>
-        ) : currentMode === "INPUT GRADE" ? (
+        ) : currentMode === "INPUT GRADE" || currentMode === "VIEW" ? (
           <>
             <FormField
               name="itemName"
@@ -604,7 +604,7 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                           src={imagePreview}
                           controls
                           className="rounded-md border border-gray-300"
-                          style={{ maxWidth: "100%", height: "auto" }}
+                          style={{ maxWidth: "auto", height: "auto" }}
                         />
                       </div>
                     )}
@@ -620,19 +620,25 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                         </p>
                       </div>
                     )}
-
-                    <FormItem>
-                      <FormLabel>Upload Video</FormLabel>
-                      <FormControl>
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={handleFileChange}
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                        />
-                      </FormControl>
-                      <FormMessage>{errors.fileName?.message}</FormMessage>
-                    </FormItem>
+                    {mode !== "VIEW" ? (
+                      <>
+                        {" "}
+                        <FormItem>
+                          <FormLabel>Upload Video</FormLabel>
+                          <FormControl>
+                            <input
+                              type="file"
+                              accept="video/*"
+                              onChange={handleFileChange}
+                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            />
+                          </FormControl>
+                          <FormMessage>{errors.fileName?.message}</FormMessage>
+                        </FormItem>
+                      </>
+                    ) : (
+                      <></>
+                    )}
 
                     <FormField
                       name="videoDescription"
@@ -642,9 +648,14 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                           <FormLabel>Video Description</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Video Description"
+                              readOnly={mode === "VIEW" ? true : false}
+                              placeholder=""
                               {...field}
-                              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className={`w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                mode === "VIEW"
+                                  ? "bg-gray-100 text-gray-500"
+                                  : "bg-white text-black"
+                              }`}
                             />
                           </FormControl>
                           <FormMessage>
@@ -688,19 +699,24 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                     </Button>
                   </div>
                 )}
-
-                <FormItem>
-                  <FormLabel>Upload Document</FormLabel>
-                  <FormControl>
-                    <input
-                      type="file"
-                      accept="pdf/*"
-                      onChange={handleDocChange}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />
-                  </FormControl>
-                  <FormMessage>{errors.docName?.message}</FormMessage>
-                </FormItem>
+                {mode !== "VIEW" ? (
+                  <>
+                    <FormItem>
+                      <FormLabel>Upload Document</FormLabel>
+                      <FormControl>
+                        <input
+                          type="file"
+                          accept="pdf/*"
+                          onChange={handleDocChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </FormControl>
+                      <FormMessage>{errors.docName?.message}</FormMessage>
+                    </FormItem>
+                  </>
+                ) : (
+                  <></>
+                )}
               </CardContent>
             </Card>
 
@@ -767,7 +783,11 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Grade</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={mode === "VIEW" ? true : false}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Grade" />
                     </SelectTrigger>
@@ -795,9 +815,14 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
                   <FormLabel>Grade Description</FormLabel>
                   <FormControl>
                     <Textarea
+                      readOnly={mode === "VIEW" ? true : false}
                       placeholder="Grade Description"
                       {...field}
-                      className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        mode === "VIEW"
+                          ? "bg-gray-100 text-gray-500"
+                          : "bg-white text-black"
+                      }`}
                     />
                   </FormControl>
 
@@ -1065,26 +1090,33 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
         )}
 
         <div className="flex justify-between mt-4">
-          <div className="flex space-x-4">
-            <Button
-              type="button"
-              onClick={handlePrevious}
-              disabled={idList.indexOf(currentId) <= 0}
-              className="mt-3 inline-flex justify-center rounded-md border shadow-sm px-4 py-2  bg-gray-400 hover:bg-gray-200 text-gray-700"
-            >
-              Previous
-            </Button>
-            <Button
-              type="button"
-              onClick={handleNextWithSave}
-              disabled={
-                idList.indexOf(currentId) >= idList.length - 1 || loading
-              }
-              className="mt-3 inline-flex justify-center rounded-md border shadow-sm px-4 py-2 bg-gray-400 hover:bg-gray-200 text-gray-700"
-            >
-              Next
-            </Button>
-          </div>
+          {mode !== "VIEW" ? (
+            <>
+              {" "}
+              <div className="flex space-x-4">
+                <Button
+                  type="button"
+                  onClick={handlePrevious}
+                  disabled={idList.indexOf(currentId) <= 0}
+                  className="mt-3 inline-flex justify-center rounded-md border shadow-sm px-4 py-2  bg-gray-400 hover:bg-gray-200 text-gray-700"
+                >
+                  Previous
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleNextWithSave}
+                  disabled={
+                    idList.indexOf(currentId) >= idList.length - 1 || loading
+                  }
+                  className="mt-3 inline-flex justify-center rounded-md border shadow-sm px-4 py-2 bg-gray-400 hover:bg-gray-200 text-gray-700"
+                >
+                  Next
+                </Button>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
 
           <div className="flex space-x-4">
             <Button
@@ -1094,18 +1126,25 @@ const VesselDrillDetailForm: React.FC<VesselDrillDetailFormProps> = ({
             >
               Close
             </Button>
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={loading}
-              className={`mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 ${
-                loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-green-900 hover:bg-green-600 text-white"
-              }`}
-            >
-              {loading ? "Saving..." : "Save"}
-            </Button>
+            {mode !== "VIEW" ? (
+              <>
+                {" "}
+                <Button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={loading}
+                  className={`mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 ${
+                    loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-900 hover:bg-green-600 text-white"
+                  }`}
+                >
+                  {loading ? "Saving..." : "Save"}
+                </Button>
+              </>
+            ) : (
+              <></>
+            )}
           </div>
         </div>
       </form>

@@ -27,7 +27,10 @@ import { UserRole } from "@/lib/type";
 import { getUser } from "@/services/auth";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getTrVesselAssessmentByNameAndPeriod } from "@/services/service_api_vesselAssessment";
+import {
+  getTrVesselAssessmentByNameAndPeriod,
+  getViewVesselAssessmentById,
+} from "@/services/service_api_vesselAssessment";
 import {
   Carousel,
   CarouselContent,
@@ -76,7 +79,14 @@ const DialogViewVesselAssessment = ({
       scoreGeneral: 0,
       scoreTechnical: 0,
       scoreMarine: 0,
+      scoreGeneralBarge: 0,
+      scoreGeneralVessel: 0,
+      vslTypeMate: "",
       mode: "",
+      gradeTotalVslMate: 0,
+      gradeTotalVslName: 0,
+      totalItemVslMate: 0,
+      totalItemVslName: 0,
     },
   });
   const [detail, setDetail] = useState<TrVesselAssessmentDetail[]>([]);
@@ -293,6 +303,8 @@ const DialogViewVesselAssessment = ({
         setValue("description", data.description);
         setValue("status", data.status);
         setValue("vslMate", data.vslMate);
+        setValue("vslTypeMate", data.vslTypeMate);
+
         setStatus(data.status ?? "");
         setId(data.id ?? 0);
         setVesselName(data.vslName ?? "");
@@ -308,6 +320,17 @@ const DialogViewVesselAssessment = ({
         setDowntimeDayGeneral(data.downtimeDaysGeneral ?? 0);
         setDowntimeGeneral(data.downtimeGeneral ?? 0);
         setAverageScoreGeneral(data.scoreItemGeneral ?? 0);
+
+        if (data) {
+          const dataView = await getViewVesselAssessmentById(data.id);
+          setValue("scoreGeneralBarge", dataView.scoreGeneralBarge);
+          setValue("scoreGeneralVessel", dataView.scoreGeneralVessel);
+          setValue("vslTypeMate", dataView.vslTypeMate);
+          setValue("gradeTotalVslName", dataView.gradeTotalVslName);
+          setValue("gradeTotalVslMate", dataView.gradeTotalVslMate);
+          setValue("totalItemVslMate", dataView.totalItemVslMate);
+          setValue("totalItemVslName", dataView.totalItemVslName);
+        }
 
         const dataVslMate = await getTrVesselAssessmentByNameAndPeriod(
           data.vslMate || "",
@@ -710,6 +733,43 @@ const DialogViewVesselAssessment = ({
                                   <Card className="p-2">
                                     <div className="grid w-full max-w-sm items-center gap-1.5">
                                       <Label htmlFor="totalScoreGeneral">
+                                        sum of item scores Vessel{" "}
+                                        {getValues("vslName")}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="gradeTotalVslName"
+                                        placeholder="gradeTotalVslName"
+                                        value={getValues("gradeTotalVslName")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneral">
+                                        Total Item Vessel {getValues("vslName")}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="totalItemVslName"
+                                        placeholder="totalItemVslName"
+                                        value={getValues("totalItemVslName")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneral">
+                                        Score Vessel {getValues("vslName")}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="scoreGeneralVessel"
+                                        placeholder="Score General Vessel"
+                                        value={getValues("scoreGeneralVessel")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {/* <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneral">
                                         Total Score Vessel{" "}
                                         {getValues("vslName")}
                                       </Label>
@@ -752,10 +812,47 @@ const DialogViewVesselAssessment = ({
                                         value={averageScoreGeneral}
                                         readOnly
                                       />
-                                    </div>
+                                    </div> */}
                                   </Card>
                                   <Card className="p-2">
                                     <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
+                                        sum of item scores Barge{" "}
+                                        {dataVslMate?.vslName}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="gradeTotalVslMate"
+                                        placeholder="gradeTotalVslMate"
+                                        value={getValues("gradeTotalVslMate")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
+                                        Total Item Barge {dataVslMate?.vslName}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="totalItemVslMate"
+                                        placeholder="totalItemVslMate"
+                                        value={getValues("totalItemVslMate")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
+                                        Score Barge {dataVslMate?.vslName}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="scoreGeneralBarge"
+                                        placeholder="Score General Barge"
+                                        value={getValues("scoreGeneralBarge")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {/*  <div className="grid w-full max-w-sm items-center gap-1.5">
                                       <Label htmlFor="downtimeDayGeneral">
                                         Downtime Day General
                                       </Label>
@@ -778,10 +875,22 @@ const DialogViewVesselAssessment = ({
                                         value={downtimeGeneral}
                                         readOnly
                                       />
-                                    </div>
+                                    </div> */}
                                   </Card>
                                   <Card className="p-2">
                                     <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="averageScoreGeneral">
+                                        Total Score
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="averageScoreGeneral"
+                                        placeholder="Average Score General"
+                                        value={averageScoreGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {/*   <div className="grid w-full max-w-sm items-center gap-1.5">
                                       <Label htmlFor="finalScoreGeneral">
                                         Final Score General
                                       </Label>
@@ -792,7 +901,7 @@ const DialogViewVesselAssessment = ({
                                         value={finalScoreGeneral}
                                         readOnly
                                       />
-                                    </div>
+                                    </div> */}
                                   </Card>
                                 </div>
                               </CardContent>
@@ -928,6 +1037,43 @@ const DialogViewVesselAssessment = ({
                                   <Card className="p-2">
                                     <div className="grid w-full max-w-sm items-center gap-1.5">
                                       <Label htmlFor="totalScoreGeneralVslMate">
+                                        Sum of item scores Barge{" "}
+                                        {dataVslMate?.vslName}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="gradeTotalVslMate"
+                                        placeholder="gradeTotalVslMate"
+                                        value={getValues("gradeTotalVslMate")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
+                                        Total Item Barge {dataVslMate?.vslName}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="totalItemVslMate"
+                                        placeholder="totalItemVslMate"
+                                        value={getValues("totalItemVslMate")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
+                                        Score Barge {dataVslMate?.vslName}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="scoreGeneralBarge"
+                                        placeholder="Score General Barge"
+                                        value={getValues("scoreGeneralBarge")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {/* <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
                                         Total Score Barge {dataVslMate?.vslName}
                                       </Label>
                                       <Input
@@ -969,10 +1115,47 @@ const DialogViewVesselAssessment = ({
                                         value={averageScoreGeneral}
                                         readOnly
                                       />
-                                    </div>
+                                    </div> */}
                                   </Card>
                                   <Card className="p-2">
                                     <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneral">
+                                        sum of item scores Vessel{" "}
+                                        {getValues("vslName")}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="gradeTotalVslName"
+                                        placeholder="gradeTotalVslName"
+                                        value={getValues("gradeTotalVslName")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneral">
+                                        Total Item Vessel {getValues("vslName")}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="totalItemVslName"
+                                        placeholder="totalItemVslName"
+                                        value={getValues("totalItemVslName")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="totalScoreGeneralVslMate">
+                                        Score Vessel {getValues("vslName")}
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="scoreGeneralVessel"
+                                        placeholder="Score General Vessel"
+                                        value={getValues("scoreGeneralVessel")}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {/* <div className="grid w-full max-w-sm items-center gap-1.5">
                                       <Label htmlFor="downtimeDayGeneral">
                                         Downtime Day General
                                       </Label>
@@ -995,10 +1178,22 @@ const DialogViewVesselAssessment = ({
                                         value={downtimeGeneral}
                                         readOnly
                                       />
-                                    </div>
+                                    </div> */}
                                   </Card>
                                   <Card className="p-2">
                                     <div className="grid w-full max-w-sm items-center gap-1.5">
+                                      <Label htmlFor="averageScoreGeneral">
+                                        Total Score
+                                      </Label>
+                                      <Input
+                                        type="number"
+                                        id="averageScoreGeneral"
+                                        placeholder="Average Score General"
+                                        value={averageScoreGeneral}
+                                        readOnly
+                                      />
+                                    </div>
+                                    {/*  <div className="grid w-full max-w-sm items-center gap-1.5">
                                       <Label htmlFor="finalScoreGeneral">
                                         Final Score General
                                       </Label>
@@ -1009,7 +1204,7 @@ const DialogViewVesselAssessment = ({
                                         value={finalScoreGeneral}
                                         readOnly
                                       />
-                                    </div>
+                                    </div> */}
                                   </Card>
                                 </div>
                               </CardContent>

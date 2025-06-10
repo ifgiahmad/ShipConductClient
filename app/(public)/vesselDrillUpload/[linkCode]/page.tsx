@@ -408,6 +408,7 @@ const VesselDrillUploadForm = () => {
                               />
                             }
                             type="VIDEO"
+                            menu="CURRENT"
                             onClose={() => handleCloseDetail()}
                             onSaveData={() => handleSaveDetail()}
                           />
@@ -433,6 +434,7 @@ const VesselDrillUploadForm = () => {
                               />
                             }
                             type="DOC"
+                            menu="CURRENT"
                             onClose={() => handleCloseDetail()}
                             onSaveData={() => handleSaveDetail()}
                           />
@@ -462,6 +464,7 @@ const VesselDrillUploadForm = () => {
                               />
                             }
                             type="VIDEO"
+                            menu="PREV"
                             onClose={() => handleCloseDetail()}
                             onSaveData={() => handleSaveDetail()}
                           />

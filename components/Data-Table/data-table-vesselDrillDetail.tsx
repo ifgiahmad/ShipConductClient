@@ -86,6 +86,7 @@ function DataTableDrillDetail<TData extends HasId>({
       sorting,
       columnFilters,
       columnVisibility,
+      pagination: { pageIndex: 0, pageSize: 300 },
     },
   });
 
@@ -200,38 +201,59 @@ function DataTableDrillDetail<TData extends HasId>({
                         <Button variant="outline">...</Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        {row.original.normalFileLink || row.original.docLink ? (
+                        {status !== "CLOSED" ? (
                           <>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "INPUT GRADE")
-                              }
-                            >
-                              Input Grade
-                            </DropdownMenuItem>
+                            {row.original.normalFileLink ||
+                            row.original.docLink ? (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(
+                                      row.original.id,
+                                      "INPUT GRADE"
+                                    )
+                                  }
+                                >
+                                  Input Grade
+                                </DropdownMenuItem>
+                              </>
+                            ) : (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(row.original.id, "EDIT")
+                                  }
+                                >
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(row.original.id, "DELETE")
+                                  }
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleOpenModal(
+                                      row.original.id,
+                                      "UPLOAD VIDEO"
+                                    )
+                                  }
+                                >
+                                  Upload File
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </>
                         ) : (
                           <>
                             <DropdownMenuItem
                               onClick={() =>
-                                handleOpenModal(row.original.id, "EDIT")
+                                handleOpenModal(row.original.id, "VIEW")
                               }
                             >
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "DELETE")
-                              }
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleOpenModal(row.original.id, "UPLOAD VIDEO")
-                              }
-                            >
-                              Upload File
+                              View
                             </DropdownMenuItem>
                           </>
                         )}
@@ -267,9 +289,9 @@ function DataTableDrillDetail<TData extends HasId>({
             }}
             className="border rounded-md px-2 py-1"
           >
-            <option value={10}>10</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
+            <option value={300}>300</option>
+            <option value={400}>400</option>
+            <option value={500}>500</option>
           </select>
         </div>
         <div className="space-x-2">

@@ -38,6 +38,15 @@ export type TrVesselAssessment = {
   closedDateTs?: Date;
   closedDateMs?: Date;
   percentageUpload?: string;
+  fleet?: string;
+  scoreGeneralVessel?: number;
+  scoreGeneralBarge?: number;
+  linkSharedVslMate?: string;
+  vslTypeMate?: string;
+  gradeTotalVslName?: number;
+  gradeTotalVslMate?: number;
+  totalItemVslName?: number;
+  totalItemVslMate?: number;
 };
 
 export const createTrVesselAssessmentZod = z.object({
@@ -45,6 +54,7 @@ export const createTrVesselAssessmentZod = z.object({
   vslName: z.string().optional(),
   vslCode: z.string().optional(),
   vslMate: z.string().optional(),
+  vslTypeMate: z.string().optional(),
   month: z.number().optional(),
   year: z.number().optional(),
   periodDate: z.date().refine((date) => !isNaN(date.getTime()), {
@@ -73,6 +83,8 @@ export const createTrVesselAssessmentZod = z.object({
   downtimeTechnical: z.number().optional(),
   downtimeMarine: z.number().optional(),
   scoreGeneral: z.number().optional(),
+  scoreGeneralBarge: z.number().optional(),
+  scoreGeneralVessel: z.number().optional(),
   scoreTechnical: z.number().optional(),
   scoreMarine: z.number().optional(),
   totalScore: z.number().optional(),
@@ -84,6 +96,11 @@ export const createTrVesselAssessmentZod = z.object({
   closedDpaby: z.string().optional(),
   closedTsby: z.string().optional(),
   closedMsby: z.string().optional(),
+  fleet: z.string().optional(),
+  gradeTotalVslName: z.number().optional(),
+  gradeTotalVslMate: z.number().optional(),
+  totalItemVslName: z.number().optional(),
+  totalItemVslMate: z.number().optional(),
 });
 
 export type createTrVesselAssessmentDto = z.infer<

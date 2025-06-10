@@ -33,7 +33,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ChevronsUpDown } from "lucide-react";
+import {
+  AlignCenter,
+  AlignCenterHorizontal,
+  ChevronsUpDown,
+} from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -702,6 +706,9 @@ const CrewUploadForm = () => {
                             <CardTitle>Assessment Detail</CardTitle>
                             {totalPhotoItems} photo item dari {totalItems} total
                             items
+                            <p className="p-2 text-center font-bold">
+                              FOTO WAJIB MENGGUNAKAN TIMESTAMP
+                            </p>
                           </CardHeader>
                           <CardContent>
                             <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
@@ -898,7 +905,7 @@ const CrewUploadForm = () => {
                                 </CollapsibleContent>
                               </Collapsible>
                             </div>
-                            <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
+                            {/* <div className="rounded-md border bg-white shadow-lg hover:shadow-xl transition-shadow m-1">
                               <p className="p-2">
                                 {totalPhotoItemsTechnicalPrev} photo item dari{" "}
                                 {totalItemsTechnicalPrev} total items Technical
@@ -973,7 +980,7 @@ const CrewUploadForm = () => {
                                   />
                                 </CollapsibleContent>
                               </Collapsible>
-                            </div>
+                            </div> */}
                           </CardContent>
                         </Card>
                       </div>

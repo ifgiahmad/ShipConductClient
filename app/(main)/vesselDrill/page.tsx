@@ -119,8 +119,14 @@ const VesselDrillPage: React.FC = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {isDisabled ? (
-                <DropdownMenuItem disabled>
-                  No Actions Available
+                <DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      handleOpenModal("view", row.id, row.linkCode || "")
+                    }
+                  >
+                    View
+                  </DropdownMenuItem>
                 </DropdownMenuItem>
               ) : (
                 <>

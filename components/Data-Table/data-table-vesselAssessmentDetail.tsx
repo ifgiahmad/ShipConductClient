@@ -89,6 +89,7 @@ DataTableAssessmentDetailProps<TData>) {
       sorting,
       columnFilters,
       columnVisibility,
+      pagination: { pageIndex: 0, pageSize: 300 },
     },
   });
 
@@ -285,9 +286,9 @@ DataTableAssessmentDetailProps<TData>) {
             }}
             className="border rounded-md px-2 py-1"
           >
-            <option value={10}>10</option>
-            <option value={50}>50</option>
             <option value={100}>100</option>
+            <option value={200}>200</option>
+            <option value={300}>300</option>
           </select>
         </div>
         <div className="space-x-2">
