@@ -189,7 +189,7 @@ function DataTableAssessmentDetail<TData extends HasId>({
                     row.original.assessedDate &&
                     new Date(row.original.uploadedDate) >
                       new Date(row.original.assessedDate)
-                      ? "bg-orange-500"
+                      ? "bg-orange-400"
                       : ""
                   }
                 >
