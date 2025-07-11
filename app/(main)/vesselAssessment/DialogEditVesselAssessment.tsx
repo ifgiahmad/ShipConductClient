@@ -403,31 +403,6 @@ const DialogEditVesselAssessment = ({
   return (
     <>
       <div style={{ height: "80vh", overflowY: "auto" }}>
-        {/*  {getValues("vslType") === "TB" &&
-        getValues("vslMate") !== "" &&
-        !isClosed ? (
-          <Card className="mb-2">
-            <p className="text-red-500 text-center">
-              Untuk Kapal TugBoat yang memiliki kapal pasangan, penginputan
-              nilai downtime akan berada di kapal pasangannya.
-            </p>
-          </Card>
-        ) : (
-          <></>
-        )} */}
-        {/*  {getValues("vslType") !== "TB" &&
-        getValues("vslMate") !== null &&
-        allowInputGrade === false &&
-        !isClosed ? (
-          <Card className="mb-2">
-            <p className="text-red-500 text-center">
-              Silahkan selesaikan penginputan nilai di kapal{" "}
-              {dataVslMate?.vslName} terlebih dahulu
-            </p>
-          </Card>
-        ) : (
-          <></>
-        )} */}
         <Card className="mb-2">
           <CardHeader>
             <CardTitle>Vessel Assessment</CardTitle>
@@ -606,10 +581,9 @@ const DialogEditVesselAssessment = ({
                         <FormLabel>Description</FormLabel>
                         <FormControl>
                           <Textarea
-                            readOnly
                             placeholder="Description"
                             {...field}
-                            className="w-full border border-gray-300 bg-gray-100 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full border border-gray-300 bg-white rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </FormControl>
                         <FormMessage>{errors.description?.message}</FormMessage>
@@ -635,15 +609,7 @@ const DialogEditVesselAssessment = ({
                     )}
                   />
                 </Card>
-                {/* {getValues("vslType") === "TB" &&
-                getValues("vslMate") !== "" ? (
-                  <></>
-                ) : (
-                  <>
-                    {(user?.superUser || user?.roleCode === "DPA") &&
-                    allowInputGrade &&
-                    !isClosed ? (
-                      <> */}
+
                 <Card className="p-2">
                   <FormField
                     name="scoreItemGeneral"
@@ -706,12 +672,6 @@ const DialogEditVesselAssessment = ({
                             )}
                           /> */}
                 </Card>
-                {/* </>
-                    ) : (
-                      <></>
-                    )}
-                  </>
-                )} */}
 
                 <div className="md:col-span-4 flex justify-end items-center mt-4 gap-2">
                   <Button

@@ -538,6 +538,10 @@ const CrewUploadForm = () => {
         const dataDetail = await getTrVesselAssessmentDetailForCrew(
           Number(data.id)
         );
+        dataDetail.sort((a, b) =>
+          (a.shipSection ?? "").localeCompare(b.shipSection ?? "")
+        );
+
         setPreviousDetail(dataDetail);
         if (dataDetail.length > 0) {
           const countWithFileLink = dataDetail.filter(
@@ -545,7 +549,6 @@ const CrewUploadForm = () => {
           ).length;
           setTotalPhotoItemsPrev(countWithFileLink);
           setTotalItemsPrev(dataDetail.length);
-          setAveragesDetail(calculateAverageGradeBySection(dataDetail));
 
           const filteredDataDetailGeneral = dataDetail.filter(
             (detail) => detail.roleCategory === "GENERAL"
@@ -557,6 +560,10 @@ const CrewUploadForm = () => {
             ).length
           );
           setDetailGeneralPrev(filteredDataDetailGeneral);
+
+          setAveragesDetail(
+            calculateAverageGradeBySection(filteredDataDetailGeneral)
+          );
 
           const filteredDataDetailMarine = dataDetail.filter(
             (detail) => detail.roleCategory === "MARINE"
@@ -656,12 +663,12 @@ const CrewUploadForm = () => {
   };
 
   const detailResults = Object.entries(averagesDetail).map(([key, value]) => ({
-    shipSection: key,
+    categorySection: key,
     average: value,
   }));
 
   const columnsDetailResults = [
-    { header: "Ship Section", accessorKey: "shipSection" },
+    { header: "Ship Section", accessorKey: "categorySection" },
     { header: "Average Grade", accessorKey: "average" },
   ];
 

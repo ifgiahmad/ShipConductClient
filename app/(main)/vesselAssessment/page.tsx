@@ -152,32 +152,6 @@ const VesselAssessmentPage: React.FC = () => {
     { header: "Total Score General", accessorKey: "scoreItemGeneral" },
     { header: "Status", accessorKey: "status" },
     { header: "Percentage Upload", accessorKey: "percentageUpload" },
-    /* {
-      accessorKey: "linkShared",
-      header: "Link Share",
-      cell: (info: CellContext<TrVesselAssessment, unknown>) => {
-        const [copied, setCopied] = React.useState(false);
-        const url = info.getValue() as string;
-
-        return (
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              {url}
-            </a>
-            {url && (
-              <CopyToClipboard text={url} onCopy={() => setCopied(true)}>
-                <button
-                  className="bg-green-900  font-small text-white hover:bg-green-700 ml-3 w-auto text-sm"
-                  style={{ marginLeft: "8px" }}
-                >
-                  {copied ? "Copied!" : "Copy"}
-                </button>
-              </CopyToClipboard>
-            )}
-          </div>
-        );
-      },
-    }, */
     {
       accessorKey: "linkShared",
       header: "Link Share",

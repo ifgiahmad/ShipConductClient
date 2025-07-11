@@ -36,6 +36,8 @@ import { DialogContent, DialogTitle } from "../ui/dialog";
 interface HasId {
   id: number;
   smallFileLink?: string;
+  uploadedDate?: Date;
+  assessedDate?: Date;
 }
 
 interface DataTableAssessmentDetailProps<TData extends HasId> {
@@ -47,8 +49,6 @@ interface DataTableAssessmentDetailProps<TData extends HasId> {
   onSaveData: () => void;
   allowInputGrade: boolean;
   isClosed: boolean;
-  /*  status: string;
-  mode: string; */
 }
 
 function DataTableAssessmentDetail<TData extends HasId>({
@@ -60,9 +60,7 @@ function DataTableAssessmentDetail<TData extends HasId>({
   vslType,
   allowInputGrade,
   isClosed,
-}: /*  status,
-  mode, */
-DataTableAssessmentDetailProps<TData>) {
+}: DataTableAssessmentDetailProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -182,8 +180,18 @@ DataTableAssessmentDetailProps<TData>) {
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
+                  /* key={row.id}
+                  data-state={row.getIsSelected() && "selected"} */
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className={
+                    row.original.uploadedDate &&
+                    row.original.assessedDate &&
+                    new Date(row.original.uploadedDate) >
+                      new Date(row.original.assessedDate)
+                      ? "bg-orange-500"
+                      : ""
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
