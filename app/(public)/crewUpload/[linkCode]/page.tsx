@@ -231,68 +231,119 @@ const CrewUploadForm = () => {
           row.original.normalFileLink3,
         ].filter(Boolean);
 
-        // State untuk mengontrol modal
+        //
+        const totalLinks = largeFileLinks.length;
+
         const [isOpen, setIsOpen] = useState(false);
 
         return (
-          <div style={{ textAlign: "center" }}>
-            {smallFileLinks.length > 0 ? (
-              <>
-                {/* Carousel tanpa membuka modal */}
-                <Carousel className="w-[120px]">
-                  <CarouselContent>
-                    {smallFileLinks.map((src, index) => (
-                      <CarouselItem key={index}>
-                        <img
-                          src={src}
-                          alt={`Thumbnail ${index + 1}`}
-                          className="w-[100px] h-auto rounded-md cursor-pointer"
-                          onClick={() => setIsOpen(true)} // Modal terbuka hanya saat gambar diklik
-                        />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
+          <>
+            {/* Gunakan Untuk mangubah tampilian foto Carousell, dengan angka hitung jumlah yang sudah diupload  */}
+            <div style={{ textAlign: "center" }}>
+              {/* Trigger untuk buka modal */}
+              <span
+                style={{
+                  cursor: "pointer",
+                  color: "blue",
+                  textDecoration: "underline",
+                }}
+                onClick={() => setIsOpen(true)}
+              >
+                {totalLinks}/3
+              </span>
 
-                {/* Modal terbuka hanya saat gambar diklik */}
-                <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                  <DialogContent className="max-w-2xl">
-                    <DialogTitle className="sr-only">Photo Preview</DialogTitle>
-                    <Carousel className="w-full">
-                      <CarouselContent>
-                        {largeFileLinks.map((src, index) => (
-                          <CarouselItem key={index}>
-                            <img
-                              src={src}
-                              alt={`Large Photo ${index + 1}`}
-                              className="w-full h-auto rounded-lg"
-                            />
-                          </CarouselItem>
-                        ))}
-                      </CarouselContent>
-                      <CarouselPrevious />
-                      <CarouselNext />
-                    </Carousel>
-                  </DialogContent>
-                </Dialog>
-              </>
-            ) : (
-              <p></p>
-            )}
+              {/* Modal dialog */}
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="max-w-2xl">
+                  <DialogTitle className="sr-only">Photo Preview</DialogTitle>
+                  <Carousel className="w-full">
+                    <CarouselContent>
+                      {largeFileLinks.map((src, index) => (
+                        <CarouselItem key={index}>
+                          <img
+                            src={src}
+                            alt={`Large Photo ${index + 1}`}
+                            className="w-full h-auto rounded-lg"
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
+                </DialogContent>
+              </Dialog>
 
-            {/* Tombol Upload Photo */}
-            <Button
-              onClick={() =>
-                handleOpenModal(row.original.id, row.original.item)
-              }
-              size="sm"
-              className="bg-orange-700 hover:bg-orange-400 mt-2"
-            >
-              Upload Photo
-            </Button>
-          </div>
+              {/* Tombol upload */}
+              <Button
+                onClick={() =>
+                  handleOpenModal(row.original.id, row.original.item)
+                }
+                size="sm"
+                className="bg-orange-700 hover:bg-orange-400 mt-2"
+              >
+                Upload Photo
+              </Button>
+            </div>
+
+            {/*  <div style={{ textAlign: "center" }}>
+              {smallFileLinks.length > 0 ? (
+                <>
+                  <Carousel className="w-[120px]">
+                    <CarouselContent>
+                      {smallFileLinks.map((src, index) => (
+                        <CarouselItem key={index}>
+                          <img
+                            src={src}
+                            alt={`Thumbnail ${index + 1}`}
+                            className="w-[100px] h-auto rounded-md cursor-pointer"
+                            onClick={() => setIsOpen(true)} // Modal terbuka hanya saat gambar diklik
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
+
+                  <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogContent className="max-w-2xl">
+                      <DialogTitle className="sr-only">
+                        Photo Preview
+                      </DialogTitle>
+                      <Carousel className="w-full">
+                        <CarouselContent>
+                          {largeFileLinks.map((src, index) => (
+                            <CarouselItem key={index}>
+                              <img
+                                src={src}
+                                alt={`Large Photo ${index + 1}`}
+                                className="w-full h-auto rounded-lg"
+                              />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                      </Carousel>
+                    </DialogContent>
+                  </Dialog>
+                </>
+              ) : (
+                <p></p>
+              )}
+
+              <Button
+                onClick={() =>
+                  handleOpenModal(row.original.id, row.original.item)
+                }
+                size="sm"
+                className="bg-orange-700 hover:bg-orange-400 mt-2"
+              >
+                Upload Photo
+              </Button>
+            </div> */}
+          </>
         );
       },
     },

@@ -167,6 +167,9 @@ const DialogDownloadVesselAssessment = ({
           <SelectItem value="BREAKDOWN SCORE VESSEL">
             Breakdown Score Vessel
           </SelectItem>
+          <SelectItem value="SUMMARY ASSESSMENT PHOTO">
+            Summary Assessment Photo
+          </SelectItem>
         </SelectContent>
       </Select>
 

@@ -684,6 +684,7 @@ const DialogEditVesselAssessment = ({
 
                   {(status === "CLOSED" ||
                     status === "UPLOADING PHOTO" ||
+                    status === "REUPLOADING PHOTO" ||
                     status === "PROCESS CLOSED" ||
                     status === "READY" ||
                     status === "PHOTO COMPLETED") &&
